@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AstroMedica — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-dim: rgba(201,168,76,0.15);
+    --bg: #07080F;
+    --bg2: #0D0F1C;
+    --text: #EAE6DC;
+    --text-muted: #8A8699;
+    --border: rgba(201,168,76,0.2);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 44px 36px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: conic-gradient(from 0deg, var(--gold), #7B6FFF, var(--gold));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.35rem; font-weight: 600; letter-spacing: 0.05em;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .sub {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 30px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .field { margin-bottom: 16px; }
+  .field:last-of-type { margin-bottom: 0; }
+
+  input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 14px 18px;
+    background: #050609;
+    border: 1px solid var(--border);
+    outline: none;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  input[type="email"]:focus, input[type="password"]:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+  }
+
+  .error {
+    display: none;
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #f87171;
+    font-size: 0.82rem;
+  }
+  .error.show { display: block; }
+
+  button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 15px 24px;
+    background: linear-gradient(135deg, var(--gold), #A8832A);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.3s, opacity 0.2s;
+    box-shadow: 0 0 30px rgba(201,168,76,0.2);
+  }
+  button:hover { transform: translateY(-1px); box-shadow: 0 6px 30px rgba(201,168,76,0.3); }
+  button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">✦</div>
+    <div class="logo-text">AstroMedica</div>
+  </div>
+  <h1>Sign In</h1>
+  <p class="sub">Enter your account email and password.</p>
+
+  <form id="login-form">
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="username" autofocus required />
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required />
+    </div>
+    <div class="error" id="error-box"></div>
+    <button type="submit" id="submit-btn">Enter</button>
+  </form>
+</div>
+
+<script>
+  const form = document.getElementById('login-form');
+  const errorBox = document.getElementById('error-box');
+  const submitBtn = document.getElementById('submit-btn');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox.classList.remove('show');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Checking…';
+
+    try {
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput.value, password: passwordInput.value })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        const params = new URLSearchParams(window.location.search);
+        window.location.href = params.get('next') || '/';
+      } else {
+        errorBox.textContent = data.error || 'Incorrect email or password.';
+        errorBox.classList.add('show');
+        passwordInput.value = '';
+        passwordInput.focus();
+      }
+    } catch (err) {
+      errorBox.textContent = 'Could not reach the server. Please try again.';
+      errorBox.classList.add('show');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enter';
+    }
+  });
+</script>
+
+</body>
+</html>

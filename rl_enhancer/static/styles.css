@@ -1,0 +1,79 @@
+:root {
+  --bg: #0f172a; --panel: #1e293b; --panel-2: #273449;
+  --text: #e2e8f0; --muted: #94a3b8; --accent: #38bdf8;
+  --ok: #22c55e; --warn: #f59e0b; --err: #ef4444; --border: #334155;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI",
+  Roboto, sans-serif; background: var(--bg); color: var(--text);
+  min-height: 100vh; }
+header { padding: 32px 24px 16px; max-width: 900px; margin: 0 auto; }
+h1 { margin: 0 0 4px; font-size: 26px; }
+.subtitle { color: var(--muted); margin: 0 0 12px; }
+main { max-width: 900px; margin: 0 auto; padding: 0 24px 48px;
+  display: grid; gap: 20px; }
+.card { background: var(--panel); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 22px; }
+.card h2 { margin: 0 0 14px; font-size: 18px; }
+.json-input { width: 100%; min-height: 200px; background: #0b1220;
+  color: #d7e2f1; border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px; font-family: ui-monospace, SFMono-Regular, Menlo,
+  Consolas, monospace; font-size: 13px; line-height: 1.45;
+  resize: vertical; margin-bottom: 12px; }
+.json-input:focus { outline: 1px solid var(--accent); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+button, .btn { background: var(--accent); color: #06263a; border: none;
+  padding: 10px 18px; border-radius: 8px; font-weight: 600;
+  cursor: pointer; text-decoration: none; display: inline-block;
+  transition: transform .05s ease, opacity .15s ease; }
+button:hover, .btn:hover { opacity: .92; }
+button:active, .btn:active { transform: translateY(1px); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+.ghost-btn { background: transparent; color: var(--muted);
+  border: 1px solid var(--border); }
+.file-label { display: inline-block; padding: 10px 18px;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: var(--panel-2); color: var(--text); font-weight: 600;
+  cursor: pointer; }
+.file-label:hover { opacity: .9; }
+.btn.disabled { pointer-events: none; opacity: .4;
+  background: var(--panel-2); color: var(--muted); }
+.btn.ghost-btn { background: transparent; color: var(--text);
+  border: 1px solid var(--border); }
+.btn.ghost-btn.disabled { opacity: .4; pointer-events: none; }
+.hint { color: var(--muted); font-size: 13px; margin: 8px 0 12px; }
+.error { color: var(--err); font-size: 13px; margin: 10px 0 0; }
+.hidden { display: none; }
+.badge { display: inline-block; padding: 4px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; background: rgba(56,189,248,.15);
+  color: var(--accent); }
+.badge-ok { background: rgba(34,197,94,.15); color: var(--ok); }
+.badge-muted { background: rgba(148,163,184,.15); color: var(--muted); }
+code { color: var(--accent); }
+.job-meta { display: flex; justify-content: space-between; font-size: 13px;
+  color: var(--muted); margin-bottom: 10px; gap: 12px; flex-wrap: wrap; }
+.progress { background: var(--panel-2); border-radius: 999px; height: 10px;
+  overflow: hidden; border: 1px solid var(--border); }
+.bar { height: 100%; width: 0%; background: linear-gradient(
+  90deg, var(--accent), #22d3ee); transition: width .4s ease; }
+.status { font-weight: 700; }
+.status-queued { color: var(--muted); }
+.status-running { color: var(--warn); }
+.status-done { color: var(--ok); }
+.status-error { color: var(--err); }
+.status-cancelled { color: var(--muted); }
+.message { font-size: 13px; color: var(--muted); margin: 10px 0 14px;
+  min-height: 18px; }
+.actions { margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap; }
+.conditions-list { list-style: none; padding: 0; margin: 0; }
+.conditions-list li { padding: 8px 10px; background: var(--panel-2);
+  border: 1px solid var(--border); border-radius: 6px;
+  margin-bottom: 6px; font-size: 14px; }
+.pill { display: inline-block; padding: 2px 8px; margin: 2px 4px 2px 0;
+  background: rgba(56,189,248,.15); color: var(--accent);
+  border-radius: 999px; font-size: 12px; font-weight: 600; }
+.train-status { display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 4px; }
+.train-btn { background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--border); }
+.train-btn:hover { background: #2f3d55; }

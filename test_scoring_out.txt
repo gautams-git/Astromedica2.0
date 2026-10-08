@@ -1,0 +1,26 @@
+﻿
+================================================
+  SCENARIO A (High concern)
+  HIGH=7  MODERATE=5  LOW=0
+================================================
+  [HIGH    ] Kidney                       score=14
+  [HIGH    ] Ovaries                      score=13
+  [HIGH    ] Vatha Dosha Imbalance        score=11
+  [HIGH    ] Groins                       score=9
+  [HIGH    ] Ulcers                       score=9
+  [HIGH    ] Female Organs                score=8
+  [HIGH    ] Breathing                    score=7
+  [MODERATE] Acute body pain              score=6
+
+================================================
+  SCENARIO B (Low concern)
+  HIGH=0  MODERATE=2  LOW=10
+================================================
+  [MODERATE] Kidney                       score=5
+  [MODERATE] Ovaries                      score=4
+  [LOW     ] Groins                       score=3
+  [LOW     ] Female Organs                score=2
+  [LOW     ] Ulcers                       score=2
+  [LOW     ] Acute body pain              score=2
+  [LOW     ] Choleric humours             score=2
+  [LOW     ] Adrenal deficiency           score=2

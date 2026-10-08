@@ -1,0 +1,39 @@
+{
+  "ascendant_house": 1,
+  "ascendant_sign": "Vrishabha",
+  "sixth_house_number": 6,
+  "sixth_house_sign": "Tula",
+  "sixth_house_lord": "Venus",
+  "rogkaraka_1": [
+    {
+      "name": "Mercury",
+      "house": 6,
+      "sign": "Tula",
+      "degree": 0,
+      "minutes": 10,
+      "nakshatra": "Chitha",
+      "nakshatra_pada": 3,
+      "isRetrograde": true
+    },
+    {
+      "name": "Venus",
+      "house": 6,
+      "sign": "Tula",
+      "degree": 28,
+      "minutes": 31,
+      "nakshatra": "Vishaka",
+      "nakshatra_pada": 3,
+      "isRetrograde": false
+    }
+  ],
+  "rogkaraka_2": {
+    "name": "Venus",
+    "house": 6,
+    "sign": "Tula",
+    "degree": 28,
+    "minutes": 31,
+    "nakshatra": "Vishaka",
+    "nakshatra_pada": 3
+  },
+  "rogkaraka_3": null
+}
