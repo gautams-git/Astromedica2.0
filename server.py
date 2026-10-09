@@ -74,6 +74,11 @@ app = Flask(__name__)
 # /api/... and /healthz endpoints. Replaces running his separate FastAPI app.
 from rl_integration import rl_bp, init_rl
 app.register_blueprint(rl_bp)
+
+from better_document_routes import better_bp, init_better
+app.register_blueprint(better_bp)
+init_better(app)
+
 CORS(app)
 
 from config import (

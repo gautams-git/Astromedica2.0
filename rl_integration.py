@@ -163,6 +163,11 @@ def _run_job(job) -> None:
 
     if patient_id:
         out_path = _save_patient_output(patient_id, wrapper, output, counts)
+        try:
+            from better_document_routes import trigger_better_build
+            trigger_better_build(patient_id)
+        except Exception as e:
+            logger.warning("Better document build failed: %s", e)
     else:
         out_path = OUTPUT_DIR / f"{job.id}_enhanced.json"
         out_path.write_text(json.dumps(output, indent=2), encoding="utf-8")
