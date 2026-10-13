@@ -536,7 +536,7 @@ the endorsed questions become new (disease → symptom) training pairs.
 | File | Page |
 |---|---|
 | `astrohealth-landing.html` | Home page: birth form, recent patients list, Sign in button |
-| `results.html` | **The final patient page**: chart, analysis (Public/Dev view toggle), chat panel, "What Our Conversation Showed" |
+| `results.html` | **The final patient page**: chart, analysis (Public/Dev view toggle), chat panel, "RAG Report" and "RL Report" (RL shown per `RL_REPORT_VISIBLE_TO`) |
 | `static/session.js` | Clerk sign-in; adds the login token to every same-origin `fetch` |
 | `priority6.html`, `results_staged.html`, `print_report.*` | Unused / legacy pages |
 
