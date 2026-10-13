@@ -75,9 +75,7 @@ app = Flask(__name__)
 from rl_integration import rl_bp, init_rl
 app.register_blueprint(rl_bp)
 
-from better_document_routes import better_bp, init_better
-app.register_blueprint(better_bp)
-init_better(app)
+init_rl()
 
 CORS(app)
 
@@ -1805,7 +1803,6 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print(f"[OK] AstroMedica server starting on port {port}")
     print_startup_status()
-    init_rl()
 
     # host="0.0.0.0" opens the port so Render can see it
     app.run(host="0.0.0.0", port=port, debug=False)
