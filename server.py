@@ -28,7 +28,7 @@ from rules import (
     complete_risk_analysis
 )
 
-from jataka_fetch import fetch_and_save
+from jataka_fetch import fetch_and_save, ChartServiceError, _api_failure
 from jataka_logic import run_logic
 from disease_diagnose import run_diagnose
 from combine_output import run_combine, write_rl_report, ensure_rl_report
@@ -76,7 +76,6 @@ from rl_integration import rl_bp, init_rl
 app.register_blueprint(rl_bp)
 
 init_rl()
-
 CORS(app)
 
 from config import (
@@ -101,6 +100,7 @@ from app_auth import (
     check_patient_access,
     db_error_hint,
     describe_main_db,
+    is_admin,
     main_db_label,
     login_required,
     print_startup_status,
@@ -152,10 +152,10 @@ async def get_token() -> str:
 
     if r.status_code != 200:
         if r.status_code == 401:
-            raise Exception(f"❌ Prokerala Auth failed: 401 (Unauthorized). "
-                            f"Please check your PROKERALA_CLIENT_ID and PROKERALA_CLIENT_SECRET in config.py. "
-                            f"Original error: {r.text}")
-        raise Exception(f"Auth failed: {r.status_code} — {r.text}")
+            raise ChartServiceError(f"Prokerala login failed: 401 (Unauthorized). "
+                                    f"Check PROKERALA_CLIENT_ID and PROKERALA_CLIENT_SECRET in .env. "
+                                    f"Original error: {r.text[:200]}")
+        raise ChartServiceError(_api_failure("Prokerala login failed:", r))
 
     d = r.json()
     _cached_token     = d["access_token"]
@@ -422,7 +422,7 @@ async def fetch_current_planetary_positions(lat: float, lng: float) -> dict:
         )
 
     if r.status_code != 200:
-        raise Exception(f"current planet-position API error {r.status_code}: {r.text}")
+        raise ChartServiceError(_api_failure("Current planet-position API", r))
 
     snapshot = build_planet_position_snapshot(r.json().get("data", {}) or {})
     return {
@@ -1200,6 +1200,8 @@ def _save_chart_source(patient_id: str, birth: dict, current_planetary_positions
 
 CHART_LIMIT_MESSAGE = ("Your birth chart is ready — continue your health chat. "
                        "Each account can create one chart and correct it once.")
+CHART_SERVICE_MESSAGE = ("The birth chart service is unavailable right now. "
+                         "Please try again later - this attempt did not count towards your chart.")
 
 
 # ══════════════════════════════════════════════════════════════
@@ -1234,6 +1236,10 @@ def generate_chart():
         print(f"  Lat / Lng   : {lat}, {lng}")
         print(f"{'='*50}")
 
+        # Today's planets first: it needs no patient, so if Prokerala is down
+        # we stop before a patient folder exists.
+        current_planetary_positions = asyncio.run(fetch_current_planetary_positions(lat, lng))
+
         # Step 1: Fetch and save raw data
         fetch_result = asyncio.run(fetch_and_save(
             name       = name,
@@ -1252,7 +1258,6 @@ def generate_chart():
         print(f"Data Source: {source}")
         print(f"Patient ID: {patient_id}")
 
-        current_planetary_positions = asyncio.run(fetch_current_planetary_positions(lat, lng))
         birth = {
             "name": name, "dob": dob, "birth_time": birth_time, "birth_place": birth_place,
             "lat": lat, "lng": lng, "gender": gender,
@@ -1271,6 +1276,14 @@ def generate_chart():
 
     except ChartLimitError:
         return jsonify({"success": False, "code": "chart_limit", "error": CHART_LIMIT_MESSAGE}), 403
+    except ChartServiceError as e:
+        # Nothing was created and the allowance is untouched; the reason is
+        # in the console, the user gets a plain message.
+        for reason in str(e).split("; "):
+            print(f"[Prokerala] [FAIL] {reason}")
+        print("[Prokerala] [FAIL] Chart not created - no patient folder made, allowance not used -> 503")
+        return jsonify({"success": False, "code": "chart_service",
+                        "error": CHART_SERVICE_MESSAGE}), 503
     except AUTH_ERRORS:
         raise
     except Exception as e:
@@ -1797,6 +1810,28 @@ def combine_output():
         print(f"❌ Aggregation error:")
         print(traceback.format_exc())
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+# RL Report under the LLM report on results.html, for comparing the two while
+# testing. RL_REPORT_VISIBLE_TO in .env: all (default) | admins | none.
+RL_REPORT_VISIBLE_TO = os.environ.get("RL_REPORT_VISIBLE_TO", "all").strip().lower()
+
+
+def _rl_report_visible() -> bool:
+    if RL_REPORT_VISIBLE_TO == "admins":
+        return is_admin()
+    return RL_REPORT_VISIBLE_TO != "none"
+
+
+@app.route("/rl-report/<patient_id>", methods=["GET"])
+@login_required()
+def rl_report(patient_id):
+    check_patient_access(patient_id)
+    if not _rl_report_visible():
+        # Same answer whether or not a report exists - nothing to see here.
+        return jsonify({"visible": False})
+    from rl_integration import patient_rl_report
+    return jsonify({"visible": True, **patient_rl_report(patient_id)})
 
 
 if __name__ == "__main__":

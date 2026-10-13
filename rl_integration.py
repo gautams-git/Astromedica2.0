@@ -163,11 +163,6 @@ def _run_job(job) -> None:
 
     if patient_id:
         out_path = _save_patient_output(patient_id, wrapper, output, counts)
-        try:
-            from better_document_routes import trigger_better_build
-            trigger_better_build(patient_id)
-        except Exception as e:
-            logger.warning("Better document build failed: %s", e)
     else:
         out_path = OUTPUT_DIR / f"{job.id}_enhanced.json"
         out_path.write_text(json.dumps(output, indent=2), encoding="utf-8")
@@ -292,6 +287,65 @@ def queue_patient_rl(patient_id: str) -> str | None:
     STORE.update(job.id, input_path=str(report), message=f"Queued — patient {patient_id}")
     print(f"[RL] Chat completed for {patient_id} -> RL job {job.id} queued")
     return job.id
+
+
+# ── RL Report on results.html (dev comparison with the LLM report) ─────────
+
+def _read_json(path: Path) -> dict:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def _norm(text) -> str:
+    return " ".join(str(text or "").lower().replace("_", " ").split())
+
+
+def _compare_with_llm(folder: Path, enhanced: list) -> dict:
+    """LLM confirmed organ + diseases (final_output.json) vs the RL organs and
+    the diseases RL lists under that same organ."""
+    cf = _read_json(folder / "final_output.json").get("confirmed_findings") or {}
+    rl = {}
+    for organ_block in enhanced or []:
+        for organ, diseases in organ_block.items():
+            rl[organ] = [name for d in diseases for name in d if name != "evidence"]
+    llm_organ = cf.get("organ") if cf.get("confirmed") else None
+    rl_match = next((o for o in rl if _norm(o) == _norm(llm_organ)), None) if llm_organ else None
+    llm_diseases = [d.get("name") for d in cf.get("diseases") or [] if d.get("name")]
+    rl_diseases = rl.get(rl_match, [])
+    rl_keys = {_norm(d) for d in rl_diseases}
+    llm_keys = {_norm(d) for d in llm_diseases}
+    return {
+        "llm_organ": llm_organ,
+        "rl_organs": list(rl),
+        "organ_agrees": rl_match is not None,
+        "diseases_in_both": [d for d in llm_diseases if _norm(d) in rl_keys],
+        "only_llm": [d for d in llm_diseases if _norm(d) not in rl_keys],
+        "only_rl": [d for d in rl_diseases if _norm(d) not in llm_keys],
+    }
+
+
+def patient_rl_report(patient_id: str) -> dict:
+    """status: ready | pending | failed | unavailable. 'ready' only when
+    RL Output.json is for the patient's latest chat, not an older one."""
+    folder = PATIENTS_DIR / patient_id
+    chat = (_inline_chat_logs(_read_json(folder / RL_REPORT_FILE)) or [{}])[0]
+    output = _read_json(folder / RL_OUTPUT_FILE)
+    current = bool(output) and output.get("chat_started_at") == chat.get("started_at")
+
+    if current:
+        return {"status": "ready", "report": output,
+                "comparison": _compare_with_llm(folder, output.get("enhanced"))}
+
+    jobs = [STORE.get(job_id) for job_id, pid in list(_patient_jobs.items()) if pid == patient_id]
+    latest = max((j for j in jobs if j), key=lambda j: j.created_at, default=None)
+    if latest and latest.status in ("queued", "running"):
+        return {"status": "pending", "message": latest.message}
+    if latest and latest.status == "error":
+        return {"status": "failed", "message": latest.error or latest.message}
+    return {"status": "unavailable",
+            "message": "No RL report for this chat (RL did not run - e.g. the server restarted)."}
 
 
 # ── Training (V2) — console lines show what it learns from ────────────────

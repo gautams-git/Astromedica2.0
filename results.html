@@ -2851,6 +2851,104 @@ async function showHealthSummary() {
   }
 }
 
+// RL Report: filled from /rl-report once the RL job (started when the chat
+// ended) has finished. Who sees it is set by RL_REPORT_VISIBLE_TO in .env.
+function renderRlReport(container, patientId, escText) {
+  const section = document.createElement('div');
+  section.style.display = 'none';
+  section.innerHTML = '<h3 style="font-size:1.1rem; color:var(--gold); margin-bottom:16px; font-weight:400; letter-spacing:0.05em;">RL Report</h3>';
+  const card = document.createElement('div');
+  card.style.cssText = 'background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:22px;';
+  section.appendChild(card);
+  container.appendChild(section);
+
+  const note = (text, color) => {
+    card.innerHTML = `<div style="color:${color || 'var(--text-muted)'}; font-size:0.9rem;">${escText(text)}</div>`;
+  };
+  const confColor = (c) => c === 'high' ? '#22C55E' : c === 'medium' ? '#F59E0B' : 'var(--text-muted)';
+  const list = (items) => items.length
+    ? items.map(s => `<li style="margin-top:4px;">${escText(s)}</li>`).join('')
+    : '<li style="list-style:none; margin-left:-18px;">none</li>';
+
+  const showReport = (rep, cmp) => {
+    const organs = (rep.enhanced || []).flatMap(block => Object.entries(block));
+    const organHtml = organs.map(([organ, diseases]) => {
+      const isLlm = cmp.llm_organ && organ.toLowerCase() === String(cmp.llm_organ).toLowerCase();
+      const rows = diseases.map(d => {
+        const name = Object.keys(d).find(k => k !== 'evidence');
+        const ev = d.evidence || {};
+        return `
+          <details style="background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:12px 14px;">
+            <summary style="cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:12px;">
+              <span style="color:var(--text); font-weight:600; font-size:0.95rem;">${escText(name)}</span>
+              <span style="font-size:0.75rem; color:${confColor(ev.confidence)}; border:1px solid currentColor; border-radius:999px; padding:2px 9px;">confidence: ${escText(ev.confidence || 'n/a')}</span>
+            </summary>
+            <div style="color:var(--text-muted); font-size:0.8rem; margin-top:12px;">Symptoms</div>
+            <ul style="color:var(--text); font-size:0.85rem; margin:4px 0 0 18px;">${list(d[name] || [])}</ul>
+            <div style="color:var(--text-muted); font-size:0.8rem; margin-top:12px;">Evidence &middot; endorsed (${(ev.endorsed || []).length})</div>
+            <ul style="color:var(--text); font-size:0.8rem; margin:4px 0 0 18px;">${list(ev.endorsed || [])}</ul>
+            <div style="color:var(--text-muted); font-size:0.8rem; margin-top:12px;">Evidence &middot; denied (${(ev.denied || []).length})</div>
+            <ul style="color:var(--text); font-size:0.8rem; margin:4px 0 0 18px;">${list(ev.denied || [])}</ul>
+            <div style="color:var(--text-muted); font-size:0.72rem; margin-top:10px;">match: ${escText(ev.match_method || 'n/a')}</div>
+          </details>`;
+      }).join('');
+      return `
+        <div style="margin-top:18px;">
+          <div style="font-size:1.15rem; color:var(--text); font-weight:500; margin-bottom:10px;">${escText(organ)}${isLlm ? ' <span style="font-size:0.7rem; color:#22C55E; border:1px solid #22C55E66; border-radius:999px; padding:2px 8px; vertical-align:middle;">same as RAG</span>' : ''}</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">${rows}</div>
+        </div>`;
+    }).join('');
+
+    const agreeLine = !cmp.llm_organ
+      ? `<span style="color:var(--text-muted);">RAG confirmed no organ &middot; RL: ${escText(cmp.rl_organs.join(', ') || 'none')}</span>`
+      : cmp.organ_agrees
+        ? `<span style="color:#22C55E;">&#10003; Both name ${escText(cmp.llm_organ)}</span>`
+          + (cmp.rl_organs.length > 1 ? `<span style="color:var(--text-muted);"> &middot; RL also lists ${escText(cmp.rl_organs.filter(o => o.toLowerCase() !== cmp.llm_organ.toLowerCase()).join(', '))}</span>` : '')
+        : `<span style="color:#EF4444;">&#10007; RAG: ${escText(cmp.llm_organ)} &middot; RL: ${escText(cmp.rl_organs.join(', ') || 'none')}</span>`;
+    const diseaseLine = cmp.llm_organ && cmp.organ_agrees ? `
+      <div style="font-size:0.8rem; color:var(--text-muted); margin-top:8px; line-height:1.6;">
+        Diseases under ${escText(cmp.llm_organ)} &mdash;
+        in both: <span style="color:var(--text);">${escText(cmp.diseases_in_both.join(', ') || 'none')}</span>
+        &middot; only RAG: <span style="color:var(--text);">${escText(cmp.only_llm.join(', ') || 'none')}</span>
+        &middot; only RL: <span style="color:var(--text);">${escText(cmp.only_rl.join(', ') || 'none')}</span>
+      </div>` : '';
+
+    card.innerHTML = `
+      <div style="font-size:0.75rem; color:var(--text-muted);">
+        Model: ${escText(rep.model)} &middot; chats used: ${escText(rep.chat_logs_used)} &middot; generated ${escText(new Date(rep.generated_at).toLocaleString())}
+      </div>
+      ${organHtml || '<div style="color:var(--text-muted); margin-top:12px;">RL returned no organs.</div>'}
+      <div style="border-top:1px solid var(--border); margin-top:20px; padding-top:14px;">
+        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Do they agree?</div>
+        <div style="font-size:0.95rem;">${agreeLine}</div>
+        ${diseaseLine}
+      </div>`;
+  };
+
+  let tries = 0;
+  const poll = async () => {
+    let data;
+    try {
+      const res = await fetch(`/rl-report/${encodeURIComponent(patientId)}`);
+      data = await res.json();
+    } catch (e) {
+      section.style.display = '';
+      return note('Could not load the RL report.', '#EF4444');
+    }
+    if (!data.visible) return;                 // hidden by RL_REPORT_VISIBLE_TO
+    section.style.display = '';
+    if (data.status === 'ready') return showReport(data.report, data.comparison || {});
+    if (data.status === 'pending' && tries++ < 40) {
+      note('RL report is being prepared…');
+      return setTimeout(poll, 3000);
+    }
+    if (data.status === 'pending') return note('RL report is taking too long - reload the page later.');
+    note(data.status === 'failed' ? `RL failed: ${data.message}` : data.message,
+         data.status === 'failed' ? '#EF4444' : null);
+  };
+  poll();
+}
+
 function renderFinalSummary(out) {
   const guidance = document.getElementById('chat-guidance');
   guidance.innerHTML = '';
@@ -2892,7 +2990,7 @@ function renderFinalSummary(out) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   const cf = out.confirmed_findings || {};
   const findSection = document.createElement('div');
-  findSection.innerHTML = '<h3 style="font-size:1.1rem; color:var(--gold); margin-bottom:16px; font-weight:400; letter-spacing:0.05em;">What Our Conversation Showed</h3>';
+  findSection.innerHTML = '<h3 style="font-size:1.1rem; color:var(--gold); margin-bottom:16px; font-weight:400; letter-spacing:0.05em;">RAG Report</h3>';
   const findCard = document.createElement('div');
   findCard.style.cssText = 'background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:22px;';
 
@@ -2958,6 +3056,9 @@ function renderFinalSummary(out) {
   }
   findSection.appendChild(findCard);
   container.appendChild(findSection);
+
+  // --- 2b. RL Report (Abhishek's model), below the LLM report for comparing ---
+  renderRlReport(container, out.patient_id, escText);
 
   // --- 3. Care Period & Doctor ---
   const midGrid = document.createElement('div');
@@ -3089,17 +3190,35 @@ function renderFinalSummary(out) {
   footer.style.cssText = 'margin-top:20px; display:flex; gap:16px; justify-content:center;';
   
   const dlBtn = document.createElement('button');
-  dlBtn.innerHTML = '<span>💾</span> Download JSON Report';
+  dlBtn.innerHTML = '<span>💾</span> Download Reports';
   dlBtn.style.cssText = 'background:transparent; border:1px solid var(--gold); color:var(--gold); padding:12px 30px; border-radius:4px; font-size:0.85rem; cursor:pointer; text-transform:uppercase; letter-spacing:0.05em; transition:0.2s; font-family:"Outfit", sans-serif;';
   dlBtn.onmouseover = () => dlBtn.style.background = 'rgba(212,175,55,0.1)';
   dlBtn.onmouseout = () => dlBtn.style.background = 'transparent';
-  dlBtn.onclick = () => {
-    const blob = new Blob([JSON.stringify(out, null, 2)], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
+  // Two files: the RAG report, and the RL report when this viewer may see it
+  // (RL_REPORT_VISIBLE_TO) and it is ready for this chat.
+  const saveJson = (data, name) => {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}));
     const a = document.createElement('a');
     a.href = url;
-    a.download = `AstroHealth_${out.patient_id}.json`;
+    a.download = name;
     a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  dlBtn.onclick = async () => {
+    saveJson(out, `AstroHealth_${out.patient_id}_RAG_Report.json`);
+    let rl;
+    try {
+      rl = await (await fetch(`/rl-report/${encodeURIComponent(out.patient_id)}`)).json();
+    } catch (e) {
+      return alert('RAG report downloaded. The RL report could not be loaded.');
+    }
+    if (!rl.visible) return;
+    if (rl.status !== 'ready') {
+      return alert(`RAG report downloaded. RL report not downloaded: ${
+        rl.status === 'pending' ? 'it is still being prepared - try again in a few seconds' : rl.message}`);
+    }
+    // A short gap so the browser treats it as a second download, not a repeat click.
+    setTimeout(() => saveJson(rl.report, `AstroHealth_${out.patient_id}_RL_Report.json`), 400);
   };
   
   const printBtn = document.createElement('button');

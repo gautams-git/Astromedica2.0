@@ -24,6 +24,20 @@ from config import PROKERALA_CLIENT_ID, PROKERALA_CLIENT_SECRET
 _cached_token     = None
 _token_expires_at = None
 
+
+class ChartServiceError(Exception):
+    """Prokerala refused or failed (no credits, bad keys, outage). Raised
+    before any patient folder is created, so a failed generate leaves
+    nothing behind and does not use up the account's chart allowance."""
+
+
+def _api_failure(label: str, r) -> str:
+    try:
+        detail = r.json()["errors"][0]["detail"]
+    except Exception:
+        detail = r.text[:200]
+    return f"{label} {r.status_code} - {detail}"
+
 # ── Cache Logic ─────────────────────────────
 CACHE_DIR = "charts_cache"
 PATIENTS_DIR = "patients"
@@ -208,10 +222,10 @@ async def get_token() -> str:
 
     if r.status_code != 200:
         if r.status_code == 401:
-            raise Exception(f"[Error] Prokerala Auth failed: 401 (Unauthorized). "
-                            f"Please check your PROKERALA_CLIENT_ID and PROKERALA_CLIENT_SECRET in config.py. "
-                            f"Original error: {r.text}")
-        raise Exception(f"Auth failed: {r.status_code} — {r.text}")
+            raise ChartServiceError(f"Prokerala login failed: 401 (Unauthorized). "
+                                    f"Check PROKERALA_CLIENT_ID and PROKERALA_CLIENT_SECRET in .env. "
+                                    f"Original error: {r.text[:200]}")
+        raise ChartServiceError(_api_failure("Prokerala login failed:", r))
 
     d = r.json()
     _cached_token     = d["access_token"]
@@ -267,8 +281,7 @@ async def fetch_and_save(
     # Step 0: Check Master Cache Folder
     req_key = get_request_key(name, dob, birth_time, lat, lng)
     cached = get_cached_data(req_key)
-    
-    patient_id, folder, created = get_or_create_patient(req_key)
+
     profile = {
         "name": name,
         "dob": dob,
@@ -282,6 +295,7 @@ async def fetch_and_save(
     }
 
     if cached:
+        patient_id, folder, created = get_or_create_patient(req_key)
         print(f"\n[Local Cache] Master data found for {name} (Key: {req_key[:8]})")
         print(f"              Reusing API responses from {CACHE_DIR}/")
         raw_chart = cached["raw_chart"]
@@ -379,6 +393,17 @@ async def fetch_and_save(
                     "la": "en"}
         )
 
+    # Planets, chart and dasha are what every algorithm runs on. If any of
+    # them failed, stop here: no patient folder, no empty chart.
+    failed = [_api_failure(label, r) for label, r in
+              (("Planet API", r1), ("Chart API", r2), ("Dasha API", r4)) if r.status_code != 200]
+    if failed:
+        raise ChartServiceError("; ".join(failed))   # server.py prints each reason
+    if r3.status_code != 200:
+        print(f"[Warning] Birth details error: {r3.status_code} - {r3.text[:200]} (chart continues without them)")
+
+    patient_id, folder, created = get_or_create_patient(req_key)
+
     # Save raw chart data
     raw_chart = {
         "patient_id":  patient_id,
@@ -390,15 +415,15 @@ async def fetch_and_save(
         "lat":         lat,
         "lng":         lng,
         "fetched_at":  datetime.now().isoformat(),
-        "planet_position": r1.json() if r1.status_code == 200 else (print(f"[Error] Planet API error: {r1.status_code} - {r1.text[:200]}") or {}),
-        "chart_svg":   r2.text if r2.status_code == 200 else (print(f"[Error] Chart API error: {r2.status_code} - {r2.text[:200]}") or ""),
-        "birth_details": r3.json() if r3.status_code == 200 else (print(f"[Error] Birth details error: {r3.status_code} - {r3.text[:200]}") or {}),
+        "planet_position": r1.json(),
+        "chart_svg":   r2.text,
+        "birth_details": r3.json() if r3.status_code == 200 else {},
     }
 
     # Save raw dasha data
     raw_dasha = {
         "patient_id": patient_id,
-        "dasha_data": r4.json() if r4.status_code == 200 else {}
+        "dasha_data": r4.json()
     }
 
     # CRITICAL FIX: Only save to Master Cache if the data is valid and complete
