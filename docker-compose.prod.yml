@@ -20,6 +20,8 @@ services:
       - chart_cache:/app/charts_cache
       - rl_outputs:/app/rl_enhancer/data/outputs
       - rl_api_cache:/app/rl_enhancer/data/api_cache
+      - rl_weights:/app/rl_enhancer/weights
+      - rl_uploads:/app/rl_enhancer/data/uploads
     read_only: true
     tmpfs:
       - /tmp
@@ -36,3 +38,5 @@ volumes:
   chart_cache:
   rl_outputs:
   rl_api_cache:
+  rl_weights:
+  rl_uploads:
