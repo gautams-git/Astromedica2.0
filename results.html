@@ -1519,6 +1519,10 @@
       </div>
     </div>
 
+    <!-- Public view only: Combined Algo Summary is moved here, then the chat
+         (positionPublicOrder). Empty in Dev view. -->
+    <div id="public-combined-slot"></div>
+
     <div id="disease-logic-section"></div>
 
     <!-- PLANET TABLE CARD -->
@@ -1793,6 +1797,7 @@
     'imp rashi distance',
     'planet distance logic',
     'combined distance verdict',
+    'combined algo summary',
     '1 year medical forecast active triggers',
     'health consultation',
     'personalised assessment',
@@ -1850,6 +1855,38 @@
       block.setAttribute('data-public-hidden', isAllowed ? 'false' : 'true');
     });
     positionCurrentDashaPriorityCard();
+    positionPublicOrder();
+  }
+
+  // Public view order: chart, Combined Algo Summary, chat (+ correction box),
+  // then everything else as before. Dev view keeps the original layout.
+  function positionPublicOrder() {
+    const slot = document.getElementById('public-combined-slot');
+    const chart = document.querySelector('.content > .chart-card');
+    const chat = document.getElementById('chat-card');
+    const correct = document.getElementById('correct-details');
+    if (!slot || !chart || !chat) return;
+    const content = chart.parentElement;
+
+    if (pageVisibilityMode !== 'public') {
+      // Dev renders its own Combined Algo card into #priority-logic-section.
+      slot.innerHTML = '';
+      content.appendChild(chat);
+      if (correct) content.appendChild(correct);
+      return;
+    }
+
+    // A fresh render puts the card in #disease-logic-section; take it from there.
+    const title = Array.from(document.querySelectorAll('#disease-logic-section .hitlist-title'))
+      .find(node => normalizeModeTitle(node.textContent) === 'combined algo summary');
+    const card = title && title.closest('.hitlist-card');
+    if (card) {
+      slot.innerHTML = '';
+      card.style.marginTop = '0';
+      slot.appendChild(card);
+    }
+    slot.insertAdjacentElement('afterend', chat);
+    if (correct) chat.insertAdjacentElement('afterend', correct);
   }
 
   function getDiseaseLogicContainer(fallbackId) {
