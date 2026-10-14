@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
 
 COPY . /app/
-RUN mkdir -p /app/patients /app/charts_cache \
+RUN mkdir -p /app/patients /app/charts_cache /app/rl_enhancer/data/uploads \
     && chown -R appuser:appuser /app
 
 USER appuser
