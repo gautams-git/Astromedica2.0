@@ -39,4 +39,8 @@ volumes:
   rl_outputs:
   rl_api_cache:
   rl_weights:
+    external: true
+    name: astrohealth_rl_weights
   rl_uploads:
+    external: true
+    name: astrohealth_rl_uploads
