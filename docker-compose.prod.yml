@@ -18,6 +18,7 @@ services:
     volumes:
       - patient_data:/app/patients
       - chart_cache:/app/charts_cache
+      - rl_outputs:/app/rl_enhancer/data/outputs
     read_only: true
     tmpfs:
       - /tmp
@@ -32,3 +33,4 @@ services:
 volumes:
   patient_data:
   chart_cache:
+  rl_outputs:
