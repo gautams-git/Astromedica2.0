@@ -1,0 +1,24 @@
+# --- Python Artifacts ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv
+env/
+
+# --- Version Control ---
+.git
+
+# --- Security & Credentials ---
+.env
+gitleaks.toml
+**/.env
+**/.env.*
+!**/.env.example
+
+# --- Local Application Storage ---
+# These are mapped securely using external volumes, so they must be kept out of the image layers
+postgres_data/
+qdrant_data/
+patients/
+charts_cache/
