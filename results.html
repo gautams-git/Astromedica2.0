@@ -752,6 +752,36 @@
     color: var(--text-muted); font-size: 0.86rem;
   }
   .correct-details[hidden] { display: none; }
+
+  .dev-unlock-overlay {
+    position: fixed; inset: 0; z-index: 9990;   /* below the custom cursor (9998/9999) */
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  }
+  .dev-unlock-overlay[hidden] { display: none; }
+  .dev-unlock-box {
+    width: 100%; max-width: 360px; padding: 26px 24px;
+    background: var(--bg2); border: 1px solid rgba(201,168,76,0.35); border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .dev-unlock-title { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--gold); margin-bottom: 4px; }
+  .dev-unlock-note { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px; }
+  .dev-unlock-box input {
+    width: 100%; padding: 11px 14px; border-radius: 8px; box-sizing: border-box;
+    border: 1px solid var(--border); background: var(--bg3); color: var(--text);
+    font-family: 'Outfit', sans-serif; font-size: 0.95rem; outline: none;
+  }
+  .dev-unlock-box input:focus { border-color: var(--gold); }
+  .dev-unlock-error { min-height: 20px; margin-top: 8px; font-size: 0.8rem; color: #ef4444; }
+  .dev-unlock-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+  .dev-unlock-actions button {
+    padding: 9px 18px; border-radius: 6px; border: 1px solid var(--border); background: transparent;
+    color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.8rem;
+    letter-spacing: 0.06em; text-transform: uppercase; cursor: none;
+  }
+  .dev-unlock-actions button.primary { border-color: var(--gold); color: var(--gold); }
+  .dev-unlock-actions button.primary:hover { background: var(--gold); color: var(--bg); }
+  .dev-unlock-actions button:disabled { opacity: 0.5; }
   .correct-details button {
     padding: 8px 18px; border: 1px solid var(--gold); background: transparent; color: var(--gold);
     font-family: 'Outfit', sans-serif; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
@@ -1759,8 +1789,22 @@
   <span class="page-visibility-label">View Mode</span>
   <div class="page-visibility-pill">
     <button type="button" id="public-mode-btn" class="page-visibility-btn is-active" onclick="setPageVisibilityMode('public')">Public</button>
-    <button type="button" id="developer-mode-btn" class="page-visibility-btn" onclick="setPageVisibilityMode('dev')">Dev</button>
+    <button type="button" id="developer-mode-btn" class="page-visibility-btn" onclick="requestDevView()">Dev</button>
   </div>
+</div>
+
+<!-- Password box for the Dev side of View Mode (checked by /dev-mode/unlock) -->
+<div class="dev-unlock-overlay" id="dev-unlock" hidden>
+  <form class="dev-unlock-box" id="dev-unlock-form" autocomplete="off">
+    <div class="dev-unlock-title">Dev view</div>
+    <div class="dev-unlock-note">Enter the password to see the developer cards.</div>
+    <input type="password" id="dev-unlock-input" placeholder="Password" aria-label="Dev view password">
+    <div class="dev-unlock-error" id="dev-unlock-error"></div>
+    <div class="dev-unlock-actions">
+      <button type="button" id="dev-unlock-cancel">Cancel</button>
+      <button type="submit" id="dev-unlock-submit" class="primary">Unlock</button>
+    </div>
+  </form>
 </div>
 
 <!-- FOOTER -->
@@ -1830,6 +1874,64 @@
     }
     applyPageVisibilityMode();
   }
+
+  // Dev side of View Mode needs the password once per browser tab.
+  const DEV_UNLOCK_KEY = 'astromedica_dev_view_unlocked';
+  function devViewUnlocked() {
+    try { return sessionStorage.getItem(DEV_UNLOCK_KEY) === '1'; } catch (e) { return false; }
+  }
+
+  function requestDevView() {
+    if (devViewUnlocked()) return setPageVisibilityMode('dev');
+    const overlay = document.getElementById('dev-unlock');
+    const input = document.getElementById('dev-unlock-input');
+    document.getElementById('dev-unlock-error').textContent = '';
+    input.value = '';
+    overlay.hidden = false;
+    input.focus();
+  }
+
+  function closeDevUnlock() {
+    document.getElementById('dev-unlock').hidden = true;
+  }
+
+  document.getElementById('dev-unlock-cancel').addEventListener('click', closeDevUnlock);
+  document.getElementById('dev-unlock').addEventListener('click', (e) => {
+    if (e.target.id === 'dev-unlock') closeDevUnlock();   // click outside the box
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !document.getElementById('dev-unlock').hidden) closeDevUnlock();
+  });
+  document.getElementById('dev-unlock-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('dev-unlock-input');
+    const error = document.getElementById('dev-unlock-error');
+    const submit = document.getElementById('dev-unlock-submit');
+    error.textContent = '';
+    submit.disabled = true;
+    try {
+      const res = await fetch('/dev-mode/unlock', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ password: input.value })
+      });
+      const result = await res.json().catch(() => ({}));
+      if (res.ok && result.success) {
+        try { sessionStorage.setItem(DEV_UNLOCK_KEY, '1'); } catch (err) {}
+        closeDevUnlock();
+        setPageVisibilityMode('dev');
+        return;
+      }
+      error.textContent = res.status === 429
+        ? 'Too many tries. Please wait a few minutes.'
+        : (result.error || 'Could not check the password.');
+      input.select();
+    } catch (err) {
+      error.textContent = 'Could not reach the server.';
+    } finally {
+      submit.disabled = false;
+    }
+  });
 
   function applyPageVisibilityMode() {
     document.querySelectorAll('[data-dev-only="true"]').forEach(block => {

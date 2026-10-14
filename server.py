@@ -19,6 +19,7 @@ import pytz
 import httpx
 import asyncio
 import time
+import hmac
 import json as _json
 
 from rules import (
@@ -1832,6 +1833,26 @@ def rl_report(patient_id):
         return jsonify({"visible": False})
     from rl_integration import patient_rl_report
     return jsonify({"visible": True, **patient_rl_report(patient_id)})
+
+
+# Password for the Dev side of the VIEW MODE toggle on results.html. Kept in
+# .env so it never sits in the page source. Only hides the Dev cards from
+# casual viewers - their data is still sent to the browser.
+DEV_MODE_PASSWORD = os.environ.get("DEV_MODE_PASSWORD", "").strip()
+
+
+@app.route("/dev-mode/unlock", methods=["POST"])
+@login_required(rate_limit="unlock")
+def dev_mode_unlock():
+    if not DEV_MODE_PASSWORD:
+        print("[Dev view] Unlock refused - DEV_MODE_PASSWORD is not set in .env")
+        return jsonify({"success": False, "error": "Dev view is not set up on this server."}), 503
+    typed = str((request.get_json(silent=True) or {}).get("password", "")).strip()
+    if hmac.compare_digest(typed.encode(), DEV_MODE_PASSWORD.encode()):
+        print("[Dev view] Unlocked")
+        return jsonify({"success": True})
+    print("[Dev view] Wrong password")
+    return jsonify({"success": False, "error": "Wrong password."}), 403
 
 
 if __name__ == "__main__":
