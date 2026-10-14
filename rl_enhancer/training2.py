@@ -2,7 +2,7 @@
 Background training — CustomANN pretraining + PPO fine-tuning.
 
 Training corpus = curated + API-enriched symptom library
-                ∪ patient chat-log evidence (endorsed question text).
+                ∪ patient chat-log evidence (clean symptom phrases only).
 
 Defaults: 20 epochs each. Weights are saved under weights/.
 """
@@ -15,7 +15,7 @@ import random
 import re
 import threading
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import torch
 import torch.nn as nn
@@ -51,6 +51,100 @@ _WORD_RE = re.compile(r"[a-z0-9][a-z0-9'\-]*")
 
 def tokenize(text: str) -> List[str]:
     return _WORD_RE.findall(text.lower())
+
+
+# ---------------------------------------------------------------------------
+# Question / boilerplate detection  (NEW — drives corpus + reward filtering)
+# ---------------------------------------------------------------------------
+
+_QUESTION_MARKERS = (
+    "have you",
+    "do you",
+    "does it",
+    "did you",
+    "are you",
+    "can you",
+    "could you",
+    "would you",
+    "when you",
+    "how often",
+    "how many",
+    "how long",
+    "how would",
+    "tell me",
+    "describe",
+    "i'd like to ask",
+    "i would like to ask",
+    "to start",
+    "i'm ready to begin",
+    "i am ready to begin",
+    "thank you for",
+    "welcome",
+    "hello",
+    "good to connect",
+    "to explore a bit further",
+    "i'm wondering",
+    "i am wondering",
+    "to help me understand",
+    "to understand the pattern",
+    "could you tell me",
+    "what do you",
+    "where do you",
+    "any swelling",
+    "any fever",
+)
+
+_BOILERPLATE_MARKERS = (
+    "clinical features consistent with",
+    "symptoms warranting clinical evaluation",
+    "reduced functional capacity",
+    "generalised fatigue",
+    "generalized fatigue",
+)
+
+
+def _looks_like_question(text: str) -> bool:
+    if not text:
+        return True
+    t = text.lower().strip()
+    if not t:
+        return True
+    if t.endswith("?"):
+        return True
+    for m in _QUESTION_MARKERS:
+        if m in t:
+            return True
+    return False
+
+
+def _looks_like_boilerplate(text: str) -> bool:
+    if not text:
+        return True
+    t = text.lower().strip()
+    for m in _BOILERPLATE_MARKERS:
+        if m in t:
+            return True
+    return False
+
+
+def _is_clean_symptom(text: str) -> bool:
+    return not _looks_like_question(text) and not _looks_like_boilerplate(text)
+
+
+def _jaccard(a, b) -> float:
+    sa, sb = set(a), set(b)
+    if not sa and not sb:
+        return 1.0
+    union = sa | sb
+    if not union:
+        return 1.0
+    return len(sa & sb) / len(union)
+
+
+def _distinct_ratio(items: List[str]) -> float:
+    if len(items) < 2:
+        return 1.0
+    return len(set(items)) / len(items)
 
 
 # ---------------------------------------------------------------------------
@@ -263,14 +357,10 @@ def _canonical_disease_from_key(key: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Chat-log harvesting
+# Chat-log harvesting  (REWRITTEN — filters questions & boilerplate)
 # ---------------------------------------------------------------------------
 
 def _iter_all_chat_logs(limit_per_patient: int = 200) -> List[Dict[str, Any]]:
-    """
-    Read every chat-log document from DB. Uses config_db.get_db()
-    directly so we do not add a new API surface for something training-only.
-    """
     try:
         db = config_db.get_db()
     except Exception as e:
@@ -291,9 +381,11 @@ def _iter_all_chat_logs(limit_per_patient: int = 200) -> List[Dict[str, Any]]:
 
 def _samples_from_chat_log(doc: Dict[str, Any]) -> List[Tuple[str, List[str]]]:
     """
-    Turn one chat-log document into a list of (disease, [symptom_phrases]).
-    A symptom phrase is an endorsed question text; those are the closest
-    real-world equivalents of a curated symptom.
+    Turn one chat-log document into (disease, [clean symptom phrases]).
+
+    NEW: endorsed strings that look like interviewer questions are dropped,
+    not fed into the corpus. This is the single change that removes the
+    repeated-question collapse from the training data.
     """
     try:
         from .chat_log_parser import parse_chat_log
@@ -305,14 +397,24 @@ def _samples_from_chat_log(doc: Dict[str, Any]) -> List[Tuple[str, List[str]]]:
     diseases = summary.get("diseases") or []
     evidence = summary.get("symptom_evidence") or {}
 
-    # Endorsed questions grouped by branch
     endorsed_by_branch: Dict[str, List[str]] = {}
+    rejected_q = 0
     for text, meta in evidence.items():
         status = meta.get("status", "")
         if status not in ("yes_strong", "yes_but"):
             continue
+        raw = (text or "").strip()
+        if not raw:
+            continue
+        if not _is_clean_symptom(raw):
+            rejected_q += 1
+            continue
         branch = (meta.get("branch") or "").lower().strip()
-        endorsed_by_branch.setdefault(branch, []).append(text.strip())
+        endorsed_by_branch.setdefault(branch, []).append(raw)
+
+    if rejected_q:
+        logger.debug("chat log %s: dropped %d question-shaped endorsements",
+                     doc.get("session_id", "?"), rejected_q)
 
     out: List[Tuple[str, List[str]]] = []
 
@@ -324,10 +426,7 @@ def _samples_from_chat_log(doc: Dict[str, Any]) -> List[Tuple[str, List[str]]]:
             branch = (entry.get("source_branch") or "").lower().strip()
             items = list(endorsed_by_branch.get(branch, []))
             if not items:
-                # Fall back to all endorsed items so we never emit an empty
-                # sample from a chat log that clearly contained answers.
                 items = [t for lst in endorsed_by_branch.values() for t in lst]
-            # De-duplicate and cap
             seen = set()
             clean: List[str] = []
             for t in items:
@@ -341,9 +440,6 @@ def _samples_from_chat_log(doc: Dict[str, Any]) -> List[Tuple[str, List[str]]]:
             if clean:
                 out.append((canonical, clean))
     else:
-        # No diseases recorded — synthesize samples keyed on the branches
-        # the patient was actually asked about, using the branch name as
-        # the "disease" string.
         for branch, items in endorsed_by_branch.items():
             if not branch or not items:
                 continue
@@ -355,8 +451,8 @@ def _samples_from_chat_log(doc: Dict[str, Any]) -> List[Tuple[str, List[str]]]:
 
 def _chat_log_corpus() -> List[Tuple[str, List[str]]]:
     """
-    Aggregate (disease, [symptom]) pairs from every chat log stored for
-    every patient. De-duplicated per disease.
+    Aggregate (disease, [clean symptom phrases]) from every chat log.
+    De-duplicated per disease.
     """
     docs = _iter_all_chat_logs()
     if not docs:
@@ -385,34 +481,40 @@ def _chat_log_corpus() -> List[Tuple[str, List[str]]]:
 
 
 # ---------------------------------------------------------------------------
-# Corpus builder — library + chat logs
+# Corpus builder — library + chat logs  (REWRITTEN — clean-only)
 # ---------------------------------------------------------------------------
+
+def _iter_library_symptoms() -> List[Tuple[str, List[str]]]:
+    """
+    Yield (disease, [clean symptom phrases]) from the symptom library,
+    dropping any entry that is question-shaped or boilerplate.
+    """
+    out: List[Tuple[str, List[str]]] = []
+    for key, symptoms in _symptom_library().items():
+        disease = _canonical_disease_from_key(key)
+        clean = [s for s in symptoms if _is_clean_symptom(s)]
+        if clean:
+            out.append((disease, clean))
+    return out
+
 
 def _build_corpus() -> Tuple[Vocab, List[List[str]], List[Tuple[str, List[str]]]]:
     """
     Build the training corpus from:
-      1. The (possibly enriched) symptom library.
-      2. Every chat log in DB, projected to (disease, endorsed questions).
+      1. The (possibly enriched) symptom library — clean entries only.
+      2. Every chat log in DB — clean symptom phrases only.
 
-    Both sources go through the same tokenisation so the LM sees a single
-    format: <sep> disease <sep> symptom1 <stop> symptom2 <stop> ... <eos>
+    Format per sample:
+        <sep> disease <sep> symptom1 <stop> symptom2 <stop> ... <eos>
     """
     vocab = Vocab()
     samples: List[List[str]] = []
     structured: List[Tuple[str, List[str]]] = []
 
-    # 1. Curated + enriched library
-    for key, symptoms in _symptom_library().items():
-        disease = _canonical_disease_from_key(key)
-        tokens: List[str] = [SEP] + tokenize(disease) + [SEP]
-        for s in symptoms:
-            tokens += tokenize(s) + [STOP]
-        samples.append(tokens)
-        structured.append((disease, list(symptoms)))
-
-    # 2. Chat-log corpus
+    lib_pairs = _iter_library_symptoms()
     chat_pairs = _chat_log_corpus()
-    for disease, items in chat_pairs:
+
+    for disease, items in lib_pairs + chat_pairs:
         tokens: List[str] = [SEP] + tokenize(disease) + [SEP]
         for s in items:
             tokens += tokenize(s) + [STOP]
@@ -428,19 +530,12 @@ def _build_corpus() -> Tuple[Vocab, List[List[str]], List[Tuple[str, List[str]]]
 
     logger.info(
         "Corpus built: %d samples (%d library + %d chat-log)",
-        len(samples),
-        len(_symptom_library()),
-        len(chat_pairs),
+        len(samples), len(lib_pairs), len(chat_pairs),
     )
     return vocab, samples, structured
 
 
 def _reward_reference_pool(disease: str) -> List[str]:
-    """
-    Reference symptom phrases used by the PPO reward. Includes the curated
-    library entry, and (append-only) any chat-log phrasings recorded for
-    the same disease.
-    """
     lib = _symptom_library()
     key = _normalise_key(disease)
     ref = lib.get(key)
@@ -449,9 +544,8 @@ def _reward_reference_pool(disease: str) -> List[str]:
             if key and (key in k or k in key):
                 ref = v
                 break
-    ref = list(ref) if ref else []
+    ref = [s for s in (ref or []) if _is_clean_symptom(s)]
 
-    # Append chat-log phrasings for the same disease (or a substring match)
     chat = dict(_chat_log_corpus())
     for c_key, c_items in chat.items():
         c_norm = _normalise_key(c_key)
@@ -459,7 +553,6 @@ def _reward_reference_pool(disease: str) -> List[str]:
             ref.extend(c_items)
             break
 
-    # De-duplicate preserving order
     seen = set()
     out: List[str] = []
     for s in ref:
@@ -472,12 +565,11 @@ def _reward_reference_pool(disease: str) -> List[str]:
 
 
 # ---------------------------------------------------------------------------
-# Pretraining
+# Pretraining  (minor — adds distinct_ratio diagnostic to the job result)
 # ---------------------------------------------------------------------------
 
 def _run_pretraining(job_id: str, epochs: int = DEFAULT_PRETRAIN_EPOCHS) -> None:
     try:
-        # ---- API enrichment (append-only) --------------------------------
         STORE.update(job_id, status="running", progress=0.01,
                      message="Enriching symptom library from APIs…")
         enrich_result = _enrich_symptom_library_from_api(
@@ -485,12 +577,15 @@ def _run_pretraining(job_id: str, epochs: int = DEFAULT_PRETRAIN_EPOCHS) -> None
         )
         logger.info("Pre-training enrichment: %s", enrich_result)
 
-        # ---- Build corpus (library + chat logs) --------------------------
         STORE.update(job_id, status="running", progress=0.11,
                      message="Building vocabulary and corpus…")
-        vocab, samples, _ = _build_corpus()
+        vocab, samples, structured = _build_corpus()
         max_len = 96
         encoded = [vocab.encode(s)[:max_len] for s in samples]
+
+        # NEW: diagnostic — distinct disease count and duplicate-ratio.
+        diseases = [d for d, _ in structured]
+        corpus_distinct = _distinct_ratio(diseases)
 
         model = CustomANN(vocab_size=len(vocab), max_seq_len=max_len).to(DEVICE)
         with STATE.lock:
@@ -551,12 +646,14 @@ def _run_pretraining(job_id: str, epochs: int = DEFAULT_PRETRAIN_EPOCHS) -> None
                      f"{STATE.last_pretrain_loss:.3f} "
                      f"(library appended: "
                      f"{enrich_result.get('symptoms_added', 0)} new symptoms; "
-                     f"corpus: {len(samples)} samples)"),
+                     f"corpus: {len(samples)} samples; "
+                     f"distinct_diseases: {corpus_distinct:.2f})"),
             output_path=str(PRETRAIN_WEIGHTS),
             result={"avg_loss": STATE.last_pretrain_loss,
                     "weights": str(PRETRAIN_WEIGHTS),
                     "enrichment": enrich_result,
-                    "corpus_samples": len(samples)},
+                    "corpus_samples": len(samples),
+                    "distinct_diseases": corpus_distinct},
         )
         logger.info("Pretraining done — %s", PRETRAIN_WEIGHTS)
 
@@ -568,40 +665,212 @@ def _run_pretraining(job_id: str, epochs: int = DEFAULT_PRETRAIN_EPOCHS) -> None
 
 
 # ---------------------------------------------------------------------------
-# Reward
+# Reward  (REWRITTEN — disease-discriminative + anti-collapse)
 # ---------------------------------------------------------------------------
 
-def _reward_for_generation(vocab: Vocab, disease: str,
-                           generated_text: str) -> float:
-    ref = _reward_reference_pool(disease)
-    if not ref:
-        return 0.0
+_SYMPTOM_VOCAB_CACHE: Optional[set] = None
+_SYMPTOM_VOCAB_CACHE_KEY: Optional[int] = None
 
-    tokens = tokenize(generated_text)
-    token_set = set(tokens)
-    ref_tokens: set[str] = set()
-    for s in ref:
-        ref_tokens.update(tokenize(s))
-    if not ref_tokens:
-        return 0.0
 
-    recall = len(token_set & ref_tokens) / len(ref_tokens)
-    n = len(token_set)
-    if n == 0:
+def _known_symptom_vocab(library: Optional[dict] = None) -> set:
+    global _SYMPTOM_VOCAB_CACHE, _SYMPTOM_VOCAB_CACHE_KEY
+    lib = library if library is not None else _symptom_library()
+    cache_key = len(lib)
+    if _SYMPTOM_VOCAB_CACHE is not None and _SYMPTOM_VOCAB_CACHE_KEY == cache_key:
+        return _SYMPTOM_VOCAB_CACHE
+
+    vocab: set = set()
+    for entry in lib.values():
+        if isinstance(entry, dict):
+            items = (
+                entry.get("symptoms")
+                or entry.get("canonical_symptoms")
+                or entry.get("keys")
+                or []
+            )
+        elif isinstance(entry, (list, tuple, set)):
+            items = entry
+        else:
+            items = []
+        for s in items:
+            if not _is_clean_symptom(s):
+                continue
+            n = _normalise_key(s)
+            if n:
+                vocab.add(n)
+
+    _SYMPTOM_VOCAB_CACHE = vocab
+    _SYMPTOM_VOCAB_CACHE_KEY = cache_key
+    return vocab
+
+
+def _canonical_symptoms_for(disease: str, lib: dict) -> Set[str]:
+    disease_key = _normalise_key(disease)
+    entry = lib.get(disease) or lib.get(disease_key) or {}
+    if isinstance(entry, dict):
+        items = (
+            entry.get("symptoms")
+            or entry.get("canonical_symptoms")
+            or entry.get("keys")
+            or []
+        )
+    elif isinstance(entry, (list, tuple, set)):
+        items = list(entry)
+    else:
+        items = []
+    return {
+        _normalise_key(s) for s in items
+        if _normalise_key(s) and _is_clean_symptom(s)
+    }
+
+
+def _reward_for_generation(
+    vocab,
+    disease: str,
+    generated_text: str,
+    *,
+    is_enriched: bool = False,
+    enrichment_bonus: float = 0.10,
+    library: Optional[dict] = None,
+    recent_generations: Optional[List[str]] = None,
+    recent_diseases: Optional[List[str]] = None,
+) -> float:
+    """
+    Score a generated symptom list against the target disease.
+
+    Hard rejections (return negative):
+      - empty output
+      - question-shaped output ("Have you noticed…?")
+      - boilerplate output ("Clinical features consistent with X")
+
+    Shaping terms:
+      + coverage    : fraction of THIS disease's canonical symptoms covered
+      + precision   : fraction of generated tokens that are in THIS disease's set
+      + disease_sim : overlap with disease tokens
+      - repetition  : penalty for duplicate tokens
+      - length_reg  : penalty for far-too-short / too-long output
+      - collapse    : penalty for near-duplicate output to a DIFFERENT disease
+      + enrichment_bonus when is_enriched is True
+    """
+    if not generated_text or not generated_text.strip():
         return -0.5
-    length_score = max(0.0, min(1.0, 1.0 - abs(n - 15) / 15.0))
-    redundancy = 1.0 - (len(token_set) / max(len(tokens), 1))
-    too_long = max(0, len(tokens) - 40) / 20.0
-    return recall + 0.3 * length_score - 0.4 * redundancy - 0.1 * too_long
+    if _looks_like_question(generated_text):
+        return -1.0
+    if _looks_like_boilerplate(generated_text):
+        return -1.0
+
+    lib = library if library is not None else _symptom_library()
+
+    gen_tokens = [t for t in tokenize(generated_text) if t.strip()]
+    gen_norm = [_normalise_key(t) for t in gen_tokens]
+    gen_norm = [t for t in gen_norm if t]
+    gen_set = set(gen_norm)
+
+    if not gen_set:
+        return -0.5
+
+    canonical = _canonical_symptoms_for(disease, lib)
+    if canonical:
+        coverage = len(gen_set & canonical) / len(canonical)
+        precision = sum(1 for t in gen_norm if t in canonical) / len(gen_norm)
+    else:
+        coverage = 0.0
+        precision = 0.0
+
+    disease_tokens = {
+        _normalise_key(t) for t in tokenize(disease) if _normalise_key(t)
+    }
+    disease_sim = (
+        len(gen_set & disease_tokens) / len(disease_tokens)
+        if disease_tokens else 0.0
+    )
+
+    unique_ratio = len(gen_set) / len(gen_norm) if gen_norm else 0.0
+    repetition = 1.0 - unique_ratio
+
+    n = len(gen_norm)
+    if n < 3:
+        length_reg = (3 - n) / 3.0
+    elif n > 25:
+        length_reg = min(1.0, (n - 25) / 25.0)
+    else:
+        length_reg = 0.0
+
+    reward = (
+        1.20 * coverage
+        + 0.60 * precision
+        + 0.30 * disease_sim
+        - 0.40 * repetition
+        - 0.20 * length_reg
+    )
+
+    collapse_penalty = 0.0
+    if recent_generations and recent_diseases:
+        cur_disease = _normalise_key(disease)
+        for prev_text, prev_disease in zip(recent_generations, recent_diseases):
+            if _normalise_key(prev_disease) == cur_disease:
+                continue
+            prev_tokens = [
+                _normalise_key(t) for t in tokenize(prev_text)
+                if _normalise_key(t)
+            ]
+            if not prev_tokens:
+                continue
+            j = _jaccard(gen_norm, prev_tokens)
+            if j > 0.6:
+                collapse_penalty = max(collapse_penalty, j - 0.6)
+    reward -= 2.0 * collapse_penalty
+
+    if is_enriched:
+        reward += enrichment_bonus
+
+    return float(max(-1.5, min(2.0, reward)))
 
 
 # ---------------------------------------------------------------------------
-# PPO
+# PPO  (REWRITTEN — pretrained KL reference, collapse alarm, clean enrichment)
 # ---------------------------------------------------------------------------
+
+_PPO_CHAT_WEIGHT = 0.30
+_PPO_LIBRARY_WEIGHT = 1.00
+_PPO_ENRICHED_WEIGHT = 2.00
+_PPO_KL_COEFF = 0.20
+_PPO_ENTROPY_COEFF = 0.01
+_PPO_ADV_CLAMP = 3.0
+_PPO_COLLAPSE_ALARM = 0.30
+_PPO_RECENT_WINDOW = 16
+
+
+def _load_reference_model(fallback: CustomANN) -> CustomANN:
+    """
+    Prefer the PRETRAINED checkpoint as the KL reference. This prevents PPO
+    from compounding an already-collapsed policy, which is what happened in
+    the previous run (the reference was a deepcopy of a drifted model).
+    """
+    try:
+        if PRETRAIN_WEIGHTS.exists():
+            data = torch.load(PRETRAIN_WEIGHTS, map_location=DEVICE)
+            cfg = data["config"]
+            ref = CustomANN(**cfg).to(DEVICE)
+            ref.load_state_dict(data["state_dict"])
+            ref.eval()
+            for p in ref.parameters():
+                p.requires_grad = False
+            logger.info("KL reference: pretrained checkpoint")
+            return ref
+    except Exception as e:
+        logger.warning("Could not load pretrained reference: %s", e)
+
+    ref = copy.deepcopy(fallback)
+    ref.eval()
+    for p in ref.parameters():
+        p.requires_grad = False
+    logger.warning("KL reference: deepcopy of current model (fallback)")
+    return ref
+
 
 def _run_ppo(job_id: str, epochs: int = DEFAULT_PPO_EPOCHS) -> None:
     try:
-        # ---- API enrichment ----------------------------------------------
         STORE.update(job_id, status="running", progress=0.01,
                      message="Enriching symptom library from APIs…")
         enrich_result = _enrich_symptom_library_from_api(
@@ -617,45 +886,96 @@ def _run_ppo(job_id: str, epochs: int = DEFAULT_PPO_EPOCHS) -> None:
 
         STORE.update(job_id, status="running", progress=0.11,
                      message="Freezing reference model for KL…")
-        ref = copy.deepcopy(model)
-        ref.eval()
-        for p in ref.parameters():
-            p.requires_grad = False
+        ref = _load_reference_model(model)
         with STATE.lock:
             STATE.ref_model = ref
 
         optim = torch.optim.AdamW(model.parameters(), lr=2e-5,
                                   weight_decay=0.01, betas=(0.9, 0.95))
 
-        # ---- Sampling pool: library ∪ chat-log corpus ---------------------
         library_keys = list(_symptom_library().keys())
         chat_pairs = _chat_log_corpus()
         chat_keys = [d for d, _ in chat_pairs]
 
-        sampling_pool: List[str] = []
-        seen_keys = set()
-        for k in library_keys + chat_keys:
-            key_norm = _normalise_key(k)
-            if not key_norm or key_norm in seen_keys:
-                continue
-            seen_keys.add(key_norm)
-            sampling_pool.append(k)
+        # Enriched keys: only keep clean ones; drop question/boilerplate.
+        enriched_keys_raw = (
+            enrich_result.get("added_keys")
+            or enrich_result.get("new_symptoms")
+            or enrich_result.get("symptoms_added_keys")
+            or []
+        )
+        if isinstance(enriched_keys_raw, int):
+            enriched_keys_raw = []
+        enriched_keys_raw = [
+            k for k in enriched_keys_raw if _is_clean_symptom(k)
+        ]
+
+        try:
+            enriched_key_set = {
+                _normalise_key(k) for k in enriched_keys_raw
+                if _normalise_key(k)
+            }
+        except Exception:
+            enriched_key_set = set()
+
+        key_weights: Dict[str, float] = {}
+        pool_index: Dict[str, str] = {}
+
+        def _add_key(k: str, weight: float) -> None:
+            kn = _normalise_key(k)
+            if not kn:
+                return
+            if weight > key_weights.get(kn, 0.0):
+                key_weights[kn] = weight
+            pool_index.setdefault(kn, k)
+
+        for k in library_keys:
+            _add_key(k, _PPO_LIBRARY_WEIGHT)
+        for k in chat_keys:
+            _add_key(k, _PPO_CHAT_WEIGHT)     # lower than library, not higher
+        for k in enriched_keys_raw:
+            _add_key(k, _PPO_ENRICHED_WEIGHT)
+
+        sampling_pool: List[str] = list(pool_index.values())
+        sampling_weights: List[float] = [
+            key_weights[_normalise_key(k)] for k in sampling_pool
+        ]
 
         samples_per_epoch = max(4, len(sampling_pool))
         total_steps = epochs * samples_per_epoch
         step = 0
         total_reward = 0.0
         baseline = 0.0
+        enriched_trained = 0
+        covered_keys: set = set()
 
         pad_id = vocab.stoi[PAD]
         eos_id = vocab.stoi[EOS]
         stop_id = vocab.stoi[STOP]
 
+        recent_generations: List[str] = []
+        recent_diseases: List[str] = []
+
         for epoch in range(epochs):
-            random.shuffle(sampling_pool)
-            for key in sampling_pool[:samples_per_epoch]:
+            if sampling_weights and any(w > 0 for w in sampling_weights):
+                epoch_keys = random.choices(
+                    sampling_pool, weights=sampling_weights,
+                    k=samples_per_epoch,
+                )
+            else:
+                epoch_keys = list(sampling_pool)
+                random.shuffle(epoch_keys)
+                epoch_keys = epoch_keys[:samples_per_epoch]
+
+            for key in epoch_keys:
                 model.train()
                 disease = _canonical_disease_from_key(key)
+                key_norm = _normalise_key(key)
+                covered_keys.add(key_norm)
+                is_enriched = key_norm in enriched_key_set
+                if is_enriched:
+                    enriched_trained += 1
+
                 prompt_ids = vocab.encode([SEP] + tokenize(disease) + [SEP],
                                           add_bos=True, add_eos=False)
                 prompt = torch.tensor(prompt_ids, dtype=torch.long,
@@ -673,7 +993,18 @@ def _run_ppo(job_id: str, epochs: int = DEFAULT_PPO_EPOCHS) -> None:
                     gen_tokens = gen_tokens[:gen_tokens.index(STOP)]
                 generated_text = " ".join(gen_tokens)
 
-                r = _reward_for_generation(vocab, disease, generated_text)
+                r = _reward_for_generation(
+                    vocab, disease, generated_text,
+                    is_enriched=is_enriched,
+                    recent_generations=recent_generations[-_PPO_RECENT_WINDOW:],
+                    recent_diseases=recent_diseases[-_PPO_RECENT_WINDOW:],
+                )
+                recent_generations.append(generated_text)
+                recent_diseases.append(disease)
+                if len(recent_generations) > _PPO_RECENT_WINDOW * 4:
+                    recent_generations = recent_generations[-_PPO_RECENT_WINDOW * 2:]
+                    recent_diseases = recent_diseases[-_PPO_RECENT_WINDOW * 2:]
+
                 total_reward += r
                 adv = r - baseline
                 baseline = 0.9 * baseline + 0.1 * r
@@ -697,8 +1028,11 @@ def _run_ppo(job_id: str, epochs: int = DEFAULT_PPO_EPOCHS) -> None:
                 probs = log_probs.exp()
                 entropy = -(probs * log_probs).sum(-1).mean()
                 adv_t = torch.tensor(adv, dtype=torch.float32, device=DEVICE)
-                loss = (-adv_t.clamp(-3.0, 3.0) * nll
-                        + 0.05 * kl - 0.01 * entropy)
+                loss = (
+                    -adv_t.clamp(-_PPO_ADV_CLAMP, _PPO_ADV_CLAMP) * nll
+                    + _PPO_KL_COEFF * kl
+                    - _PPO_ENTROPY_COEFF * entropy
+                )
 
                 optim.zero_grad()
                 loss.backward()
@@ -707,10 +1041,23 @@ def _run_ppo(job_id: str, epochs: int = DEFAULT_PPO_EPOCHS) -> None:
 
                 step += 1
                 p = 0.11 + 0.83 * (step / max(total_steps, 1))
+                tag = " [enriched]" if is_enriched else ""
                 STORE.update(job_id, progress=p,
                              message=f"PPO {epoch+1}/{epochs} — "
                                      f"step {step}/{total_steps} — "
-                                     f"reward {r:.3f}")
+                                     f"reward {r:.3f}{tag}")
+
+                if step % 32 == 0:
+                    dr = _distinct_ratio(
+                        recent_generations[-_PPO_RECENT_WINDOW:]
+                    )
+                    if dr < _PPO_COLLAPSE_ALARM:
+                        raise RuntimeError(
+                            f"Policy collapse detected: distinct_ratio="
+                            f"{dr:.2f} < {_PPO_COLLAPSE_ALARM}. Aborting "
+                            f"PPO. Check chat-corpus cleanliness with "
+                            f"`python -m maintenance audit-chat`."
+                        )
 
         STATE.last_ppo_reward = total_reward / max(step, 1)
 
@@ -723,18 +1070,29 @@ def _run_ppo(job_id: str, epochs: int = DEFAULT_PPO_EPOCHS) -> None:
         with STATE.lock:
             STATE.ppo_trained = True
 
+        final_distinct = _distinct_ratio(
+            recent_generations[-_PPO_RECENT_WINDOW:]
+        )
+
         STORE.update(
             job_id, status="done", progress=1.0,
             message=(f"PPO complete — avg reward "
                      f"{STATE.last_ppo_reward:.3f} "
                      f"(library appended: "
                      f"{enrich_result.get('symptoms_added', 0)} new symptoms; "
-                     f"sampling pool: {len(sampling_pool)})"),
+                     f"trained on {enriched_trained} enriched steps; "
+                     f"sampling pool: {len(sampling_pool)}; "
+                     f"distinct_ratio: {final_distinct:.2f})"),
             output_path=str(PPO_WEIGHTS),
             result={"avg_reward": STATE.last_ppo_reward,
                     "weights": str(PPO_WEIGHTS),
                     "enrichment": enrich_result,
-                    "sampling_pool": len(sampling_pool)},
+                    "sampling_pool": len(sampling_pool),
+                    "enriched_steps": enriched_trained,
+                    "enriched_keys_covered": len(
+                        covered_keys & enriched_key_set
+                    ) if enriched_key_set else 0,
+                    "distinct_ratio": final_distinct},
         )
         logger.info("PPO done — %s", PPO_WEIGHTS)
 
@@ -806,7 +1164,7 @@ def training_status() -> Dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# Generation
+# Generation  (post-filter added as last-line defense)
 # ---------------------------------------------------------------------------
 
 def _clean_symptom_fragment(fragment: str) -> str:
@@ -849,11 +1207,17 @@ def generate_symptoms(disease: str,
                 break
             else:
                 fragments[-1].append(tok)
+
         clean: List[str] = []
         seen = set()
+        rejected = 0
         for ft in fragments:
             text = _clean_symptom_fragment(" ".join(ft))
             if not text:
+                continue
+            # Last-line defense: never surface question-shaped output.
+            if not _is_clean_symptom(text):
+                rejected += 1
                 continue
             if text.lower() in seen:
                 continue
@@ -861,6 +1225,13 @@ def generate_symptoms(disease: str,
             clean.append(text)
             if len(clean) >= 8:
                 break
+
+        if rejected:
+            logger.debug(
+                "generate_symptoms(%s): dropped %d question/boilerplate "
+                "fragments", disease, rejected,
+            )
+
         if len(clean) < 2:
             return None
         if all(len(f.split()) < 2 for f in clean):
@@ -900,7 +1271,7 @@ def load_existing_weights() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Append-only API enrichment
+# Append-only API enrichment  (drops question/boilerplate from API too)
 # ---------------------------------------------------------------------------
 
 def _enrich_symptom_library_from_api(
@@ -910,6 +1281,8 @@ def _enrich_symptom_library_from_api(
 ) -> Dict[str, Any]:
     """
     Append-only enrichment. Never overwrites, never deletes.
+    NEW: filters API responses through _is_clean_symptom so questions and
+    boilerplate can't enter the library.
     """
     library = dict(config_loader.SYMPTOM_LIBRARY)
     if not library:
@@ -937,6 +1310,8 @@ def _enrich_symptom_library_from_api(
                 continue
             t = s.strip()
             if not t:
+                continue
+            if not _is_clean_symptom(t):
                 continue
             key = t.lower()
             if key in existing_lower or key in seen_fresh:
@@ -979,9 +1354,16 @@ def _enrich_symptom_library_from_api(
 
     refreshed = config_loader.refresh_symptom_library_after_write()
 
+    # Return enriched keys so PPO can weight them. Also expose the
+    # normalized form used by _run_ppo.
+    added_keys: List[str] = []
+    for items in delta.values():
+        added_keys.extend(items)
+
     return {
         "status": "ok",
         "diseases_processed": total,
         **stats,
+        "added_keys": added_keys,
         "library_size": refreshed.get("symptom_library_size", len(library)),
     }
