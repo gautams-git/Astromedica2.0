@@ -34,7 +34,8 @@ from __future__ import annotations
 import httpx
 
 import db_layer
-from config import GEMINI_API_KEY, GEMINI_EMBEDDING_DIM, GEMINI_EMBEDDING_MODEL
+import gemini_client
+from config import GEMINI_EMBEDDING_DIM, GEMINI_EMBEDDING_MODEL
 
 TOP_K_CHUNKS = 5
 MAX_PROMPT_TOKENS = 4096
@@ -89,15 +90,13 @@ async def embed_query(text: str) -> list[float]:
     kb_chunks at ingest time, or cosine similarity in Step 3A is
     meaningless (different embedding models don't share a vector space).
     """
-    url = (
-        f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{GEMINI_EMBEDDING_MODEL}:embedContent"
-    )
-    # Key in a header, not the URL: errors print the URL, which leaked the key.
-    headers = {"x-goog-api-key": GEMINI_API_KEY}
+    # Vertex AI with the ADC login (gemini_client.py) - API keys are blocked.
+    # Same model and size as before, so the vectors stay comparable.
+    url = gemini_client.embed_url(GEMINI_EMBEDDING_MODEL)
+    headers = await gemini_client.auth_headers()
     payload = {
-        "content": {"parts": [{"text": text}]},
-        "outputDimensionality": GEMINI_EMBEDDING_DIM,
+        "instances": [{"content": text}],
+        "parameters": {"outputDimensionality": GEMINI_EMBEDDING_DIM},
     }
 
     async with httpx.AsyncClient(timeout=30) as client:
@@ -105,7 +104,7 @@ async def embed_query(text: str) -> list[float]:
         response.raise_for_status()
         data = response.json()
 
-    return data["embedding"]["values"]
+    return data["predictions"][0]["embeddings"]["values"]
 
 
 # ══════════════════════════════════════════════════════════════

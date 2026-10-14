@@ -635,11 +635,14 @@ def _disease_branch_id(disease: str) -> str:
 
 
 def _score_disease(name: str, cluster_answers: list) -> dict:
-    branch_id = _disease_branch_id(name)
+    # Gemini-written plans have one branch per disease (question_generator);
+    # built-in plans group diseases by keyword rule.
+    from question_generator import generated_branch_id
+    branch_ids = {generated_branch_id(name), _disease_branch_id(name)} - {""}
     scored, seen = [], set()
     for a in cluster_answers:
         key = (_norm_term(a["question"]), _norm_term(a["answer"]), a["result"])
-        if branch_id and a["branch_id"] == branch_id and a["result"] in ANSWER_POINTS and key not in seen:
+        if a["branch_id"] in branch_ids and a["result"] in ANSWER_POINTS and key not in seen:
             seen.add(key)
             scored.append(a)
     said_yes, said_no = _split_yes_no(scored)

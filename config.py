@@ -16,7 +16,8 @@ PROKERALA_CLIENT_ID     = os.environ.get("PROKERALA_CLIENT_ID", "")
 PROKERALA_CLIENT_SECRET = os.environ.get("PROKERALA_CLIENT_SECRET", "")
 
 # ── Gemini / LLM Config ────────────────────────────
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+# No API key: Gemini is reached through Vertex AI with the Google (ADC) login,
+# see gemini_client.py. Region: GEMINI_LOCATION in .env.
 GEMINI_MODEL   = "gemini-2.5-flash"
 LLM_PROVIDER   = "gemini"
 
@@ -42,7 +43,7 @@ DEIDENTIFICATION_SECRET = os.environ.get("DEIDENTIFICATION_SECRET", "")
 # Serper.dev key — used by llm1_search.py's real _web_search().
 SERPER_API_KEY = os.environ.get("SERPER_API_KEY", "")
 
-_missing = [name for name in ("PROKERALA_CLIENT_ID", "PROKERALA_CLIENT_SECRET", "GEMINI_API_KEY",
+_missing = [name for name in ("PROKERALA_CLIENT_ID", "PROKERALA_CLIENT_SECRET",
                               "SECRET_KEY", "DEIDENTIFICATION_SECRET") if not globals()[name]]
 if _missing:
     print(f"[Config] Missing in .env: {', '.join(_missing)} - see .env.example")

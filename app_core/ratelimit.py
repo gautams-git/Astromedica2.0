@@ -16,6 +16,7 @@ _LIMITS = {
     "chart": (6, 300),
     "chat": (30, 300),
     "read": (120, 60),
+    "unlock": (10, 300),   # Dev view password tries (server.py /dev-mode/unlock)
 }
 
 
