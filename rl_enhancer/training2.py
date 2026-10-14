@@ -2,9 +2,14 @@
 Background training — CustomANN pretraining + PPO fine-tuning.
 
 Training corpus = curated + API-enriched symptom library
-                ∪ patient chat-log evidence (clean symptom phrases only).
+                ∪ clean chat-log symptom phrases
+                ∪ clinical prose mined from chat logs (concept-aligned).
 
 Defaults: 20 epochs each. Weights are saved under weights/.
+
+This module derives its notion of "clinical concept" from the data it
+already has (library co-occurrence, chat logs, and the model's own
+embeddings). There is no hand-authored medical ontology.
 """
 from __future__ import annotations
 
@@ -14,6 +19,7 @@ import math
 import random
 import re
 import threading
+from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -54,7 +60,7 @@ def tokenize(text: str) -> List[str]:
 
 
 # ---------------------------------------------------------------------------
-# Question / boilerplate detection  (NEW — drives corpus + reward filtering)
+# Question / boilerplate detection
 # ---------------------------------------------------------------------------
 
 _QUESTION_MARKERS = (
@@ -348,6 +354,11 @@ class TrainerState:
         self.last_pretrain_loss: float = 0.0
         self.last_ppo_reward: float = 0.0
 
+        # Data-derived knowledge caches (learned once per process,
+        # refreshed after pretraining).
+        self.concept_map: Optional[Dict[str, str]] = None
+        self.tfidf: Optional[Dict[str, Dict[str, float]]] = None
+
 
 STATE = TrainerState()
 
@@ -357,7 +368,213 @@ def _canonical_disease_from_key(key: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Chat-log harvesting  (REWRITTEN — filters questions & boilerplate)
+# Learned concept clustering  (replaces a static synonym map)
+# ---------------------------------------------------------------------------
+
+def _learn_concept_clusters(
+    min_support: int = 2,
+    sim_threshold: float = 0.55,
+) -> Dict[str, str]:
+    """
+    Learn synonym clusters from co-occurrence across diseases.
+
+    Two symptom strings that consistently appear together under the same
+    disease are likely synonyms. We build a co-occurrence graph and greedily
+    merge clusters whose Jaccard similarity exceeds `sim_threshold`.
+
+    Returns a mapping raw_normalized -> cluster_representative.
+    """
+    lib = _symptom_library()
+
+    disease_symptoms: Dict[str, Set[str]] = {}
+    for disease, symptoms in lib.items():
+        items = (symptoms.get("symptoms") if isinstance(symptoms, dict)
+                 else symptoms) or []
+        clean = {_normalise_key(s) for s in items
+                 if isinstance(s, str) and _is_clean_symptom(s)}
+        if clean:
+            disease_symptoms[_normalise_key(disease)] = clean
+
+    symptom_diseases: Dict[str, Set[str]] = {}
+    for disease, symptoms in disease_symptoms.items():
+        for s in symptoms:
+            symptom_diseases.setdefault(s, set()).add(disease)
+
+    candidates = [s for s, ds in symptom_diseases.items()
+                  if len(ds) >= min_support]
+
+    clusters: List[Set[str]] = []
+    for s in candidates:
+        placed = False
+        for cluster in clusters:
+            rep = next(iter(cluster))
+            j = _jaccard(symptom_diseases[s], symptom_diseases[rep])
+            if j >= sim_threshold:
+                cluster.add(s)
+                placed = True
+                break
+        if not placed:
+            clusters.append({s})
+
+    mapping: Dict[str, str] = {}
+    for cluster in clusters:
+        # Prefer the shortest string (usually the clinical term).
+        rep = min(cluster, key=len)
+        for s in cluster:
+            mapping[s] = rep
+
+    for s in symptom_diseases:
+        mapping.setdefault(s, s)
+
+    logger.info(
+        "Learned %d concept clusters from %d symptoms across %d diseases",
+        len(clusters), len(symptom_diseases), len(disease_symptoms),
+    )
+    return mapping
+
+
+def _get_concept_map() -> Dict[str, str]:
+    if STATE.concept_map is None:
+        STATE.concept_map = _learn_concept_clusters()
+    return STATE.concept_map
+
+
+def _canonical_term_learned(term: str) -> str:
+    key = _normalise_key(term)
+    if not key:
+        return key
+    return _get_concept_map().get(key, key)
+
+
+def _refresh_concept_map() -> None:
+    with STATE.lock:
+        STATE.concept_map = _learn_concept_clusters()
+        STATE.tfidf = None
+
+
+# ---------------------------------------------------------------------------
+# Learned characteristic symptoms  (replaces hand-labeled red flags)
+# ---------------------------------------------------------------------------
+
+def _compute_tfidf() -> Dict[str, Dict[str, float]]:
+    """
+    For each disease, score every concept by how characteristic it is of
+    that disease relative to the whole library.
+
+    Returns {disease_key: {concept: score in [0, 1]}}.
+    """
+    lib = _symptom_library()
+    disease_docs: Dict[str, Counter] = {}
+
+    for disease, symptoms in lib.items():
+        items = (symptoms.get("symptoms") if isinstance(symptoms, dict)
+                 else symptoms) or []
+        d_key = _normalise_key(disease)
+        c = Counter()
+        for s in items:
+            if not isinstance(s, str) or not _is_clean_symptom(s):
+                continue
+            c[_canonical_term_learned(s)] += 1
+        if c:
+            disease_docs[d_key] = c
+
+    df = Counter()
+    for c in disease_docs.values():
+        for s in c:
+            df[s] += 1
+    n_docs = max(1, len(disease_docs))
+
+    idf = {s: math.log((1 + n_docs) / (1 + d)) + 1.0
+           for s, d in df.items()}
+
+    out: Dict[str, Dict[str, float]] = {}
+    for disease, c in disease_docs.items():
+        total = sum(c.values())
+        scores = {s: (tf / total) * idf[s] for s, tf in c.items()}
+        max_s = max(scores.values()) if scores else 1.0
+        out[disease] = {s: v / max_s for s, v in scores.items()}
+
+    logger.info("TF-IDF computed for %d diseases", len(out))
+    return out
+
+
+def _get_tfidf() -> Dict[str, Dict[str, float]]:
+    if STATE.tfidf is None:
+        STATE.tfidf = _compute_tfidf()
+    return STATE.tfidf
+
+
+def _characteristic_symptoms(disease: str, top_k: int = 6) -> List[str]:
+    """
+    Return the top-k most characteristic concepts for a disease,
+    scored by TF-IDF over the library itself.
+    """
+    d_key = _normalise_key(disease)
+    scores = _get_tfidf().get(d_key, {})
+    if not scores:
+        # Substring fallback for slight name mismatches.
+        for k, v in _get_tfidf().items():
+            if d_key and (d_key in k or k in d_key):
+                scores = v
+                break
+    return [s for s, _ in sorted(scores.items(), key=lambda x: -x[1])[:top_k]]
+
+
+# ---------------------------------------------------------------------------
+# Model-derived concept refresh  (self-improving loop)
+# ---------------------------------------------------------------------------
+
+@torch.no_grad()
+def _extract_concept_map_from_model(
+    model: CustomANN,
+    vocab: Vocab,
+    sim_threshold: float = 0.75,
+) -> Dict[str, str]:
+    """
+    Cluster vocabulary tokens by embedding cosine similarity. Yields a
+    concept map that reflects what the model has actually learned.
+
+    Only tokens that appear in the symptom library are considered, so
+    function words don't distort the clustering.
+    """
+    emb = model.token_embed.weight
+    emb = F.normalize(emb, dim=-1)
+    sim = emb @ emb.t()
+
+    lib_tokens: Set[str] = set()
+    for symptoms in _symptom_library().values():
+        items = (symptoms.get("symptoms") if isinstance(symptoms, dict)
+                 else symptoms) or []
+        for s in items:
+            if not isinstance(s, str):
+                continue
+            for t in tokenize(s):
+                lib_tokens.add(t)
+    lib_token_ids = [vocab.stoi[t] for t in lib_tokens if t in vocab.stoi]
+    if not lib_token_ids:
+        return {}
+
+    mapping: Dict[str, str] = {}
+    assigned: Set[int] = set()
+    for i in lib_token_ids:
+        if i in assigned:
+            continue
+        cluster = {i}
+        for j in lib_token_ids:
+            if j in cluster or j in assigned:
+                continue
+            if sim[i, j].item() >= sim_threshold:
+                cluster.add(j)
+        rep = min(cluster, key=lambda k: len(vocab.itos[k]))
+        for k in cluster:
+            mapping[vocab.itos[k]] = vocab.itos[rep]
+            assigned.add(k)
+    logger.info("Extracted %d model-derived concept keys", len(mapping))
+    return mapping
+
+
+# ---------------------------------------------------------------------------
+# Chat-log harvesting  (question/boilerplate filtered)
 # ---------------------------------------------------------------------------
 
 def _iter_all_chat_logs(limit_per_patient: int = 200) -> List[Dict[str, Any]]:
@@ -382,10 +599,7 @@ def _iter_all_chat_logs(limit_per_patient: int = 200) -> List[Dict[str, Any]]:
 def _samples_from_chat_log(doc: Dict[str, Any]) -> List[Tuple[str, List[str]]]:
     """
     Turn one chat-log document into (disease, [clean symptom phrases]).
-
-    NEW: endorsed strings that look like interviewer questions are dropped,
-    not fed into the corpus. This is the single change that removes the
-    repeated-question collapse from the training data.
+    Question-shaped and boilerplate endorsements are dropped.
     """
     try:
         from .chat_log_parser import parse_chat_log
@@ -480,19 +694,71 @@ def _chat_log_corpus() -> List[Tuple[str, List[str]]]:
     return [(d, items) for d, items in per_disease.items() if items]
 
 
+def _clinical_prose_corpus() -> List[Tuple[str, List[str]]]:
+    """
+    Extract clinician-style sentences from chat logs, aligned to concepts.
+
+    A sentence qualifies only if it contains a concept that is
+    characteristic of the disease (top-k TF-IDF). This filters out
+    generic phrasing that would otherwise blur across diseases.
+    """
+    docs = _iter_all_chat_logs()
+    if not docs:
+        return []
+
+    per_disease: Dict[str, List[str]] = {}
+    per_disease_seen: Dict[str, Set[str]] = {}
+
+    for doc in docs:
+        try:
+            from .chat_log_parser import parse_chat_log
+            summary = parse_chat_log(doc)
+        except Exception:
+            continue
+
+        evidence = summary.get("symptom_evidence") or {}
+        for entry in summary.get("diseases") or []:
+            disease = (entry.get("canonical") or entry.get("raw") or "").strip()
+            if not disease:
+                continue
+            d_key = _normalise_key(disease)
+            disease_concepts = set(_characteristic_symptoms(disease, top_k=8))
+            if not disease_concepts:
+                continue
+
+            for text, meta in evidence.items():
+                if meta.get("status") not in ("yes_strong", "yes_but"):
+                    continue
+                if not _is_clean_symptom(text):
+                    continue
+                sentence_concepts = {
+                    _canonical_term_learned(t) for t in tokenize(text)
+                }
+                if not (sentence_concepts & disease_concepts):
+                    continue
+                k = text.lower()
+                per_disease_seen.setdefault(d_key, set())
+                if k in per_disease_seen[d_key]:
+                    continue
+                per_disease_seen[d_key].add(k)
+                per_disease.setdefault(disease, []).append(text)
+                if len(per_disease[disease]) >= 10:
+                    break
+
+    return [(d, items) for d, items in per_disease.items() if items]
+
+
 # ---------------------------------------------------------------------------
-# Corpus builder — library + chat logs  (REWRITTEN — clean-only)
+# Corpus builder — library + chat logs + clinical prose
 # ---------------------------------------------------------------------------
 
 def _iter_library_symptoms() -> List[Tuple[str, List[str]]]:
-    """
-    Yield (disease, [clean symptom phrases]) from the symptom library,
-    dropping any entry that is question-shaped or boilerplate.
-    """
     out: List[Tuple[str, List[str]]] = []
     for key, symptoms in _symptom_library().items():
         disease = _canonical_disease_from_key(key)
-        clean = [s for s in symptoms if _is_clean_symptom(s)]
+        items = (symptoms.get("symptoms") if isinstance(symptoms, dict)
+                 else symptoms) or []
+        clean = [s for s in items if isinstance(s, str) and _is_clean_symptom(s)]
         if clean:
             out.append((disease, clean))
     return out
@@ -501,8 +767,9 @@ def _iter_library_symptoms() -> List[Tuple[str, List[str]]]:
 def _build_corpus() -> Tuple[Vocab, List[List[str]], List[Tuple[str, List[str]]]]:
     """
     Build the training corpus from:
-      1. The (possibly enriched) symptom library — clean entries only.
-      2. Every chat log in DB — clean symptom phrases only.
+      1. Symptom library entries (clean).
+      2. Clean chat-log symptom phrases.
+      3. Clinical prose mined from chat logs, concept-aligned.
 
     Format per sample:
         <sep> disease <sep> symptom1 <stop> symptom2 <stop> ... <eos>
@@ -513,8 +780,9 @@ def _build_corpus() -> Tuple[Vocab, List[List[str]], List[Tuple[str, List[str]]]
 
     lib_pairs = _iter_library_symptoms()
     chat_pairs = _chat_log_corpus()
+    clinical_pairs = _clinical_prose_corpus()
 
-    for disease, items in lib_pairs + chat_pairs:
+    for disease, items in lib_pairs + chat_pairs + clinical_pairs:
         tokens: List[str] = [SEP] + tokenize(disease) + [SEP]
         for s in items:
             tokens += tokenize(s) + [STOP]
@@ -529,8 +797,8 @@ def _build_corpus() -> Tuple[Vocab, List[List[str]], List[Tuple[str, List[str]]]
         raise RuntimeError("Training corpus is empty.")
 
     logger.info(
-        "Corpus built: %d samples (%d library + %d chat-log)",
-        len(samples), len(lib_pairs), len(chat_pairs),
+        "Corpus built: %d samples (%d library + %d chat-log + %d clinical)",
+        len(samples), len(lib_pairs), len(chat_pairs), len(clinical_pairs),
     )
     return vocab, samples, structured
 
@@ -565,7 +833,7 @@ def _reward_reference_pool(disease: str) -> List[str]:
 
 
 # ---------------------------------------------------------------------------
-# Pretraining  (minor — adds distinct_ratio diagnostic to the job result)
+# Pretraining
 # ---------------------------------------------------------------------------
 
 def _run_pretraining(job_id: str, epochs: int = DEFAULT_PRETRAIN_EPOCHS) -> None:
@@ -577,13 +845,15 @@ def _run_pretraining(job_id: str, epochs: int = DEFAULT_PRETRAIN_EPOCHS) -> None
         )
         logger.info("Pre-training enrichment: %s", enrich_result)
 
+        # Refresh data-derived knowledge after enrichment.
+        _refresh_concept_map()
+
         STORE.update(job_id, status="running", progress=0.11,
                      message="Building vocabulary and corpus…")
         vocab, samples, structured = _build_corpus()
         max_len = 96
         encoded = [vocab.encode(s)[:max_len] for s in samples]
 
-        # NEW: diagnostic — distinct disease count and duplicate-ratio.
         diseases = [d for d, _ in structured]
         corpus_distinct = _distinct_ratio(diseases)
 
@@ -640,6 +910,21 @@ def _run_pretraining(job_id: str, epochs: int = DEFAULT_PRETRAIN_EPOCHS) -> None
         with STATE.lock:
             STATE.pretrained = True
 
+        # Self-improving loop: refresh concept map from the trained model.
+        try:
+            model_map = _extract_concept_map_from_model(model, vocab)
+            if model_map:
+                # Merge with the co-occurrence map. Model-derived entries
+                # take precedence only for tokens the co-occurrence map
+                # didn't already cluster.
+                existing = _get_concept_map()
+                for k, v in model_map.items():
+                    existing.setdefault(k, v)
+                logger.info("Merged %d model-derived concept entries",
+                            len(model_map))
+        except Exception as e:
+            logger.warning("Model-derived concept refresh skipped: %s", e)
+
         STORE.update(
             job_id, status="done", progress=1.0,
             message=(f"Pretraining complete — avg loss "
@@ -653,7 +938,10 @@ def _run_pretraining(job_id: str, epochs: int = DEFAULT_PRETRAIN_EPOCHS) -> None
                     "weights": str(PRETRAIN_WEIGHTS),
                     "enrichment": enrich_result,
                     "corpus_samples": len(samples),
-                    "distinct_diseases": corpus_distinct},
+                    "distinct_diseases": corpus_distinct,
+                    "concept_clusters": len(set(
+                        _get_concept_map().values()
+                    ))},
         )
         logger.info("Pretraining done — %s", PRETRAIN_WEIGHTS)
 
@@ -665,7 +953,7 @@ def _run_pretraining(job_id: str, epochs: int = DEFAULT_PRETRAIN_EPOCHS) -> None
 
 
 # ---------------------------------------------------------------------------
-# Reward  (REWRITTEN — disease-discriminative + anti-collapse)
+# Reward — data-derived, disease-discriminative, anti-collapse
 # ---------------------------------------------------------------------------
 
 _SYMPTOM_VOCAB_CACHE: Optional[set] = None
@@ -682,12 +970,9 @@ def _known_symptom_vocab(library: Optional[dict] = None) -> set:
     vocab: set = set()
     for entry in lib.values():
         if isinstance(entry, dict):
-            items = (
-                entry.get("symptoms")
-                or entry.get("canonical_symptoms")
-                or entry.get("keys")
-                or []
-            )
+            items = (entry.get("symptoms")
+                     or entry.get("canonical_symptoms")
+                     or entry.get("keys") or [])
         elif isinstance(entry, (list, tuple, set)):
             items = entry
         else:
@@ -708,20 +993,15 @@ def _canonical_symptoms_for(disease: str, lib: dict) -> Set[str]:
     disease_key = _normalise_key(disease)
     entry = lib.get(disease) or lib.get(disease_key) or {}
     if isinstance(entry, dict):
-        items = (
-            entry.get("symptoms")
-            or entry.get("canonical_symptoms")
-            or entry.get("keys")
-            or []
-        )
+        items = (entry.get("symptoms")
+                 or entry.get("canonical_symptoms")
+                 or entry.get("keys") or [])
     elif isinstance(entry, (list, tuple, set)):
         items = list(entry)
     else:
         items = []
-    return {
-        _normalise_key(s) for s in items
-        if _normalise_key(s) and _is_clean_symptom(s)
-    }
+    cleaned = [s for s in items if _is_clean_symptom(s)]
+    return {_canonical_term_learned(s) for s in cleaned if s}
 
 
 def _reward_for_generation(
@@ -732,25 +1012,29 @@ def _reward_for_generation(
     is_enriched: bool = False,
     enrichment_bonus: float = 0.10,
     library: Optional[dict] = None,
+    negative_disease: Optional[str] = None,
     recent_generations: Optional[List[str]] = None,
     recent_diseases: Optional[List[str]] = None,
 ) -> float:
     """
-    Score a generated symptom list against the target disease.
+    Data-derived reward.
 
-    Hard rejections (return negative):
-      - empty output
-      - question-shaped output ("Have you noticed…?")
-      - boilerplate output ("Clinical features consistent with X")
+    Hard rejections:
+      - empty / question-shaped / boilerplate output
 
     Shaping terms:
-      + coverage    : fraction of THIS disease's canonical symptoms covered
-      + precision   : fraction of generated tokens that are in THIS disease's set
-      + disease_sim : overlap with disease tokens
-      - repetition  : penalty for duplicate tokens
-      - length_reg  : penalty for far-too-short / too-long output
-      - collapse    : penalty for near-duplicate output to a DIFFERENT disease
-      + enrichment_bonus when is_enriched is True
+      + concept_coverage    : fraction of THIS disease's concepts covered
+      + concept_precision   : fraction of generated concepts that belong to it
+      + characteristic      : bonus for the disease's top TF-IDF concepts
+      + contrastive         : bonus for concepts that separate this disease
+                              from the sampled negative disease
+      + system_coverage     : bonus for covering multiple systems when the
+                              disease is systemic; staying in-system when
+                              organ-specific
+      + disease_sim         : token overlap with disease name
+      - repetition          : token duplication penalty
+      - length_reg          : output length regularization
+      - collapse_penalty    : near-duplicate of a DIFFERENT disease's output
     """
     if not generated_text or not generated_text.strip():
         return -0.5
@@ -762,33 +1046,72 @@ def _reward_for_generation(
     lib = library if library is not None else _symptom_library()
 
     gen_tokens = [t for t in tokenize(generated_text) if t.strip()]
-    gen_norm = [_normalise_key(t) for t in gen_tokens]
-    gen_norm = [t for t in gen_norm if t]
-    gen_set = set(gen_norm)
-
-    if not gen_set:
+    if not gen_tokens:
         return -0.5
 
-    canonical = _canonical_symptoms_for(disease, lib)
-    if canonical:
-        coverage = len(gen_set & canonical) / len(canonical)
-        precision = sum(1 for t in gen_norm if t in canonical) / len(gen_norm)
+    gen_norm_tokens = [_normalise_key(t) for t in gen_tokens]
+    gen_concepts = {_canonical_term_learned(t) for t in gen_norm_tokens if t}
+    gen_concepts.discard("")
+
+    if not gen_concepts:
+        return -0.5
+
+    canonical_concepts = _canonical_symptoms_for(disease, lib)
+
+    if canonical_concepts:
+        hits = len(gen_concepts & canonical_concepts)
+        coverage = hits / len(canonical_concepts)
+        precision = (sum(1 for c in gen_concepts if c in canonical_concepts)
+                     / len(gen_concepts))
     else:
         coverage = 0.0
         precision = 0.0
 
+    # Characteristic bonus (replaces hand-labeled red flags).
+    char_symptoms = set(_characteristic_symptoms(disease, top_k=6))
+    char_hits = len(gen_concepts & char_symptoms) if char_symptoms else 0
+    characteristic_bonus = (0.6 * (char_hits / len(char_symptoms))
+                            if char_symptoms else 0.0)
+
+    # Contrastive bonus (replaces hand-labeled discriminators).
+    contrastive_bonus = 0.0
+    if negative_disease:
+        pos_chars = set(_characteristic_symptoms(disease, top_k=8))
+        neg_chars = set(_characteristic_symptoms(negative_disease, top_k=8))
+        pos_only = pos_chars - neg_chars
+        if pos_only:
+            contrastive_bonus = 0.5 * (len(gen_concepts & pos_only)
+                                       / len(pos_only))
+
+    # System coverage from the learned clusters themselves.
+    # We infer "system" as the set of concepts shared with sibling diseases.
+    disease_char = set(_characteristic_symptoms(disease, top_k=12))
+    sibling_systems: Dict[str, Set[str]] = {}
+    for other, scores in _get_tfidf().items():
+        if other == _normalise_key(disease):
+            continue
+        for c, v in scores.items():
+            if v >= 0.5:
+                sibling_systems.setdefault(c, set()).add(other)
+    systemic = len({tuple(sorted(s)) for s in sibling_systems.values()}) > 3
+    if systemic:
+        covered = sum(1 for c in gen_concepts if c in sibling_systems)
+        system_coverage = min(1.0, covered / max(1, len(disease_char)))
+    else:
+        covered = sum(1 for c in gen_concepts if c in disease_char)
+        system_coverage = min(1.0, covered / max(1, len(disease_char)))
+
     disease_tokens = {
         _normalise_key(t) for t in tokenize(disease) if _normalise_key(t)
     }
-    disease_sim = (
-        len(gen_set & disease_tokens) / len(disease_tokens)
-        if disease_tokens else 0.0
-    )
+    disease_sim = (len(gen_concepts & disease_tokens) / len(disease_tokens)
+                   if disease_tokens else 0.0)
 
-    unique_ratio = len(gen_set) / len(gen_norm) if gen_norm else 0.0
+    unique_ratio = (len(set(gen_norm_tokens)) / len(gen_norm_tokens)
+                    if gen_norm_tokens else 0.0)
     repetition = 1.0 - unique_ratio
 
-    n = len(gen_norm)
+    n = len(gen_norm_tokens)
     if n < 3:
         length_reg = (3 - n) / 3.0
     elif n > 25:
@@ -797,9 +1120,12 @@ def _reward_for_generation(
         length_reg = 0.0
 
     reward = (
-        1.20 * coverage
-        + 0.60 * precision
-        + 0.30 * disease_sim
+        1.00 * coverage
+        + 0.50 * precision
+        + 0.60 * characteristic_bonus
+        + 0.30 * contrastive_bonus
+        + 0.25 * system_coverage
+        + 0.20 * disease_sim
         - 0.40 * repetition
         - 0.20 * length_reg
     )
@@ -810,13 +1136,13 @@ def _reward_for_generation(
         for prev_text, prev_disease in zip(recent_generations, recent_diseases):
             if _normalise_key(prev_disease) == cur_disease:
                 continue
-            prev_tokens = [
-                _normalise_key(t) for t in tokenize(prev_text)
-                if _normalise_key(t)
-            ]
-            if not prev_tokens:
+            prev_tokens = [_normalise_key(t) for t in tokenize(prev_text)
+                           if _normalise_key(t)]
+            prev_concepts = {_canonical_term_learned(t)
+                             for t in prev_tokens if t}
+            if not prev_concepts:
                 continue
-            j = _jaccard(gen_norm, prev_tokens)
+            j = _jaccard(gen_concepts, prev_concepts)
             if j > 0.6:
                 collapse_penalty = max(collapse_penalty, j - 0.6)
     reward -= 2.0 * collapse_penalty
@@ -824,18 +1150,18 @@ def _reward_for_generation(
     if is_enriched:
         reward += enrichment_bonus
 
-    return float(max(-1.5, min(2.0, reward)))
+    return float(max(-1.5, min(2.5, reward)))
 
 
 # ---------------------------------------------------------------------------
-# PPO  (REWRITTEN — pretrained KL reference, collapse alarm, clean enrichment)
+# PPO
 # ---------------------------------------------------------------------------
 
 _PPO_CHAT_WEIGHT = 0.30
 _PPO_LIBRARY_WEIGHT = 1.00
 _PPO_ENRICHED_WEIGHT = 2.00
 _PPO_KL_COEFF = 0.20
-_PPO_ENTROPY_COEFF = 0.01
+_PPO_ENTROPY_COEFF = 0.02      # raised from 0.01 to encourage exploration
 _PPO_ADV_CLAMP = 3.0
 _PPO_COLLAPSE_ALARM = 0.30
 _PPO_RECENT_WINDOW = 16
@@ -843,9 +1169,8 @@ _PPO_RECENT_WINDOW = 16
 
 def _load_reference_model(fallback: CustomANN) -> CustomANN:
     """
-    Prefer the PRETRAINED checkpoint as the KL reference. This prevents PPO
-    from compounding an already-collapsed policy, which is what happened in
-    the previous run (the reference was a deepcopy of a drifted model).
+    Prefer the PRETRAINED checkpoint as the KL reference. This prevents
+    PPO from compounding an already-drifted policy.
     """
     try:
         if PRETRAIN_WEIGHTS.exists():
@@ -878,6 +1203,9 @@ def _run_ppo(job_id: str, epochs: int = DEFAULT_PPO_EPOCHS) -> None:
         )
         logger.info("PPO enrichment: %s", enrich_result)
 
+        # Refresh data-derived knowledge after enrichment.
+        _refresh_concept_map()
+
         with STATE.lock:
             if STATE.model is None or STATE.vocab is None:
                 raise RuntimeError("Run pretraining first.")
@@ -897,7 +1225,6 @@ def _run_ppo(job_id: str, epochs: int = DEFAULT_PPO_EPOCHS) -> None:
         chat_pairs = _chat_log_corpus()
         chat_keys = [d for d, _ in chat_pairs]
 
-        # Enriched keys: only keep clean ones; drop question/boilerplate.
         enriched_keys_raw = (
             enrich_result.get("added_keys")
             or enrich_result.get("new_symptoms")
@@ -906,15 +1233,12 @@ def _run_ppo(job_id: str, epochs: int = DEFAULT_PPO_EPOCHS) -> None:
         )
         if isinstance(enriched_keys_raw, int):
             enriched_keys_raw = []
-        enriched_keys_raw = [
-            k for k in enriched_keys_raw if _is_clean_symptom(k)
-        ]
+        enriched_keys_raw = [k for k in enriched_keys_raw
+                             if _is_clean_symptom(k)]
 
         try:
-            enriched_key_set = {
-                _normalise_key(k) for k in enriched_keys_raw
-                if _normalise_key(k)
-            }
+            enriched_key_set = {_normalise_key(k) for k in enriched_keys_raw
+                                if _normalise_key(k)}
         except Exception:
             enriched_key_set = set()
 
@@ -932,7 +1256,7 @@ def _run_ppo(job_id: str, epochs: int = DEFAULT_PPO_EPOCHS) -> None:
         for k in library_keys:
             _add_key(k, _PPO_LIBRARY_WEIGHT)
         for k in chat_keys:
-            _add_key(k, _PPO_CHAT_WEIGHT)     # lower than library, not higher
+            _add_key(k, _PPO_CHAT_WEIGHT)
         for k in enriched_keys_raw:
             _add_key(k, _PPO_ENRICHED_WEIGHT)
 
@@ -993,9 +1317,18 @@ def _run_ppo(job_id: str, epochs: int = DEFAULT_PPO_EPOCHS) -> None:
                     gen_tokens = gen_tokens[:gen_tokens.index(STOP)]
                 generated_text = " ".join(gen_tokens)
 
+                # Contrastive negative: a different disease from the pool.
+                neg_candidates = [k for k in sampling_pool
+                                  if _normalise_key(k) != key_norm]
+                neg_key = (random.choice(neg_candidates)
+                           if neg_candidates else None)
+                negative_disease = (_canonical_disease_from_key(neg_key)
+                                    if neg_key else None)
+
                 r = _reward_for_generation(
                     vocab, disease, generated_text,
                     is_enriched=is_enriched,
+                    negative_disease=negative_disease,
                     recent_generations=recent_generations[-_PPO_RECENT_WINDOW:],
                     recent_diseases=recent_diseases[-_PPO_RECENT_WINDOW:],
                 )
@@ -1055,8 +1388,7 @@ def _run_ppo(job_id: str, epochs: int = DEFAULT_PPO_EPOCHS) -> None:
                         raise RuntimeError(
                             f"Policy collapse detected: distinct_ratio="
                             f"{dr:.2f} < {_PPO_COLLAPSE_ALARM}. Aborting "
-                            f"PPO. Check chat-corpus cleanliness with "
-                            f"`python -m maintenance audit-chat`."
+                            f"PPO. Check chat-corpus cleanliness."
                         )
 
         STATE.last_ppo_reward = total_reward / max(step, 1)
@@ -1148,6 +1480,7 @@ def start_ppo(epochs: int = DEFAULT_PPO_EPOCHS) -> str:
 
 def training_status() -> Dict[str, Any]:
     with STATE.lock:
+        cm = STATE.concept_map or {}
         return {
             "pretrained": STATE.pretrained,
             "ppo_trained": STATE.ppo_trained,
@@ -1160,11 +1493,13 @@ def training_status() -> Dict[str, Any]:
             "ppo_weights_exists": PPO_WEIGHTS.exists(),
             "default_pretrain_epochs": DEFAULT_PRETRAIN_EPOCHS,
             "default_ppo_epochs": DEFAULT_PPO_EPOCHS,
+            "concept_clusters": len(set(cm.values())) if cm else 0,
+            "concept_terms_mapped": len(cm),
         }
 
 
 # ---------------------------------------------------------------------------
-# Generation  (post-filter added as last-line defense)
+# Generation
 # ---------------------------------------------------------------------------
 
 def _clean_symptom_fragment(fragment: str) -> str:
@@ -1180,6 +1515,14 @@ def _clean_symptom_fragment(fragment: str) -> str:
 
 def generate_symptoms(disease: str,
                       max_tokens: int = 64) -> Optional[List[str]]:
+    """
+    Generate symptoms for a disease.
+
+    Post-processing:
+      - Drop question-shaped and boilerplate fragments.
+      - Prefer the learned representative for each concept cluster.
+      - De-duplicate by learned concept, not raw string.
+    """
     with STATE.lock:
         model = STATE.model
         vocab = STATE.vocab
@@ -1199,6 +1542,7 @@ def generate_symptoms(disease: str,
         ids = gen[0].tolist()
         new_ids = ids[len(prompt_ids):]
         decoded = vocab.decode(new_ids)
+
         fragments: List[List[str]] = [[]]
         for tok in decoded:
             if tok == STOP:
@@ -1208,29 +1552,19 @@ def generate_symptoms(disease: str,
             else:
                 fragments[-1].append(tok)
 
+        seen_concepts: Set[str] = set()
         clean: List[str] = []
-        seen = set()
-        rejected = 0
         for ft in fragments:
             text = _clean_symptom_fragment(" ".join(ft))
-            if not text:
+            if not text or not _is_clean_symptom(text):
                 continue
-            # Last-line defense: never surface question-shaped output.
-            if not _is_clean_symptom(text):
-                rejected += 1
+            concept = _canonical_term_learned(text)
+            if concept in seen_concepts:
                 continue
-            if text.lower() in seen:
-                continue
-            seen.add(text.lower())
+            seen_concepts.add(concept)
             clean.append(text)
             if len(clean) >= 8:
                 break
-
-        if rejected:
-            logger.debug(
-                "generate_symptoms(%s): dropped %d question/boilerplate "
-                "fragments", disease, rejected,
-            )
 
         if len(clean) < 2:
             return None
@@ -1265,13 +1599,24 @@ def load_existing_weights() -> None:
                 STATE.ppo_trained = True
             else:
                 STATE.pretrained = True
+        # Refresh concept map from the loaded model so downstream
+        # generation uses the same clustering the model learned.
+        try:
+            _refresh_concept_map()
+            model_map = _extract_concept_map_from_model(model, vocab)
+            if model_map:
+                existing = _get_concept_map()
+                for k, v in model_map.items():
+                    existing.setdefault(k, v)
+        except Exception as e:
+            logger.warning("Concept refresh after weight load skipped: %s", e)
         logger.info("Loaded CustomANN weights from %s", path)
     except Exception as e:
         logger.warning("Failed to load weights %s: %s", path, e)
 
 
 # ---------------------------------------------------------------------------
-# Append-only API enrichment  (drops question/boilerplate from API too)
+# Append-only API enrichment
 # ---------------------------------------------------------------------------
 
 def _enrich_symptom_library_from_api(
@@ -1281,8 +1626,8 @@ def _enrich_symptom_library_from_api(
 ) -> Dict[str, Any]:
     """
     Append-only enrichment. Never overwrites, never deletes.
-    NEW: filters API responses through _is_clean_symptom so questions and
-    boilerplate can't enter the library.
+    API responses pass through question/boilerplate filters and are
+    normalized to learned concept representatives before insertion.
     """
     library = dict(config_loader.SYMPTOM_LIBRARY)
     if not library:
@@ -1302,6 +1647,8 @@ def _enrich_symptom_library_from_api(
 
         existing = library.get(disease, []) or []
         existing_lower = {s.lower() for s in existing if isinstance(s, str)}
+        existing_concepts = {_canonical_term_learned(e).lower()
+                             for e in existing if isinstance(e, str)}
 
         fresh: List[str] = []
         seen_fresh: set[str] = set()
@@ -1313,11 +1660,14 @@ def _enrich_symptom_library_from_api(
                 continue
             if not _is_clean_symptom(t):
                 continue
-            key = t.lower()
+            concept = _canonical_term_learned(t)
+            key = concept.lower()
             if key in existing_lower or key in seen_fresh:
                 continue
+            if key in existing_concepts:
+                continue
             seen_fresh.add(key)
-            fresh.append(t)
+            fresh.append(concept)
 
         if fresh:
             delta[disease] = fresh
@@ -1354,8 +1704,6 @@ def _enrich_symptom_library_from_api(
 
     refreshed = config_loader.refresh_symptom_library_after_write()
 
-    # Return enriched keys so PPO can weight them. Also expose the
-    # normalized form used by _run_ppo.
     added_keys: List[str] = []
     for items in delta.values():
         added_keys.extend(items)
