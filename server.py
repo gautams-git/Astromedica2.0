@@ -13,6 +13,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 from flask import (Flask, request, g,
                    jsonify, send_from_directory)
 from flask_cors import CORS
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 from timezonefinder import TimezoneFinder
 from datetime import datetime
 import pytz
