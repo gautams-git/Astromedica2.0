@@ -82,11 +82,11 @@ CORS(app)
 from config import (
     PROKERALA_CLIENT_ID,
     PROKERALA_CLIENT_SECRET,
-    GEMINI_API_KEY,
     GEMINI_MODEL,
     LLM_PROVIDER,
     SECRET_KEY,
 )
+import gemini_client
 
 app.secret_key = SECRET_KEY
 
@@ -1541,12 +1541,9 @@ async def call_gemini(
     conversation history.
     Returns AI response text.
     """
-    url = (
-        f"https://generativelanguage.googleapis"
-        f".com/v1beta/models/{GEMINI_MODEL}"
-        f":generateContent"
-        f"?key={GEMINI_API_KEY}"
-    )
+    # Vertex AI with the ADC login (gemini_client.py) - API keys are blocked.
+    url = gemini_client.generate_url(GEMINI_MODEL)
+    headers = await gemini_client.auth_headers()
 
     # Build contents from conversation history
     contents = []
@@ -1604,16 +1601,18 @@ async def call_gemini(
             "generationConfig": generation_config
         }
 
-    # 5xx from Gemini ("high demand", overloaded) is usually gone within seconds.
-    retry_waits = [1, 3]
+    # 5xx from Gemini ("high demand", overloaded) and 429 (Vertex per-minute
+    # quota) are usually gone within seconds.
+    retry_waits = [2, 5]
     async with httpx.AsyncClient() as client:
         for attempt in range(len(retry_waits) + 1):
             r = await client.post(
                 url,
                 json=payload,
+                headers=headers,
                 timeout=30.0
             )
-            if r.status_code not in (500, 502, 503, 504) or attempt == len(retry_waits):
+            if r.status_code not in (429, 500, 502, 503, 504) or attempt == len(retry_waits):
                 break
             print(f"[Warning] Gemini {r.status_code}, retrying in {retry_waits[attempt]}s "
                   f"(attempt {attempt + 2} of {len(retry_waits) + 1})")
@@ -1621,15 +1620,16 @@ async def call_gemini(
 
     if r.status_code != 200:
         if r.status_code == 429:
-            print("[Warning] Gemini Rate Limit Exceeded.")
-            return _json_fallback_message(
-                "I am experiencing high traffic right now and need to catch my breath. Please wait just a moment and try sending your message again."
-            )
-            
+            # Raised, not returned as a chat message: chat_module.ask_gemini then
+            # asks the plan's next question (or gives the final summary) itself,
+            # instead of telling the patient to resend an answer already counted.
+            print("[Warning] Gemini rate limit (429) still hit after retries - the chat uses its own next question")
+            raise Exception("Gemini rate limit (429) after retries")
+
         if r.status_code in [401, 403]:
-            raise Exception(f"[Error] Gemini API Auth failed: {r.status_code}. "
-                            f"Please check your GEMINI_API_KEY in config.py. "
-                            f"Original error: {r.text}")
+            message = gemini_client.auth_failure_message(r.status_code, r.text)
+            print(f"[Gemini] [FAIL] {message}")
+            raise Exception(f"[Error] Gemini login failed: {r.status_code}. {message}")
 
         print(f"Gemini error: {r.status_code}")
         print(f"Response: {r.text[:300]}")
@@ -1859,6 +1859,7 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print(f"[OK] AstroMedica server starting on port {port}")
     print_startup_status()
+    gemini_client.print_startup_status(GEMINI_MODEL)
 
     # host="0.0.0.0" opens the port so Render can see it
     app.run(host="0.0.0.0", port=port, debug=False)

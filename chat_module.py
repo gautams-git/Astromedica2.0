@@ -207,8 +207,13 @@ DASHA CHAT PRIORITY
 {priority_json}
 
 CORE RULES
-1. Never mention organs, disease names, planets, nakshatra, dasha, rogkaraka, or astrology to the patient.
-2. Ask from symptom_targets and prepared question lists only. You may rewrite them warmly, but do not add unrelated medical areas.
+1. Never mention disease names, internal organs (kidney, liver, lungs, thyroid, bladder...), planets, nakshatra, dasha, rogkaraka, or astrology to the patient. Everyday body parts people can see or feel (nose, ears, eyes, throat, chest, stomach, skin, back, legs) are fine.
+2. Ask from symptom_targets and prepared question lists only. You may rewrite them warmly, but do not add unrelated medical areas. Each branch is one possible condition: set branch_id to the branch whose question you ask.
+2b. Language for everyone - young or old, little schooling, English not their first language:
+   - ONE symptom per question. Never join two symptoms with "or" / "and".
+   - Simple everyday words, no medical terms. The question itself at most 18 words.
+   - Answerable with yes / no / sometimes. Calm and neutral, never suggest the answer.
+   - Never repeat a question already asked in this chat, even in other words.
 3. Ask exactly one question per turn.
 4. Turns 1-2: screen Cluster 1 first using two different symptom angles.
 5. Turn 3: continue with Cluster 1 unless the patient has been clearly negative so far; only then check Cluster 2.
@@ -1095,6 +1100,10 @@ def start_chat(
     """
     context       = load_patient_context(patient_id)
     chat_plan = build_hitlist_chat_plan(context.get("hitlist", {}), max_clusters=3)
+    # Gemini-written questions per disease (question_generator.py); falls back
+    # to symptom_mapper's built-in questions for anything it can't cover.
+    from question_generator import improve_chat_plan
+    chat_plan = improve_chat_plan(patient_id, chat_plan, context.get("gender", "Unknown"))
     system_prompt = build_hitlist_system_prompt(
         chat_plan,
         context.get("gender", "Unknown"),
@@ -1141,10 +1150,19 @@ def start_chat(
         **{
             key: value for key, value in {
                 "cluster_rank": parsed_opening.get("cluster_rank"),
-                "question_type": parsed_opening.get("question_type")
+                "question_type": parsed_opening.get("question_type"),
+                "branch_id": parsed_opening.get("branch_id")
             }.items() if value is not None
         }
     }
+    # Same check as send_message: the opening answer must be credited to a real branch.
+    opening_meta = conversation_store[session_id]["last_question_meta"]
+    if opening_meta.get("branch_id") and not branch_by_id(
+            cluster_by_rank(conversation_store[session_id], opening_meta.get("cluster_rank") or 0),
+            opening_meta["branch_id"]):
+        opening_meta["branch_id"] = choose_branch_for_cluster(
+            conversation_store[session_id], opening_meta.get("cluster_rank") or 0,
+            opening_meta.get("question_type", "screening"))
     conversation_store[session_id]["debug_context"]["latest_question_explanation"] = build_backend_reasoning(
         conversation_store[session_id],
         1,
@@ -1225,13 +1243,26 @@ def send_message(
 
     # Get Gemma response
     next_assistant_turn = session["turn_count"] + 1
+    # Decide BEFORE writing the reply whether this turn ends the chat - the
+    # early-finish check used to run only after it, so the chat could close on
+    # a question the patient never got to answer.
+    finish_now = next_assistant_turn >= 15 or should_finish_early(
+        {**session, "turn_count": next_assistant_turn})
     runtime_prompt = session["system_prompt"] + build_runtime_state(
         session,
         next_assistant_turn
     )
+    if finish_now:
+        runtime_prompt += ("\nTHIS IS THE FINAL TURN. Give the final summary now in the FINAL TURN FORMAT "
+                           "(question_type \"final\"). Do not ask another question.\n")
     response = ask_gemini(call_gemini_fn, runtime_prompt, session["messages"], next_assistant_turn)
     parsed_response = parse_model_json(response)
-    fallback_meta = fallback_question_meta(next_assistant_turn, session)
+    fallback_meta = ({"cluster_rank": 0, "question_type": "final"} if finish_now
+                     else fallback_question_meta(next_assistant_turn, session))
+    if parsed_response and finish_now and parsed_response.get("question_type") != "final":
+        print(f"[Chat] Turn {next_assistant_turn}: final turn but Gemini asked another question - using the standard summary")
+        parsed_response = {}
+        response = ""
     if not parsed_response:
         log_unreadable_reply(next_assistant_turn, response)
         response = build_safe_json_response(
@@ -1281,7 +1312,7 @@ def send_message(
         (turn >= 15 or should_finish_early(session)) and
         "based on our conversation today" in response.lower()
     )
-    if turn >= 15 or should_finish_early(session):
+    if finish_now or turn >= 15:
         is_final = True
 
     # Mark completed in log

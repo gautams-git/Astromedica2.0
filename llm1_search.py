@@ -22,7 +22,8 @@ import re
 
 import httpx
 
-from config import GEMINI_API_KEY, GEMINI_MODEL, SERPER_API_KEY
+import gemini_client
+from config import GEMINI_MODEL, SERPER_API_KEY
 
 LLM1_SYSTEM_PROMPT = (
     "You are a clinical search assistant. Given raw web search results about "
@@ -88,14 +89,13 @@ async def _parse_search_results(disease: str, organ: str, raw_results: list[dict
         f"Disease: {disease}\nOrgan: {organ}\n\nSearch results:\n{results_text}"
     )
 
-    url = (
-        f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
-    )
+    # Vertex AI with the ADC login (gemini_client.py) - API keys are blocked.
+    url = gemini_client.generate_url(GEMINI_MODEL)
+    headers = await gemini_client.auth_headers()
     payload = {"contents": [{"role": "user", "parts": [{"text": prompt}]}]}
 
     async with httpx.AsyncClient(timeout=30) as client:
-        response = await client.post(url, json=payload)
+        response = await client.post(url, json=payload, headers=headers)
         response.raise_for_status()
         data = response.json()
 
