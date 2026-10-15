@@ -37,6 +37,41 @@
     if (window.Clerk) window.Clerk.openSignIn();
   }
 
+  // Signing in reloads the page (and Google sign-in leaves the site and comes
+  // back), which used to wipe the birth form. The typed details wait in this
+  // tab's sessionStorage until the page reopens signed in, then the landing
+  // page puts them back and carries on with Generate.
+  const PENDING_FORM_KEY = "astromedica_pending_birth_form";
+  const PENDING_MAX_AGE_MS = 30 * 60 * 1000;
+
+  function savePendingForm(form) {
+    const fields = {};
+    form.querySelectorAll("input[id], select[id], textarea[id]").forEach(function (el) {
+      fields[el.id] = el.value;
+    });
+    const geo = document.getElementById("geo-status");
+    try {
+      sessionStorage.setItem(PENDING_FORM_KEY, JSON.stringify({
+        savedAt: Date.now(), fields: fields, geoStatus: geo ? geo.innerHTML : "",
+      }));
+    } catch (_err) { /* storage blocked: the user re-enters the details, as before */ }
+  }
+
+  // Returns the saved details once (and forgets them), or null.
+  window.astromedicaTakePendingBirthForm = function () {
+    let saved = null;
+    try {
+      saved = JSON.parse(sessionStorage.getItem(PENDING_FORM_KEY) || "null");
+      sessionStorage.removeItem(PENDING_FORM_KEY);
+    } catch (_err) { return null; }
+    if (!saved || !saved.fields || Date.now() - (saved.savedAt || 0) > PENDING_MAX_AGE_MS) return null;
+    return saved;
+  };
+
+  window.astromedicaIsSignedIn = function () {
+    return !signInRequired || Boolean(window.Clerk && window.Clerk.user);
+  };
+
   document.addEventListener("submit", function (event) {
     const form = event.target;
     if (!form || !form.classList || !form.classList.contains("birth-form")) return;
@@ -44,6 +79,7 @@
     if (!window.Clerk || !window.Clerk.user) {
       event.preventDefault();
       event.stopImmediatePropagation();
+      savePendingForm(form);
       openSignIn();
     }
   }, true);

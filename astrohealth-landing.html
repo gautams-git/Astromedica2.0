@@ -1479,11 +1479,32 @@
     }
   }
 
+  // Details typed before signing in (saved by session.js): put them back and
+  // continue the Generate the user had clicked - unless this account already
+  // has its chart, in which case the "chart ready" card is shown instead.
+  function resumePendingGenerate() {
+    const saved = window.astromedicaTakePendingBirthForm && window.astromedicaTakePendingBirthForm();
+    if (!saved) return;
+    const form = document.querySelector('.birth-form');
+    if (!form || form.style.display === 'none') return;
+    Object.entries(saved.fields).forEach(([id, value]) => {
+      const el = document.getElementById(id);
+      if (el && form.contains(el)) el.value = value;
+    });
+    const geo = document.getElementById('geo-status');
+    if (geo && saved.geoStatus) geo.innerHTML = saved.geoStatus;
+    document.getElementById('cta').scrollIntoView({ behavior: 'smooth' });
+    if (window.astromedicaIsSignedIn && window.astromedicaIsSignedIn()) {
+      setTimeout(() => form.requestSubmit(), 400);
+    }
+  }
+
   // Render on page load, once requests can carry the login token
   document.addEventListener('DOMContentLoaded', async () => {
     await (window.astromedicaAuthReady || Promise.resolve());
     renderRecentBar();
-    applyChartAllowance();
+    await applyChartAllowance();
+    resumePendingGenerate();
   });
 </script>
 </body>
