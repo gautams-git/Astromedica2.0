@@ -154,7 +154,12 @@ def register_auth_errors(app) -> None:
 
     @app.errorhandler(RateLimitError)
     def _limited(exc):
-        response = jsonify({"success": False, "error": "Too many requests."})
+        user = (getattr(g, "user", None) or {}).get("internal_user_id", "?")
+        if getattr(exc, "bucket", None):
+            print(f"[RateLimit] user {user[:8]}... hit the '{exc.bucket}' limit "
+                  f"({exc.limit} per {exc.window // 60} min) - retry in {exc.retry_after}s")
+        response = jsonify({"success": False, "code": "rate_limited", "error": "Too many requests.",
+                            "retry_after": exc.retry_after})
         response.status_code = 429
         response.headers["Retry-After"] = str(exc.retry_after)
         return response

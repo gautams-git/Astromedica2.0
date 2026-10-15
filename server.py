@@ -1728,7 +1728,10 @@ def send_message():
             return jsonify({"success": False, "error": "session_id required"}), 400
 
         if not orchestrator.session_exists(session_id):
-            return jsonify({"success": False, "error": "Session not found."}), 400
+            # Sessions live in server memory: a restart or a second gunicorn
+            # worker loses them. The page offers to restart the chat.
+            print(f"[Chat] Session {session_id} not found (server restarted, or more than one worker?)")
+            return jsonify({"success": False, "code": "session_ended", "error": "Session not found."}), 400
         # The request only carries session_id, so check the session's patient.
         check_patient_access(orchestrator.get_session(session_id)["patient_id"])
 
