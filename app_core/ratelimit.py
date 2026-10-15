@@ -34,7 +34,12 @@ class RateLimiter:
             while queue and now - queue[0] > window:
                 queue.popleft()
             if len(queue) >= limit:
-                raise RateLimitError(retry_after=window)
+                # Seconds until the oldest counted request leaves the window,
+                # so the page can show a real countdown.
+                wait = max(1, int(window - (now - queue[0])) + 1)
+                error = RateLimitError(retry_after=wait)
+                error.bucket, error.limit, error.window = bucket, limit, window
+                raise error
             queue.append(now)
 
     def reset(self) -> None:

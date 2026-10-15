@@ -2717,6 +2717,95 @@ function addUserMessage(text) {
   wrap.appendChild(bubble);
   document.getElementById('chat-messages').appendChild(wrap);
   scrollChat();
+  return wrap;
+}
+
+// ── Chat problems shown to the patient (not AI messages) ──────────
+// Plain-language notice for a failed request, with an optional button.
+function addChatNotice(text, action) {
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-notice';
+  wrap.style.cssText = 'align-self:center;max-width:85%;text-align:center;padding:12px 18px;border:1px dashed rgba(201,168,76,0.55);border-radius:10px;background:rgba(201,168,76,0.08);color:var(--text);font-size:0.85rem;line-height:1.5;';
+  const msg = document.createElement('div');
+  msg.textContent = text;
+  wrap.appendChild(msg);
+  if (action) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = action.label;
+    b.style.cssText = 'margin-top:10px;padding:7px 18px;border:1px solid var(--gold);background:transparent;color:var(--gold);border-radius:4px;font-family:Outfit,sans-serif;font-size:0.78rem;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;';
+    b.addEventListener('click', () => { wrap.remove(); action.onClick(); });
+    wrap.appendChild(b);
+  }
+  document.getElementById('chat-messages').appendChild(wrap);
+  scrollChat();
+  return wrap;
+}
+
+// What went wrong, from the server's answer.
+function chatProblem(res, data) {
+  if (res.status === 429) {
+    const secs = parseInt((data && data.retry_after) || res.headers.get('Retry-After') || '60', 10);
+    return { kind: 'rate_limited', secs: isNaN(secs) ? 60 : secs };
+  }
+  if (res.status === 401) return { kind: 'signed_out' };
+  if ((data && data.code === 'session_ended') || (res.status === 400 && data && data.error === 'Session not found.')) {
+    return { kind: 'session_ended' };
+  }
+  if (res.status === 404) return { kind: 'no_access' };
+  return { kind: 'busy' };
+}
+
+function formatWait(secs) {
+  const m = Math.floor(secs / 60), s = secs % 60;
+  return m ? `${m}:${String(s).padStart(2, '0')}` : `${s}s`;
+}
+
+// Locks the reply box until the limit resets, showing the time left on Send.
+function lockSendFor(secs, onDone) {
+  const input = document.getElementById('chat-input');
+  const btn = document.getElementById('chat-send-btn');
+  let left = secs;
+  const tick = () => {
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.55'; btn.textContent = `Wait ${formatWait(left)}`; }
+    if (input) input.disabled = true;
+  };
+  tick();
+  const timer = setInterval(() => {
+    left -= 1;
+    if (left > 0) return tick();
+    clearInterval(timer);
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.textContent = 'Send'; }
+    if (input) { input.disabled = false; input.focus({ preventScroll: true }); }
+    if (onDone) onDone();
+  }, 1000);
+}
+
+function showChatProblem(problem, retry) {
+  const signIn = () => (window.Clerk ? window.Clerk.openSignIn() : location.reload());
+  const restart = () => location.reload();   // a page load starts a fresh chat session
+  switch (problem.kind) {
+    case 'rate_limited':
+      addChatNotice(`You're sending messages very quickly. Please wait about ${formatWait(problem.secs)}, then continue. Your chat is saved.`);
+      lockSendFor(problem.secs, retry && (() => addChatNotice('You can continue now.', { label: 'Try again', onClick: retry })));
+      break;
+    case 'session_ended':
+      hideTextInput();
+      addChatNotice('This chat session has ended (the server was restarted). Please start the chat again.', { label: 'Restart chat', onClick: restart });
+      break;
+    case 'signed_out':
+      addChatNotice('Your sign-in has expired. Please sign in again to continue.', { label: 'Sign in', onClick: signIn });
+      break;
+    case 'no_access':
+      hideTextInput();
+      addChatNotice('This chart is not available for your account.');
+      break;
+    case 'offline':
+      addChatNotice("Couldn't reach the server. Check your internet connection and send your answer again.", retry && { label: 'Try again', onClick: retry });
+      break;
+    default:
+      addChatNotice('The service is busy right now. Please try again in a moment.', retry && { label: 'Try again', onClick: retry });
+  }
 }
 
 function showTypingIndicator() {
@@ -2754,28 +2843,23 @@ async function startConsultation(chartData) {
       })
     })
 
-    const data = await res.json()
+    const data = await res.json().catch(() => ({}))
     hideTypingIndicator()
 
-    if (data.success) {
+    if (res.ok && data.success) {
       addAppMessage(data.response)
-    } else {
-      addAppMessage(
-          "Namaste! How have you been "
-          + "feeling overall recently?")
+      // Don't focus on start to keep viewport at the top for "Math Receipt"
+      showTextInput(false)
+      return
     }
-    // Don't focus on start to keep viewport at the top for "Math Receipt"
-    showTextInput(false)
-
+    // No chat exists on the server, so don't fake an opening question:
+    // say what went wrong and offer to start again.
+    console.warn('Start consultation failed:', res.status, data.error)
+    showChatProblem(chatProblem(res, data), () => startConsultation(chartData))
   } catch (err) {
     console.error('Start error:', err)
     hideTypingIndicator()
-    addAppMessage(
-        "Namaste! How have you been "
-        + "feeling overall in the past "
-        + "few months?")
-    // Don't focus on error start
-    showTextInput(false)
+    showChatProblem({ kind: 'offline' }, () => startConsultation(chartData))
   }
 }
 
@@ -2789,9 +2873,17 @@ async function handleSend() {
   if (!text || isWaiting) return
 
   input.value = ''
-  addUserMessage(text)
+  const sentBubble = addUserMessage(text)
   isWaiting = true
   showTypingIndicator()
+
+  // The server didn't take this answer: take the bubble back and return the
+  // text to the box, so nothing is lost or counted twice when it's re-sent.
+  const giveBack = () => {
+    sentBubble.remove()
+    const box = document.getElementById('chat-input')
+    if (box) box.value = text
+  }
 
   try {
     const res = await fetch('/send-message', {
@@ -2804,11 +2896,11 @@ async function handleSend() {
       })
     })
 
-    const data = await res.json()
+    const data = await res.json().catch(() => ({}))
     hideTypingIndicator()
     isWaiting = false
 
-    if (data.success) {
+    if (res.ok && data.success) {
       addAppMessage(data.response)
       turnCount = data.turn
 
@@ -2821,17 +2913,17 @@ async function handleSend() {
         }, 2000)
       }
     } else {
-      addAppMessage(
-          "Could you please share more "
-          + "about how you are feeling?")
+      console.warn('Send message failed:', res.status, data.error)
+      const problem = chatProblem(res, data)
+      if (problem.kind !== 'session_ended' && problem.kind !== 'no_access') giveBack()
+      showChatProblem(problem, problem.kind === 'rate_limited' ? null : handleSend)
     }
   } catch (err) {
     console.error('Send error:', err)
     hideTypingIndicator()
     isWaiting = false
-    addAppMessage(
-        "I apologise for the interruption. "
-        + "Please continue sharing.")
+    giveBack()
+    showChatProblem({ kind: 'offline' }, handleSend)
   }
 }
 
@@ -2878,6 +2970,7 @@ function showTextInput(shouldFocus = true) {
   })
 
   const btn = document.createElement('button')
+  btn.id            = 'chat-send-btn'
   btn.textContent   = 'Send'
   btn.style.cssText = `
     background: linear-gradient(135deg,
