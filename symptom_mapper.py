@@ -532,45 +532,73 @@ def build_hitlist_chat_plan(hitlist_result: dict, max_clusters: int = 2) -> dict
     }
 
 
+# ── Answer scoring ───────────────────────────────────────────────
+# Whole words / phrases only (so "not daily" is not read as "daily"), in a
+# fixed order. English, Hinglish and how-often answers ("3 times a week").
+# Labels: yes_strong (yes) · yes_but (partly yes) · no_but (partly no / unsure)
+# · no_strong (no).
+
+_UNSURE = ["not sure", "dont know", "do not know", "no idea", "cant say", "can not say",
+           "not certain", "pata nahi", "pata nahin", "maybe", "may be", "perhaps"]
+_SOFT_NO = ["no but", "only sometimes", "not really", "not much", "not often", "not daily", "not every day",
+            "not everyday", "not regularly", "rarely", "hardly", "almost never", "only once",
+            "once in a while", "very rarely", "seldom", "bahut kam", "kam hi"]
+_SOFT_YES = ["yes but", "not always", "sometimes", "sometime", "some times", "occasionally",
+             "at times", "now and then", "on and off", "off and on", "a little", "a bit",
+             "little bit", "mild", "mildly", "slightly", "kabhi kabhi", "kabhi kabhar",
+             "thoda", "thodi", "thoda sa", "halka"]
+_STRONG_NO = ["no never", "never", "not at all", "nothing like that", "absolutely not",
+              "kabhi nahi", "kabhi nahin", "bilkul nahi", "bilkul nahin", "nope", "nah", "naa",
+              "nahi", "nahin", "nai", "none", "no", "noo", "nooo", "nop", "n"]
+_YES_WORDS = ["yes", "yess", "yesss", "ys", "yse", "yas", "y", "yea", "yeah", "yeh", "yep", "yup",
+              "ya", "yaa", "yah", "haan", "haa",
+              "han", "ha", "ji", "sure", "correct", "right", "true", "absolutely", "definitely",
+              "indeed", "of course", "ofcourse", "exactly"]
+_OFTEN = ["every day", "everyday", "daily", "always", "often", "very often", "frequently",
+          "frequent", "all the time", "a lot", "very much", "most days", "regularly",
+          "constantly", "many times", "every night", "every morning", "roz", "rozana",
+          "hamesha", "bahut", "zyada"]
+_SYMPTOM_WORDS = ["noticed", "have", "pain", "swelling", "dizzy", "weak", "burning", "tired",
+                  "breath", "shaky", "sweat", "itch", "stiff", "numb", "hurts", "ache", "aches"]
+_NEGATIONS = ["not", "dont", "doesnt", "didnt", "isnt", "wasnt", "havent", "cannot"]
+
+# "3 times", "twice a week", "once a day", "for 2 years", "since a month"...
+_FREQUENCY = re.compile(
+    r"\b(\d+|one|two|three|four|five|six|seven|once|twice|thrice)\s*(times?|x)\b"
+    r"|\b(twice|thrice)\b"
+    r"|\b(once|\d+)\s+(a|per|every)\s+(day|week|month|night)\b"
+    r"|\b(for|since)\s+(\d+|a|an|one|two|three|few|many|several|last)\s+"
+    r"(days?|weeks?|months?|years?)\b")
+
+
+def _has(msg: str, phrases) -> bool:
+    return any(re.search(r"\b" + re.escape(p) + r"\b", msg) for p in phrases)
+
+
 def classify_answer(text: str) -> str:
-    msg = _norm(text)
-    strong_yes_phrases = [
-        "yes very much", "yes definitely", "yes always", "yes often",
-        "very much", "definitely", "a lot", "daily", "frequent", "often",
-    ]
-    soft_yes_markers = [
-        "yes but", "sometimes", "mild", "a little", "occasionally",
-        "on and off", "not always", "a bit",
-    ]
-    soft_no_markers = [
-        "no but", "not really", "rarely", "hardly", "almost never",
-        "only once", "once in a while", "only sometimes",
-    ]
-    strong_no_phrases = [
-        "no never", "not at all", "never", "nothing like that", "absolutely not",
-    ]
-
-    if any(phrase in msg for phrase in strong_no_phrases):
-        return "no_strong"
-    if any(phrase in msg for phrase in soft_no_markers):
+    msg = _norm(str(text or "").replace("'", ""))   # "don't" -> "dont"
+    if not msg:
         return "no_but"
-    if any(phrase in msg for phrase in soft_yes_markers):
-        return "yes_but"
-    if any(phrase in msg for phrase in strong_yes_phrases):
-        return "yes_strong"
+    says_yes = _has(msg, _YES_WORDS)
 
-    words = msg.split()
-    if "no" in words:
+    if _has(msg, _UNSURE):
+        return "no_but"
+    if says_yes and (_has(msg, _SOFT_NO) or _has(msg, _SOFT_YES) or _has(msg, _NEGATIONS)):
+        return "yes_but"                       # "yes, but not daily", "yes sometimes"
+    if _has(msg, _SOFT_NO):
+        return "no_but"
+    if _has(msg, _SOFT_YES):
+        return "yes_but"
+    if _has(msg, _STRONG_NO):
         return "no_strong"
-    if "yes" in words or any(
-        word in words for word in [
-            "noticed", "have", "pain", "swelling", "dizzy", "weak",
-            "burning", "tired", "breath", "shaky", "sweat", "itch",
-            "stiff", "numb"
-        ]
-    ):
+    if says_yes or _has(msg, _OFTEN) or _FREQUENCY.search(msg):
         return "yes_strong"
-    return "yes_but" if msg else "no_but"
+    if _has(msg, _NEGATIONS):
+        return "no_strong"                     # "I dont get that", "it doesnt happen"
+    if _has(msg, _SYMPTOM_WORDS):
+        return "yes_strong"                    # "my back hurts in the morning"
+    print(f"[Chat] Answer not recognised: {str(text)[:80]!r} -> counted as 'yes, but'")
+    return "yes_but"
 
 
 def score_answer(label: str) -> int:
