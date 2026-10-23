@@ -104,6 +104,37 @@ class MemoryRepository:
             "results": [doc for doc in owned if doc.get("record_type") == "combined"],
         }
 
+    # ── Admin page (admin_routes.py): list and delete ────────────────────
+    def list_users(self) -> list[dict]:
+        with self._lock:
+            return [dict(user) for user in self.users.values()]
+
+    def list_docs(self, internal_user_id: str, collection: str, patient_id: str | None = None) -> list[tuple]:
+        """(doc_id, data) pairs of one user collection, optionally only one patient's."""
+        with self._lock:
+            return [
+                (doc_id, dict(doc))
+                for (owner, coll, doc_id), doc in self.docs.items()
+                if owner == internal_user_id and coll == collection
+                and (patient_id is None or doc.get("patient_id") == patient_id)
+            ]
+
+    def delete(self, internal_user_id: str, collection: str, doc_id: str) -> bool:
+        with self._lock:
+            return self.docs.pop(self._path(internal_user_id, collection, doc_id), None) is not None
+
+    def delete_user(self, internal_user_id: str, clerk_user_id: str | None) -> int:
+        """Removes the user record, its Clerk link and every document it owns.
+        The Clerk login itself is untouched: signing in again starts fresh."""
+        with self._lock:
+            keys = [key for key in self.docs if key[0] == internal_user_id]
+            for key in keys:
+                del self.docs[key]
+            self.users.pop(internal_user_id, None)
+            if clerk_user_id:
+                self.users_by_clerk.pop(clerk_user_id, None)
+            return len(keys)
+
 
 class FirestoreRepository(MemoryRepository):
     """Firestore-backed repository. Admin credentials stay on the server."""
@@ -191,6 +222,36 @@ class FirestoreRepository(MemoryRepository):
             for doc in self._user_collection(internal_user_id, "combined_results").stream(**self._call)
         ]
         return {"inputs": inputs, "results": results}
+
+    # ── Admin page (admin_routes.py): list and delete ────────────────────
+    def list_users(self) -> list[dict]:
+        users = []
+        for snap in self._client.collection("users").stream(**self._call):
+            data = snap.to_dict() or {}
+            data["internal_user_id"] = snap.id
+            users.append(data)
+        return users
+
+    def list_docs(self, internal_user_id: str, collection: str, patient_id: str | None = None) -> list[tuple]:
+        from google.cloud import firestore
+        query = self._user_collection(internal_user_id, collection)
+        if patient_id is not None:
+            query = query.where(filter=firestore.FieldFilter("patient_id", "==", patient_id))
+        return [(snap.id, snap.to_dict() or {}) for snap in query.stream(**self._call)]
+
+    def delete(self, internal_user_id: str, collection: str, doc_id: str) -> bool:
+        """Deletes the document and all of its subcollections (Firestore's own
+        delete leaves subcollections behind)."""
+        ref = self._user_collection(internal_user_id, collection).document(doc_id)
+        existed = ref.get(**self._call).exists
+        self._client.recursive_delete(ref)
+        return existed
+
+    def delete_user(self, internal_user_id: str, clerk_user_id: str | None) -> int:
+        count = self._client.recursive_delete(self._client.collection("users").document(internal_user_id))
+        if clerk_user_id:
+            self._client.collection("clerk_index").document(clerk_user_id).delete(**self._call)
+        return count
 
 
 def build_repository(settings: Settings):

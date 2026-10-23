@@ -765,6 +765,7 @@
   </ul>
   <div style="display: flex; align-items: center;">
     <a href="#cta" class="nav-cta">Request Access</a>
+    <a href="/admin" class="nav-cta" id="admin-link" hidden style="margin-left:14px;">Admin</a>
     <div id="account-slot"></div>
     <button class="theme-toggle" id="theme-toggle" aria-label="Toggle Theme">
       <!-- Sun Icon (Lucide-like SVG) -->
@@ -1456,6 +1457,8 @@
     } catch (e) {
       return;
     }
+    // Admin page link: only for ADMIN_CLERK_USER_IDS (the server checks again).
+    if (status.is_admin) document.getElementById('admin-link').hidden = false;
     if (!status.limited) return;        // admins and local testing: unlimited
 
     const form = document.querySelector('.birth-form');

@@ -76,6 +76,10 @@ app = Flask(__name__)
 from rl_integration import rl_bp, init_rl
 app.register_blueprint(rl_bp)
 
+# Admin page (/admin): accounts, charts, delete / reset. Admin-only data.
+from admin_routes import admin_bp
+app.register_blueprint(admin_bp)
+
 init_rl()
 CORS(app)
 

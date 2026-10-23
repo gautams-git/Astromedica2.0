@@ -62,13 +62,28 @@ def is_limited() -> bool:
 
 # ── Allowance ──────────────────────────────────────────────────────────────
 
-def get_allowance() -> dict:
-    doc = _repo().get(_uid(), *_ALLOWANCE) or {}
-    return {
-        "charts_used": int(doc.get("charts_used", 0)),
-        "active_patient_id": doc.get("active_patient_id"),
-        "history": list(doc.get("history", [])),
-    }
+def get_allowance(uid: str | None = None, heal: bool = True) -> dict:
+    """The account's allowance. Charts deleted since (admin page, or by hand in
+    the Firestore console) no longer count and can't stay the active chart, so
+    the user can create a chart again. heal=False only reports, never saves."""
+    uid = uid or _uid()
+    doc = _repo().get(uid, *_ALLOWANCE) or {}
+    stored_used = int(doc.get("charts_used", 0))
+    active = doc.get("active_patient_id")
+    history = list(doc.get("history", []))
+
+    def exists(pid):
+        return bool(pid) and _repo().get(uid, "patients", pid) is not None
+
+    live = [h for h in history if exists(h.get("patient_id"))]
+    used = len(live) if history else stored_used
+    live_active = active if exists(active) else None
+
+    if heal and doc and (used != stored_used or live_active != active):
+        _repo().save(uid, *_ALLOWANCE, {"charts_used": used, "active_patient_id": live_active, "history": live})
+        print(f"[Allowance] user {uid[:8]}...: deleted chart(s) no longer count -> "
+              f"{used}/{MAX_CHARTS} used, active chart {live_active or 'none'}")
+    return {"charts_used": used, "active_patient_id": live_active, "history": live}
 
 
 def chart_status() -> dict:
@@ -85,7 +100,13 @@ def chart_status() -> dict:
         "can_generate": (not limited) or used < MAX_CHARTS,
         # The "I typed my details wrong" option: only after the first chart.
         "can_correct": limited and used == 1 and bool(allowance["active_patient_id"]),
+        "is_admin": is_admin(),          # the home page shows the Admin link
     }
+
+
+def reset_allowance(uid: str) -> bool:
+    """Admin page: the account can create charts again; nothing else changes."""
+    return _repo().delete(uid, *_ALLOWANCE)
 
 
 def check_can_generate() -> None:
