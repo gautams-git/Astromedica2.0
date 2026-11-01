@@ -155,9 +155,13 @@ def run_logic(patient_id: str) -> dict:
         patient_gender=raw_gender
     )
 
+    '''
     from hitlist_engine import run_hitlist_analysis
     hitlist_result = run_hitlist_analysis(
         chart, rule1_result, gender=gender_code)
+    '''
+    from agentic import run_agentic_analysis
+    hitlist_result = run_agentic_analysis(chart, rule1_result, gender=gender_code)
     from rashi_correlation_engine import run_rashi_correlation_analysis
     rashi_correlation_result = run_rashi_correlation_analysis(
         chart, rule1_result, gender=gender_code)
