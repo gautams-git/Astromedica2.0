@@ -1329,7 +1329,11 @@ def send_message(
         with open(log_file, "w") as f:
             json.dump(log, f, indent=2)
         sync_rl_report(patient_id, log)
-        queue_rl(patient_id)
+        if session.get("skip_rl"):
+            # Tester chat: not for RL training (set in server.start_consultation).
+            print(f"[RL] Patient {patient_id}: tester chat - RL not queued")
+        else:
+            queue_rl(patient_id)
         print(f"✅ Chat completed — log saved for patient {patient_id}")
 
     session.setdefault("debug_context", {})["cluster_scores"] = session.get("cluster_scores", {})

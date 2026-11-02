@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AstroMedica Tester</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07091a; --bg2: #0e1124; --card: #141936; --card2: #1a2042;
+    --border: rgba(201,168,76,0.22); --border2: rgba(255,255,255,0.08);
+    --gold: #C9A84C; --gold-dim: rgba(201,168,76,0.14);
+    --text: #ECEAF4; --muted: #9A98B0;
+    --danger: #ef6b6b; --danger-dim: rgba(239,107,107,0.12);
+    --ok: #3ec491; --ok-dim: rgba(62,196,145,0.12);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; overflow-x: hidden; }
+  a { color: var(--gold); }
+  header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 16px;
+    padding: 14px 32px; background: rgba(7,9,26,0.92); border-bottom: 1px solid var(--border2); backdrop-filter: blur(8px); }
+  .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--text); text-decoration: none; }
+  .logo span { color: var(--gold); }
+  .tag { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold);
+    border: 1px solid var(--border); padding: 3px 10px; border-radius: 999px; }
+  header .spacer { flex: 1; }
+  #account-slot button, .btn { font-family: inherit; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--gold); cursor: pointer;
+    text-decoration: none; display: inline-block; }
+  .btn:hover { background: var(--gold-dim); }
+  .btn.solid { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+  .btn.small { padding: 5px 11px; font-size: 0.7rem; }
+  main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
+  h1 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 2.4rem; margin: 0 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 24px; line-height: 1.55; }
+  .top { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
+  .panel { background: var(--card); border: 1px solid var(--border2); border-radius: 12px; padding: 16px 18px; }
+  .panel h2 { margin: 0 0 10px; font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 400; }
+  .big { font-size: 1.9rem; font-family: 'Cormorant Garamond', serif; }
+  .big small { font-size: 0.95rem; color: var(--muted); font-family: 'Outfit', sans-serif; }
+  .bar { height: 6px; border-radius: 999px; background: var(--bg2); margin: 10px 0 8px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--gold); border-radius: 999px; }
+  .bar.full i { background: var(--danger); }
+  .note { color: var(--muted); font-size: 0.82rem; line-height: 1.5; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: 0.8rem; color: var(--muted); background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 999px; padding: 5px 12px; }
+  .chip b { color: var(--text); font-weight: 500; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 18px; }
+  .toolbar input, .toolbar select { font-family: inherit; font-size: 0.92rem; color: var(--text); background: var(--bg2);
+    border: 1px solid var(--border2); border-radius: 8px; padding: 10px 14px; }
+  .toolbar input { flex: 1; min-width: 220px; }
+  .toolbar input:focus, .toolbar select:focus { outline: none; border-color: var(--gold); }
+  #notice { display: none; margin-bottom: 18px; padding: 14px 18px; border-radius: 10px; border: 1px dashed var(--border); background: var(--gold-dim); line-height: 1.55; }
+  .day { margin-bottom: 22px; }
+  .day h3 { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 8px; font-weight: 400; font-size: 0.95rem; }
+  .day h3 span { color: var(--muted); font-size: 0.82rem; }
+  .run { display: grid; grid-template-columns: 62px 1.3fr 1.5fr auto auto; gap: 8px 16px; align-items: center;
+    background: var(--card); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; }
+  .time { color: var(--muted); font-size: 0.82rem; font-family: Consolas, monospace; }
+  .who b { font-weight: 500; }
+  .who small { display: block; color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
+  .organs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .organ { font-size: 0.76rem; color: var(--gold); border: 1px solid var(--border); border-radius: 999px; padding: 2px 10px; }
+  .badge { display: inline-block; font-size: 0.7rem; letter-spacing: 0.06em; padding: 2px 10px; border-radius: 999px;
+    border: 1px solid var(--border2); color: var(--muted); white-space: nowrap; }
+  .badge.correct { color: var(--ok); border-color: rgba(62,196,145,0.35); background: var(--ok-dim); }
+  .badge.partly { color: var(--gold); border-color: var(--border); background: var(--gold-dim); }
+  .badge.wrong { color: var(--danger); border-color: rgba(239,107,107,0.35); background: var(--danger-dim); }
+  .state { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+  .state small { color: var(--muted); font-size: 0.74rem; }
+  .none { padding: 22px; color: var(--muted); text-align: center; background: var(--card); border: 1px solid var(--border2); border-radius: 12px; line-height: 1.6; }
+  @media (max-width: 760px) {
+    header { padding: 10px 16px; gap: 10px; flex-wrap: wrap; }
+    .logo { font-size: 1.25rem; }
+    main { padding: 24px 16px 60px; }
+    h1 { font-size: 2rem; }
+    .top { grid-template-columns: 1fr; }
+    .toolbar input { min-width: 0; flex-basis: 100%; }
+    .run { grid-template-columns: 1fr auto; }
+    .run .time { grid-column: 1; }
+    .run .who, .run .organs { grid-column: 1 / -1; }
+    .run .state { grid-column: 1; }
+    .run .open { grid-column: 2; grid-row: 1; justify-self: end; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Astro<span>Medica</span></a>
+  <span class="tag">Tester</span>
+  <span class="spacer"></span>
+  <a class="btn" href="/">Home</a>
+  <div id="account-slot"></div>
+</header>
+
+<main>
+  <h1>My test charts</h1>
+  <p class="sub">Every chart you generate in tester mode is saved here, with all five algorithms, the Combined Algo, the chatbot and your feedback. Charts are kept until an admin deletes them.</p>
+
+  <div id="notice"></div>
+
+  <div id="content" hidden>
+    <div class="top">
+      <div class="panel">
+        <h2>Today</h2>
+        <div class="big" id="today-big"></div>
+        <div class="bar" id="bar"><i id="bar-fill" style="width:0"></i></div>
+        <div class="note">The limit resets at midnight India time. Entering birth details you used before does not count towards the limit: the saved chart is reused and every algorithm runs again.</div>
+        <div style="margin-top:12px"><a class="btn solid" href="/">Generate a new chart</a></div>
+      </div>
+      <div class="panel">
+        <h2>Last 7 days</h2>
+        <div class="big"><span id="w-charts">0</span> <small>charts</small></div>
+        <div class="chips" style="margin-top:10px">
+          <span class="chip">Rated <b id="w-rated">0</b></span>
+          <span class="chip">Correct <b id="w-correct">0</b></span>
+          <span class="chip">Partly <b id="w-partly">0</b></span>
+          <span class="chip">Wrong <b id="w-wrong">0</b></span>
+          <span class="chip">Not rated <b id="w-not">0</b></span>
+        </div>
+        <div class="note" style="margin-top:10px">Rate a chart from its results page, at the bottom ("Tester feedback"). The rating comes from the organs you mark.</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <select id="range" aria-label="Time range">
+        <option value="7">Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="all">All time</option>
+      </select>
+      <select id="status" aria-label="Rating filter">
+        <option value="all">All ratings</option>
+        <option value="not_rated">Not rated yet</option>
+        <option value="correct">Correct</option>
+        <option value="partly">Partly</option>
+        <option value="wrong">Wrong</option>
+      </select>
+      <input id="search" type="search" placeholder="Search by name, place or organ" aria-label="Search charts">
+      <button class="btn" id="refresh" type="button">Refresh</button>
+    </div>
+
+    <div id="runs"></div>
+  </div>
+</main>
+
+<script src="/static/session.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const IST = { timeZone: 'Asia/Kolkata' };
+  const istDay = (d) => new Date(d).toLocaleDateString('en-CA', IST);           // 2026-11-03
+  const state = { runs: [] };
+
+  function notice(html) {
+    const n = $('notice');
+    n.style.display = html ? 'block' : 'none';
+    n.innerHTML = html || '';
+  }
+
+  function dayLabel(day) {
+    const today = istDay(Date.now());
+    const yesterday = istDay(Date.now() - 86400000);
+    const pretty = new Date(day + 'T12:00:00+05:30').toLocaleDateString('en-IN',
+      { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', ...IST });
+    return day === today ? 'Today · ' + pretty : day === yesterday ? 'Yesterday · ' + pretty : pretty;
+  }
+
+  async function load() {
+    notice('');
+    let res, data;
+    try {
+      res = await fetch('/tester/api/charts');
+      data = await res.json().catch(() => ({}));
+    } catch (e) {
+      return notice("Couldn't reach the server. Check your connection and press Refresh.");
+    }
+    if (res.status === 401) {
+      $('content').hidden = true;
+      return notice('Please sign in first. <button class="btn small" type="button" onclick="window.Clerk && window.Clerk.openSignIn()">Sign in</button>');
+    }
+    if (res.status === 404) {
+      $('content').hidden = true;
+      return notice('This page is for testers. Go to the <a href="/">home page</a>, press <b>Tester</b> at the bottom and enter the tester password.');
+    }
+    if (!res.ok || !data.success) {
+      return notice('Could not load your charts: ' + esc(data.error || res.status));
+    }
+    state.runs = data.runs;
+    $('content').hidden = false;
+    $('today-big').innerHTML = data.cap_applies
+      ? `${data.charts_today} <small>of ${data.daily_cap} new charts</small>`
+      : `${data.charts_today} <small>new charts · no daily limit for admins</small>`;
+    const pct = data.cap_applies ? Math.min(100, Math.round(100 * data.charts_today / data.daily_cap)) : 0;
+    $('bar-fill').style.width = pct + '%';
+    $('bar').classList.toggle('full', data.cap_applies && data.charts_today >= data.daily_cap);
+    render();
+  }
+
+  function weekly() {
+    const since = Date.now() - 7 * 86400000;
+    const week = state.runs.filter(r => new Date(r.run_at).getTime() >= since);
+    const count = (k) => week.filter(r => r.rating === k).length;
+    $('w-charts').textContent = week.length;
+    $('w-correct').textContent = count('correct');
+    $('w-partly').textContent = count('partly');
+    $('w-wrong').textContent = count('wrong');
+    $('w-not').textContent = count('not_rated');
+    $('w-rated').textContent = week.length - count('not_rated');
+  }
+
+  const RATING = { not_rated: ['Not rated', ''], correct: ['Correct', 'correct'], partly: ['Partly', 'partly'], wrong: ['Wrong', 'wrong'] };
+
+  function render() {
+    weekly();
+    const range = $('range').value, status = $('status').value, q = $('search').value.trim().toLowerCase();
+    const since = range === 'all' ? 0 : Date.now() - Number(range) * 86400000;
+    const list = state.runs.filter(r => {
+      if (new Date(r.run_at).getTime() < since) return false;
+      if (status !== 'all' && r.rating !== status) return false;
+      if (!q) return true;
+      return [r.name, r.birth_place, r.patient_id, ...(r.top_organs || [])].join(' ').toLowerCase().includes(q);
+    });
+    if (!list.length) {
+      $('runs').innerHTML = state.runs.length
+        ? '<div class="none">No charts match these filters.</div>'
+        : '<div class="none">No test charts yet. Press <b>Generate a new chart</b> to make your first one.</div>';
+      return;
+    }
+    const days = [];
+    list.forEach(r => {
+      const day = r.day || istDay(r.run_at);
+      let g = days.find(d => d.day === day);
+      if (!g) days.push(g = { day, runs: [] });
+      g.runs.push(r);
+    });
+    $('runs').innerHTML = days.map(g => `
+      <section class="day">
+        <h3>${esc(dayLabel(g.day))}<span>${g.runs.length} chart${g.runs.length === 1 ? '' : 's'}</span></h3>
+        ${g.runs.map(r => {
+          const [label, cls] = RATING[r.rating] || RATING.not_rated;
+          const time = new Date(r.run_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false, ...IST });
+          const chat = r.chat_turns ? (r.chat_completed ? `Chat done · ${r.chat_turns} turns` : `Chat started · ${r.chat_turns} turns`) : 'No chat yet';
+          return `<div class="run">
+            <div class="time">${esc(time)}</div>
+            <div class="who"><b>${esc(r.name || 'Unnamed')}</b><small>${esc(r.dob || '')}${r.birth_place ? ' · ' + esc(r.birth_place) : ''}${r.chart_source === 'cache' ? ' · reused chart' : ''}</small></div>
+            <div class="organs">${(r.top_organs || []).map(o => `<span class="organ">${esc(o)}</span>`).join('') || '<span class="note">no organs</span>'}</div>
+            <div class="state"><span class="badge ${cls}">${esc(label)}</span><small>${esc(chat)}</small></div>
+            <div class="open"><a class="btn small" href="/results?patient_id=${encodeURIComponent(r.patient_id)}">Open</a></div>
+          </div>`;
+        }).join('')}
+      </section>`).join('');
+  }
+
+  $('range').addEventListener('change', render);
+  $('status').addEventListener('change', render);
+  $('search').addEventListener('input', render);
+  $('refresh').addEventListener('click', load);
+  (window.astromedicaAuthReady || Promise.resolve()).then(load);
+</script>
+</body>
+</html>

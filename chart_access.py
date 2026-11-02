@@ -9,6 +9,8 @@ Rules (login on, non-admin users):
     admins, chats included) and the new one becomes the active chart.
   - Accounts with no allowance record yet start fresh (existing users too).
   - Admins (ADMIN_CLERK_USER_IDS) and login-off local testing are unlimited.
+  - Testers (tester_access.py) have no 2-chart limit; they have a daily cap of
+    new Prokerala charts instead.
 
 Firestore (per user, all under users/{internal_user_id}/):
   account/chart_allowance      {charts_used, active_patient_id, history[]}
@@ -29,6 +31,7 @@ from datetime import datetime, timezone
 
 from flask import g
 
+import tester_access
 from app_auth import AUTH_ENABLED, is_admin
 from app_core.runtime import get_services
 
@@ -56,8 +59,8 @@ def _short_uid() -> str:
 
 
 def is_limited() -> bool:
-    """Only signed-in non-admin users have the one-chart rule."""
-    return AUTH_ENABLED and not is_admin()
+    """Only signed-in users who are neither admins nor testers have the one-chart rule."""
+    return AUTH_ENABLED and not is_admin() and not tester_access.is_tester()
 
 
 # ── Allowance ──────────────────────────────────────────────────────────────
@@ -101,6 +104,7 @@ def chart_status() -> dict:
         # The "I typed my details wrong" option: only after the first chart.
         "can_correct": limited and used == 1 and bool(allowance["active_patient_id"]),
         "is_admin": is_admin(),          # the home page shows the Admin link
+        "is_tester": tester_access.is_tester(),   # ... and the "My test charts" link
     }
 
 

@@ -13,13 +13,18 @@ What "everything linked to a chart" is (Firestore has no cascade delete):
   users/{uid}/patients/{pid}  (+ its subcollections)
   users/{uid}/chart_sources/{pid}, users/{uid}/identity_vault/{pid}
   users/{uid}/{inputs, chart_inputs, prokerala_results, algorithm_results,
-              combined_results} documents with patient_id == pid
+              combined_results, tester_charts} documents with patient_id == pid
   users/{uid}/account/chart_allowance  (fixed by chart_access.get_allowance)
   chat_logs/{pid}__...               RL chat logs (Abhishek's collection)
   patients/{pid}/ on the server disk  chat log, RAG/RL reports, question set
 With 001-style ids two accounts that typed the same birth details share one
 patient; then the disk folder and RL logs are kept while another account uses it.
 Every action is recorded in users/{admin}/admin_audit and printed as [Admin].
+
+Testers (tester_access.py): an account's row shows a Tester badge with today's
+charts and total runs; "Remove tester" ends the role (their charts stay). The
+"Tester accuracy" panel sums up the feedback testers gave. Tester charts are kept
+until deleted here: "Delete chart" removes that chart's tester runs too.
 """
 
 from __future__ import annotations
@@ -34,6 +39,7 @@ from datetime import datetime, timezone
 from flask import Blueprint, g, jsonify, request, send_from_directory
 
 import chart_access
+import tester_access
 from app_auth import AUTH_ENABLED, is_admin, login_required
 from app_core.errors import AuthorizationError, RequestValidationError
 from app_core.runtime import get_services
@@ -42,7 +48,8 @@ from app_core.validation import require_patient_id
 admin_bp = Blueprint("admin", __name__)
 
 PATIENTS_DIR = "patients"
-PER_RUN_COLLECTIONS = ("inputs", "chart_inputs", "prokerala_results", "algorithm_results", "combined_results")
+PER_RUN_COLLECTIONS = ("inputs", "chart_inputs", "prokerala_results", "algorithm_results", "combined_results",
+                       tester_access.RUNS)
 PER_PATIENT_DOCS = ("patients", "chart_sources", "identity_vault")
 
 
@@ -137,6 +144,8 @@ def _account(user: dict, profiles: dict) -> dict:
               for pid, doc in _repo().list_docs(uid, "patients")]
     charts.sort(key=lambda c: str(c.get("created_at") or ""), reverse=True)
     profile = profiles.get(clerk_id, {})
+    is_tester = tester_access.has_role(uid)
+    runs = _repo().list_docs(uid, tester_access.RUNS) if is_tester else []
     return {
         "internal_user_id": uid,
         "clerk_user_id": clerk_id,
@@ -149,6 +158,10 @@ def _account(user: dict, profiles: dict) -> dict:
         "max_charts": chart_access.MAX_CHARTS,
         "active_patient_id": allowance["active_patient_id"],
         "charts": charts,
+        "is_tester": is_tester,
+        "tester_charts_today": tester_access.charts_today(uid) if is_tester else 0,
+        "tester_daily_cap": tester_access.daily_cap(),
+        "tester_runs": len(runs),
     }
 
 
@@ -304,6 +317,27 @@ def admin_reset_allowance(uid):
     return jsonify({"success": True, "report": {
         "removed": ["chart allowance (now 0 of %d used)" % chart_access.MAX_CHARTS] if had else [],
         "kept": ["all charts"], "failed": []}})
+
+
+@admin_bp.post("/admin/api/accounts/<uid>/remove-tester")
+@login_required(rate_limit="read")
+def admin_remove_tester(uid):
+    _require_admin()
+    user = _find_user(uid)
+    if not _confirm_matches("remove"):
+        raise RequestValidationError("Confirm removing the tester role.")
+    had = tester_access.remove_tester(uid)
+    _audit("remove_tester", {**user, "email": _email_of(user)}, {"was_tester": had})
+    return jsonify({"success": True, "report": {
+        "removed": ["tester role (back to the normal chart limit)"] if had else [],
+        "kept": ["all charts and tester feedback"], "failed": []}})
+
+
+@admin_bp.get("/admin/api/tester-accuracy")
+@login_required(rate_limit="read")
+def admin_tester_accuracy():
+    _require_admin()
+    return jsonify({"success": True, **tester_access.accuracy_summary()})
 
 
 @admin_bp.post("/admin/api/accounts/<uid>/delete-all")

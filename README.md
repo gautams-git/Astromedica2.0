@@ -24,6 +24,9 @@ network)** without any other context. Section 12 is the Siamese hand-off; sectio
 > | If you want to… | Read |
 > |---|---|
 > | Run the app on your PC | §1 |
+> | Deploy on the VM (Docker) | §1.8 |
+> | Open the admin page / make someone admin | §1.9 |
+> | Early-access testers (Tester button, daily cap, accuracy feedback) | §1.10 |
 > | Understand the whole system in 10 minutes | §2 (flow) → §5 (worked example) |
 > | Work on the RL / Siamese network | §2 → §8 (data formats) → §10 (RL) → §12 (Siamese) |
 > | Understand the astrology and the Combined Algo | §14 (glossary) → §3 → §5 |
@@ -37,10 +40,12 @@ network)** without any other context. Section 12 is the Siamese hand-off; sectio
 >
 > **Assumed knowledge:** basic Python, JSON and a terminal. No astrology knowledge needed.
 
-- Stack: Python 3.13, Flask (port 5000), PyTorch (CPU), Google Firestore,
-  Clerk (login), Gemini API (chat + embeddings), Prokerala API (charts).
+- Stack: Python 3.13, Flask (port 5000 locally, 8000 in Docker), PyTorch (CPU),
+  Google Firestore, Clerk (login), **Gemini 2.5 Flash on Vertex AI** (chat,
+  question writer, embeddings — Google login, no API key), Prokerala API (charts).
 - Everything runs in **one Flask process**: web app, chat, RAG, RL worker and
-  the hourly RL training scheduler.
+  the hourly RL training scheduler. On the VM it runs in Docker under gunicorn
+  with **1 worker + threads** (chat sessions live in memory — see §1.8).
 
 ---
 
@@ -53,7 +58,8 @@ network)** without any other context. Section 12 is the Siamese hand-off; sectio
 - **Google Cloud CLI** — https://cloud.google.com/sdk/docs/install (for Firestore)
 - **Access** to the private GitHub repo (ask to be added to the
   `Ameya-Innovations` organisation) and to the Google Cloud project
-  `astrohealth-509609` (role *Cloud Datastore User*).
+  `astrohealth-509609` (roles *Cloud Datastore User* for Firestore and
+  *Vertex AI User* for Gemini — project owners already have both).
 - About 3 GB free disk (PyTorch is most of it).
 
 ### 1.2 Clone the repository
@@ -89,20 +95,22 @@ pip install -r requirements.txt
 
 ### 1.4 Configure
 
-1. Copy `.env.example` to `.env` and fill it in (Clerk keys, Firestore
-   project — see the table in §1.6). Get the values from the team; `.env` is
-   gitignored, never commit or share it.
-2. Log in to Google for Firestore (once per machine; Workspace accounts need
-   this again roughly every day):
+1. Copy `.env.example` to `.env` and fill it in (Clerk keys, Prokerala keys,
+   Firestore project, secrets — see the table in §1.6). Get the values from
+   the team; `.env` is gitignored, never commit or share it. `config.py` holds
+   no keys — it reads them from `.env`.
+2. Log in to Google — used by **Firestore and Gemini** (once per machine;
+   Workspace accounts need this again roughly every day, otherwise both stop
+   with `[DB] [FAIL]` / `[Gemini] [FAIL]` at startup):
 
    ```bash
    gcloud auth application-default login
    gcloud auth application-default set-quota-project astrohealth-509609
    ```
 
-   On the VM skip this — its service account is used automatically.
-3. API keys for Prokerala / Gemini / Serper are currently in `config.py`
-   (being moved to `.env`) — get them from the team.
+   On the VM skip this — its service account (`astromedica-backend-runner`)
+   is used automatically. There is **no Gemini API key**: Ameya's organisation
+   policy blocks API keys, so Gemini goes through Vertex AI with this login.
 
 ### 1.5 Run
 
@@ -131,8 +139,10 @@ Healthy startup looks like:
 
 ```
 [Auth] Clerk login: ON
+[Auth] Admins (see all patients): 3 in ADMIN_CLERK_USER_IDS
 [DB] Main DB: Firestore project astrohealth-509609
 [DB] Firestore connection OK
+[Gemini] Vertex AI via ADC OK - project astrohealth-509609, region asia-south1, model gemini-2.5-flash
 [RL] Lookup tables loaded from firestore (symptom library: 45 diseases)
 [Firestore] RL connected to astrohealth-509609: symptom_library (45), organ_aliases (25), branch_hints (44), chat_maps (2), stop_words (106), organ_branch_families (9), chat_logs (N)
 | INFO | training | Loaded CustomANN weights from ...rl_enhancer\weights\customann_ppo.pt
@@ -144,15 +154,20 @@ Healthy startup looks like:
 
 | Variable | Meaning |
 |---|---|
-| `AUTH_ENABLED` | `true` = Clerk sign-in required; `false` = everything runs as user `local-dev` |
-| `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | Clerk dev instance keys |
-| `ADMIN_CLERK_USER_IDS` | comma-separated Clerk user ids that can see every patient |
+| `AUTH_ENABLED` | `true` = Clerk sign-in required; `false` = everything runs as user `local-dev` (who counts as admin) |
+| `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | Clerk instance keys (the secret key also lets the admin page show emails) |
+| `ADMIN_CLERK_USER_IDS` | comma-separated Clerk user ids (`user_…`, no spaces). Admins see every patient, have no chart limit and get the **Admin page** (§1.9) |
+| `RL_REPORT_VISIBLE_TO` | who sees the RL Report on the results page: `all` (testing) · `admins` · `none`. Use `admins` or `none` before real patients |
+| `TESTER_PASSWORD`, `TESTER_DAILY_CAP` (30) | the **Tester** button at the bottom of the home page asks for this password; the cap is new charts per tester per day (§1.10). Empty password = nobody can unlock |
+| `DEV_MODE_PASSWORD` | password for the **Dev** side of the View Mode toggle on the results page. Empty = Dev view can't be opened |
 | `FRONTEND_URL` | `http://localhost:5000` — Clerk tokens from other origins are rejected |
+| `PROKERALA_CLIENT_ID`, `PROKERALA_CLIENT_SECRET` | birth-chart API (charts already in `charts_cache/` need no call) |
+| `SECRET_KEY`, `DEIDENTIFICATION_SECRET` | long random strings — never change them once set (sessions / patient tokens) |
+| `GEMINI_LOCATION` (asia-south1), `GEMINI_PROJECT` | Vertex AI region and project (project defaults to `FIRESTORE_PROJECT_ID`) |
+| `SERPER_API_KEY` | LLM1 web search — not used for now (returns 403) |
 | `FIRESTORE_BACKEND=firestore`, `FIRESTORE_PROJECT_ID` | main DB **and** RL data. Without them the app DB is in-memory (RL still needs Firestore) |
 | `TRAIN_INTERVAL_SECONDS` (3600), `TRAIN_LEADIN_SECONDS` (300), `TRAIN_SCHEDULER_ENABLED` (true) | RL training scheduler |
-
-API keys for Prokerala / Gemini / Serper are still hard-coded in `config.py`
-(to be moved to env vars) — don't share that file.
+| `WEB_CONCURRENCY=1`, `GUNICORN_CMD_ARGS=--threads 8` | **Docker/VM only** — 1 gunicorn worker with 8 threads (§1.8) |
 
 ### 1.7 Sending your changes back (Git workflow)
 
@@ -172,6 +187,117 @@ latest changes before starting new work: `git checkout main && git pull`.
 `.venv/`, `rl_enhancer/data/`, service-account `.json` keys, or API keys in code.
 If `git status` shows any of these, stop and fix `.gitignore` first.
 
+### 1.8 Deployment on the VM (Docker)
+
+The VM is `astromedica-dev-vm` (zone `asia-south1-c`). The app runs as the
+container `astrohealth-api-1` from `docker-compose.prod.yml` (gunicorn,
+`gunicorn.conf.py`, port 8000 behind a proxy). Settings come from the env file
+named in the compose file (`env_file:` — `/etc/astrohealth.env` in the repo
+version); it holds the same variables as `.env` (§1.6).
+
+**Must be set in that env file** — chat sessions live in the server's memory,
+so a second gunicorn worker can't find a chat started in the first one
+(`/send-message` → 400 "Session not found", the chat shows "This chat session
+has ended"):
+
+```
+WEB_CONCURRENCY=1
+GUNICORN_CMD_ARGS=--threads 8
+```
+
+Deploy new code (from the folder that holds `docker-compose.prod.yml`):
+
+```bash
+git pull origin main
+sudo docker compose -f docker-compose.prod.yml up -d --build     # code changed: rebuild
+sudo docker compose -f docker-compose.prod.yml up -d --force-recreate   # only the env file changed
+```
+
+Check it:
+
+```bash
+ps aux | grep gunicorn | grep -v grep          # 2 lines = master + 1 worker
+sudo docker logs astrohealth-api-1 --tail 80    # startup lines as in §1.5
+```
+
+The VM's service account `astromedica-backend-runner` needs the roles
+*Cloud Datastore User* (Firestore) and *Vertex AI User* (Gemini). Clerk
+production mode needs HTTPS and a domain; a plain `http://<ip>` shows "Not
+Secure" and Clerk stays in Development mode.
+
+### 1.9 Admin page — `/admin`
+
+**Who:** only Clerk ids in `ADMIN_CLERK_USER_IDS`. Everyone else gets "Not
+found" from every admin request, even when typing the URL.
+
+**Give someone admin:**
+1. Find their Clerk user id: Clerk dashboard → **Users** → the person → **User
+   ID** (`user_…`), or the `[Auth] Signed in: user_… -> patient` line in the
+   server log after they sign in.
+2. Add it to `ADMIN_CLERK_USER_IDS` (comma-separated, no spaces) — in `.env`
+   locally, in the env file on the VM.
+3. Restart (VM: `sudo docker compose -f docker-compose.prod.yml up -d --force-recreate`).
+   The log shows `[Auth] Admins (see all patients): N …`, and on their next
+   sign-in `-> admin`.
+
+**Open it:** sign in → the home page shows an **Admin** button in the top bar
+→ or go straight to `http://localhost:5000/admin` (VM: `http://<vm-address>/admin`).
+
+**What's on it:** every account with its **email** (from Clerk), sign-up and
+last sign-in, "X of 2 charts used", and its charts (patient id, name, birth
+date/place, active · replaced · saved, last chat, RAG/RL report ready).
+Search by email, name or patient id; filter by charts / no charts / allowance
+used up; **Open** any chart.
+
+| Option | Effect |
+|---|---|
+| **Delete chart** | Deletes this chart and everything linked to it (Firestore records, saved chart, RL `chat_logs`, the patient folder on the server) and fixes the allowance — the user can create a new chart. Type the patient id to confirm. |
+| **Reset allowance** | Keeps all charts; the user can create a chart again (0 of 2 used). |
+| **Delete all data** | All of the account's charts, chats, reports and RL logs plus its user record. The **Clerk login stays**, so signing in again starts fresh. Type the email to confirm. |
+
+Every action is saved in `users/{admin}/admin_audit` and printed as `[Admin] …`.
+A patient id shared by two accounts (same birth details) keeps its folder and
+RL logs while the other account still uses it. Deletes can't be undone.
+Code: `admin_routes.py`, `admin.html`.
+
+### 1.10 Tester mode — early-access testers
+
+For people who test new charts, the algorithms and the chatbot, and tell us how accurate they are.
+
+**Getting in:** send them the hosted address. They sign in, scroll to the bottom of the home page, press **Tester** and type
+`TESTER_PASSWORD` (set in the env file; on the VM edit `/etc/astrohealth.env` and recreate the container). That marks
+their account as a tester (`users/{id}/account/tester`). After that the same button opens **My test charts**
+(`/tester`), and the home page shows a **My test charts** link. An admin can end the role on the admin page (**Remove tester**; their charts stay).
+
+| | Normal user | Tester |
+|---|---|---|
+| Charts | 2 in total (first + one correction) | no total limit; **`TESTER_DAILY_CAP` (30) new charts per day**, counted from midnight India time |
+| Same birth details again | — | allowed any time and **not counted**: the saved chart is reused and **all 5 algorithms + the Combined Algo run again** (new run in the history) |
+| Results page | Public view; Dev view needs `DEV_MODE_PASSWORD` | opens in **Public** view like everyone; the **Dev** toggle (all algorithms, Combined Algo, RAG + RL report) works without the password |
+| Chat | RL runs when it finishes | works the same, but **RL is not queued**, so tester chats never reach Abhishek's `chat_logs` |
+
+**Prokerala cost:** a brand-new chart is 4 calls (today's planets + planets + chart + birth details/dasha). Birth details already in
+`charts_cache/` cost **1 call** — today's planet positions are fetched on every Generate — so they don't count towards the cap.
+
+**My test charts (`/tester`):** today's count (e.g. 12 of 30), a last-7-days summary (charts, rated, correct / partly / wrong,
+not rated), and every run grouped by day, newest first, with the Combined Algo's top organs, the rating, the chat state and
+**Open**. Filters: last 7 days (default) · 30 days · all, rating, search. Nothing expires — runs stay until an admin deletes the chart.
+
+**Tester feedback (the last card on the results page, below the chat and reports):** mark each Combined Algo organ **and each
+disease listed under it** as **Correct / Partly / Wrong**, name an organ we **missed**, say whether the chat's questions and final
+plan fitted, add a note. Saved on that run (`feedback.organs`, `feedback.diseases` keyed `Organ::Disease`).
+
+**Admin page → Tester accuracy:** testers, charts run, rated, and for each algorithm how often its **first organ** and its
+**top 3** contained a correct organ (an organ marked Correct, or the missed organ the tester named), and how often it **lists a
+disease** the tester marked Correct. This is how to compare
+HitList / Rashi / Organ Truth / Disease First / Disease Compare / Combined — e.g. before changing weights.
+Each tester's row shows a **Tester** badge, today's count and saved runs. **Delete chart** also deletes that chart's tester runs.
+
+**Stored in Firestore** (`users/{id}/…`): `account/tester` (the role), `account/tester_usage` (`{date, charts}`), and
+`tester_charts/{patient_id}_{timestamp}` — birth details, Combined Algo top organs, every algorithm's output
+(`snapshot_json`, no `raw_output`), each algorithm's organs, the chat (`chat_json`, `chat_turns`), the final report
+(`final_output_json`) and `feedback`. Code: `tester_access.py`, `tester_routes.py`, `tester.html`, the tester card in `results.html`.
+
 ---
 
 ## 2. Data flow — from birth details to RL output
@@ -188,8 +314,8 @@ If `git status` shows any of these, stop and fix `.gitignore` first.
 | 6 | Cache + de-identify | `orchestrator.handle_chart_generation`, `deidentification` | name/DOB go to the identity vault; AI side keeps only the patient id |
 | 7 | Create the RL input file | `combine_output.write_rl_report` | top 3 organs → `For RL Report.json` (`conditions`, empty `chat_log`) |
 | 8 | Save to the main DB | `db_layer.save_chart_generation` | inputs + all algorithm outputs → Firestore `users/{uid}/…` |
-| 9 | Show results, patient starts the chat | `results.html` → `POST /start-consultation` | Combined Algo top 3 → chat plan: 3 clusters × several symptom branches (§4.1) |
-| 10 | Each question | `chat_module` + `rag_pipeline` + Gemini | runtime state + RAG context → next question JSON |
+| 9 | Show results, patient starts the chat | `results.html` → `POST /start-consultation` | Combined Algo top 3 → chat plan: 3 clusters, **one branch per disease** with Gemini-written questions (`question_generator`, §4.1) |
+| 10 | Each question | `chat_module` + `rag_pipeline` + Gemini (`gemini_client`, Vertex AI) | runtime state + RAG context → next question JSON |
 | 11 | Each answer | `POST /send-message` → `symptom_mapper.classify_answer`, `chat_module.update_cluster_support` | answer text → label `yes_strong / yes_but / no_but / no_strong` → cluster/branch status (§4.2–4.3). `chat_log.json` and `For RL Report.json` updated |
 | 12 | Chat ends | `chat_module` (turn 15 or early finish, §4.4) | `completed = true` → RL job queued |
 | 13 | RL enhancement | `rl_integration._run_job` → `rl_enhancer` | report + this chat + the patient's older chats (Firestore) → `RL Output.json` (§10.1) |
@@ -203,6 +329,7 @@ If `git status` shows any of these, stop and fix `.gitignore` first.
 | 2 | `profile.json`, `raw_chart.json`, `raw_dasha.json`, `shadbala.json` | — | — |
 | 4–5 | `processed_logic.json`, `chart_data.json`, `diagnosis.json`, `algorithm_comparison.json` | — | orchestrator chart cache |
 | 6–8 | `For RL Report.json` | `users/{uid}/inputs, prokerala_results, algorithm_results, combined_results, patients, identity_vault` | — |
+| 9 | `chat_questions.json` (Gemini's question set, reused by later chats) | — | — |
 | 10–11 | `chat_log.json`, `For RL Report.json` (chat_log refreshed) | — | orchestrator chat session |
 | 13 | `RL Output.json` | `chat_logs/{patient}__{started_at}` | RL job store |
 | 14 | `final_output.json` | — | — |
@@ -386,10 +513,25 @@ score well — one algorithm alone can't push it up. Combined Algo **v2**
 ### 4.1 Chat plan
 
 `combined_algo_clusters` turns the Combined Algo top 3 organs into **clusters**
-(rank 1–3). `symptom_mapper` splits each cluster's diseases into **branches** —
-symptom themes such as `kidney`, `prostate`, `micturition`, `piles` — each with
-lay-language **screening**, **drilldown** and **context** questions. The
-patient never hears organ or disease names.
+(rank 1–3). At chat start **`question_generator.improve_chat_plan`** asks
+Gemini, once, to write the questions: **one branch per disease** (id
+`gen_<disease>`, e.g. `gen_kidney_stone`) with plain **screening**,
+**drilldown**, **severity** and **red-flag** questions, plus 1–2 **"telling
+apart"** questions per organ that separate it from the other two.
+
+- Rules for every question: **one symptom only** (no "or"/"and"), everyday
+  words a 12-year-old understands, ≤ 18 words, yes/no answerable, calm, never a
+  disease name or internal organ (kidney, liver…) — everyday body parts (nose,
+  eyes, chest, stomach…) are fine.
+- Code checks drop any question that breaks those rules (the dropped ones are
+  listed under `rejected` in the file).
+- Saved to `patients/<id>/chat_questions.json`; later chats of the same patient
+  reuse it (bump `PROMPT_VERSION` to rebuild all sets).
+- If Gemini fails, that organ keeps `symptom_mapper`'s built-in questions
+  (14 hand-written symptom groups) and the chat still starts.
+
+The patient never hears organ or disease names. The questions are AI-written:
+have a doctor review a sample of `chat_questions.json` before real patients.
 
 ### 4.2 One turn
 
@@ -398,14 +540,30 @@ patient never hears organ or disease names.
    `{chat_message, reasoning, cluster_rank, question_type, branch_id}`.
    The backend checks `branch_id` exists; if Gemini fails it uses
    `fallback_question_meta` (fixed order: cluster 1 screening → drilldown → next clusters).
-2. The patient answers. `symptom_mapper.classify_answer` labels it (first rule that matches wins):
+2. The patient answers. `symptom_mapper.classify_answer` labels it. It matches
+   **whole words and phrases** only (so "not daily" is not read as "daily"),
+   knows Hinglish and how-often answers, and checks in this order — the first
+   match wins:
 
-| Label | Matches | Cluster points |
-|---|---|---|
-| `no_strong` | "never", "not at all", "absolutely not", or the word "no" | −3 |
-| `no_but` | "not really", "rarely", "hardly", "only once", "no but" | −1 |
-| `yes_but` | "sometimes", "mild", "a little", "occasionally", "yes but" | +1 |
-| `yes_strong` | "definitely", "daily", "often", "a lot", the word "yes", or a symptom word (pain, swelling, tired…) | +3 |
+| Order | Label | Matches (examples) | Cluster points |
+|---|---|---|---|
+| 1 | `no_but` | unsure: "not sure", "I don't know", "maybe", "pata nahi" | −1 |
+| 2 | `yes_but` | a yes word **plus** a qualifier: "yes but only at night", "haan kabhi kabhi", "yes, but not daily" | +1 |
+| 3 | `no_but` | "not really", "rarely", "only once", "only sometimes", "not daily", "not often", "bahut kam" | −1 |
+| 4 | `yes_but` | "sometimes", "occasionally", "a little", "mild", "kabhi kabhi", "thoda", "not always" | +1 |
+| 5 | `no_strong` | "no", "nope", "nah", "n", "never", "not at all", "nahi", "kabhi nahi", "bilkul nahi" | −3 |
+| 6 | `yes_strong` | "yes", "yea", "yeah", "yep", "ys", "y", "haan", "ji", "sure"; "every day", "daily", "always", "often", "roz", "hamesha"; "3 times", "twice a week", "for 2 years" | +3 |
+| 7 | `no_strong` | other negations: "I don't get that", "it doesn't happen" | −3 |
+| 8 | `yes_strong` | a symptom word: "my back hurts", "I have pain after meals" | +3 |
+| — | `yes_but` | anything else — logged as `[Chat] Answer not recognised: '…'` so the lists can be extended | +1 |
+
+3. If the request fails, the chat shows what happened instead of a fake
+   question (`results.html`, `chatProblem`): too many messages → a countdown
+   on Send (30 messages per 5 min per account); chat session ended (server
+   restart) → **Restart chat**; signed out → **Sign in**; busy / offline →
+   **Try again**. A refused answer goes back into the input box, so nothing is
+   lost or counted twice. Gemini errors (incl. 429 after retries) don't reach
+   the patient: the chat asks its plan's own next question.
 
 ### 4.3 Branch and cluster status (`chat_module.update_cluster_support`)
 
@@ -433,7 +591,10 @@ cluster, then asks severity/context follow-ups.
 - **early**: from turn 6, when a confirmed cluster has no unasked branch left
   and its main branch has ≥ 2 follow-up answers (severity / red flag / context).
 
-Then `completed = true`, the RL job is queued and the closing message is shown.
+Whether this turn ends the chat is decided **before** the reply is written, so
+the last message is always the summary (if Gemini still asks a question, the
+standard summary is used). Then `completed = true`, the RL job is queued and
+the closing message is shown.
 
 ### 4.5 The 0–10 scores on the results page (`combine_output.build_confirmed_findings`)
 
@@ -441,6 +602,7 @@ Then `completed = true`, the RL job is queued and the closing message is shown.
 organ    = the confirmed cluster with the most yes_strong answers (then highest score)
 diseases = all Combined Algo diseases of that organ (asked or not)
 score    = average answer points × 10, over the answers on that disease's branch
+           (branch gen_<disease>, or the built-in keyword branch)
            points: yes_strong 1.0, yes_but 0.5, no_but 0, no_strong 0
            no answers on its branch → "Not asked"
 ```
@@ -511,19 +673,25 @@ the endorsed questions become new (disease → symptom) training pairs.
 
 | File | What it does |
 |---|---|
-| `server.py` | Flask app: all page and API routes, Gemini call (`call_gemini`, JSON mode, retries), Prokerala token/current-positions, registers the RL blueprint, calls `init_rl()` on start. Loads `.env` first. |
+| `server.py` | Flask app: all page and API routes, Gemini chat call (`call_gemini`, JSON mode, retries on 429/5xx), Prokerala token/current-positions, `/rl-report`, `/dev-mode/unlock`, registers the RL and admin blueprints, calls `init_rl()` at import. Loads `.env` first. |
+| `gemini_client.py` | How the app reaches Gemini: Vertex AI with the Google (ADC) login, region `GEMINI_LOCATION`; clear messages when the login expired or a role is missing. Used by the chat, the question writer, LLM1 and the RAG embeddings. |
+| `question_generator.py` | Gemini writes the chat's questions per disease at chat start, checks them and saves `chat_questions.json` (§4.1). |
+| `tester_access.py`, `tester_routes.py` | Tester mode: the role, the daily cap, saved runs + chats + feedback in Firestore, `/tester/…` endpoints, the accuracy summary (§1.10). |
+| `admin_routes.py` | The admin page's server side (`/admin`, `/admin/api/…`): accounts with Clerk emails, delete chart (cascade), reset allowance, delete all data, audit records (§1.9). |
+| `chart_access.py` | One chart + one correction per account, the saved chart in Firestore, `ALGO_VERSION` re-runs; the allowance **heals itself** when a chart was deleted (§11.1). |
 | `orchestrator.py` | Single coordination layer: owns chat sessions (in memory), patient chart cache (Combined Algo + priority ladder), de-identification, RAG call, safety prompt. |
 | `chat_module.py` | The consultation chat ("Module B"): builds the chat plan from Combined Algo clusters, system prompt rules, parses Gemini JSON, classifies answers (`yes_strong / yes_but / no_but / no_strong`), tracks cluster/branch scores, decides when to finish, saves turns, syncs the RL report, queues RL on completion. |
 | `combine_output.py` | "Module C": final report. Also writes **`For RL Report.json`** (`write_rl_report`, `ensure_rl_report`, `refresh_rl_report_chat`) and builds the 0–10 confirmed findings (`build_confirmed_findings`, `ANSWER_POINTS`). |
 | `combined_algo_clusters.py` | Combined Algo v1 top organs reshaped into the cluster format the chat understands. This is the chat plan source. |
-| `symptom_mapper.py` | Turns organ/disease names into lay symptom questions (the patient never hears disease names). |
-| `rag_pipeline.py` | RAG steps 1, 2, 3A, 4: query builder, Gemini embedding (gemini-embedding-001, 768-dim), retrieval via `db_layer.query_similar_chunks` (stub, no knowledge base yet), prompt augmentation. |
-| `llm1_search.py` | RAG step 3B "LLM1" web search (Serper — key currently returns 403; planned switch to Gemini grounding). |
+| `symptom_mapper.py` | Built-in lay symptom questions (14 groups, the fallback when Gemini can't write them) and **answer scoring** (`classify_answer`, §4.2). |
+| `rag_pipeline.py` | RAG steps 1, 2, 3A, 4: query builder, Gemini embedding (gemini-embedding-001, 768-dim, via Vertex AI), retrieval via `db_layer.query_similar_chunks` (stub, no knowledge base yet), prompt augmentation. Runs once at chat start. |
+| `llm1_search.py` | RAG step 3B "LLM1" web search (Serper — key returns 403; not needed for now). |
 | `deidentification.py` | Splits name/DOB/place/parents into the identity vault; AI/RAG/RL see only an HMAC token or patient_id. |
 | `db_layer.py` | The only place that talks to the main DB: identity vault, chart saves (`save_chart_generation`), RAG `kb_chunks` (stub). |
 | `app_auth.py` | Glue to the login/DB code in `app_core/`: `login_required`, `check_patient_access`, admin list, `AUTH_ENABLED` switch, Firestore error handling (fails in ~10 s with a clear message). |
 | `rl_integration.py` | Runs the RL enhancer inside Flask (replaces the standalone FastAPI `main.py`): `/rl` page, `/api/...` routes, worker thread, patient RL jobs, Firestore logs, training start + hourly scheduler. |
-| `config.py` | API keys and model names (Gemini model, embedding model/dim). |
+| `config.py` | Reads keys from `.env` (none written in the file) and holds model names (Gemini model, embedding model/dim). |
+| `Dockerfile`, `docker-compose.prod.yml`, `gunicorn.conf.py`, `deploy/vm-startup.sh` | VM deployment (§1.8). |
 | `jataka_fetch.py` / `jataka_logic.py` | Module A: Prokerala fetch + patient folder/ID allocation (`001`, `002` …) / runs the astrology rule set. |
 | `rules.py`, `knowledge_base.py`, `term_to_systems.py`, `parhora_table.py` | Astrology rules and lookup tables (planets/rashis/nakshatras → organs/diseases). |
 | `hitlist_engine*.py`, `rashi_correlation_engine*.py`, `organ_truth_correlation_engine*.py`, `disease_*_logic*.py`, `*_weighted_disease_priority.py`, `priority_cascade.py`, `algorithm_comparison*.py`, `zone_engine.py`, `second_ascendant.py`, `imp_rashi_distance.py`, `dasha_chat_priority.py`, `eleventh_lord_confirmation.py`, `related_house_severity_engine.py`, `rashi_truth_*.py`, `common_findings_engine.py`, `chart_specific_overrides.py` | The individual astrology algorithms whose outputs feed the Combined Algo. `*_v2` versions only feed the unused "New Priority Engine" page. |
@@ -535,9 +703,11 @@ the endorsed questions become new (disease → symptom) training pairs.
 
 | File | Page |
 |---|---|
-| `astrohealth-landing.html` | Home page: birth form, recent patients list, Sign in button |
-| `results.html` | **The final patient page**: chart, analysis (Public/Dev view toggle), chat panel, "RAG Report" and "RL Report" (RL shown per `RL_REPORT_VISIBLE_TO`) |
-| `static/session.js` | Clerk sign-in; adds the login token to every same-origin `fetch` |
+| `astrohealth-landing.html` | Home page: birth form, patients list, Sign in button, **Admin** button (admins only). Details typed before signing in are kept and Generate continues after sign-in |
+| `results.html` | **The final patient page**. Public view: chart → Combined Algo Summary → chat → the rest; Dev view behind `DEV_MODE_PASSWORD`. After the chat: "RAG Report", "RL Report" (per `RL_REPORT_VISIBLE_TO`) with a "Do they agree?" row, **Download Reports** (both JSON files), clear chat error messages (§4.2) |
+| `admin.html` | The admin page (§1.9), incl. tester badges and the **Tester accuracy** table (§1.10) |
+| `tester.html` | **My test charts** page for testers (§1.10) |
+| `static/session.js` | Clerk sign-in; adds the login token to every same-origin `fetch`; keeps the birth form through sign-in |
 | `priority6.html`, `results_staged.html`, `print_report.*` | Unused / legacy pages |
 
 ### 6.3 `app_core/` — login + main DB (from the Google-Cloud version of the app)
@@ -589,6 +759,7 @@ Merged in with **only import paths changed** (relative imports) plus marked
 | `profile.json`, `raw_chart.json`, `raw_dasha.json`, `shadbala.json` | jataka_fetch | Birth details + Prokerala data |
 | `processed_logic.json`, `chart_data.json`, `diagnosis.json`, `algorithm_comparison.json` | generate-chart | Algorithm outputs (Combined Algo is computed from `processed_logic.json`) |
 | `chat_log.json` | chat_module | Every turn of every session (appends) |
+| `chat_questions.json` | question_generator | Gemini's question set for this patient (+ the questions the checks dropped) |
 | **`For RL Report.json`** | combine_output | **RL input** — created at Generate, `chat_log` refreshed every turn |
 | **`RL Output.json`** | rl_integration | **RL output** for the latest finished chat (admin/dev only) |
 | `final_output.json` | combine_output | Final report + confirmed findings |
@@ -690,6 +861,9 @@ users/{internal_user_id}                        app data, one subtree per user
                                                 of generation day, algo_version — reopen/re-run without Prokerala
     identity_vault/{patient_id}                 name, DOB, place (PII)
     audit_events/                               denied access attempts
+    admin_audit/                                admin page actions done by this admin (§1.9)
+    account/tester, account/tester_usage        tester role, and today's new-chart count (§1.10)
+    tester_charts/{patient_id}_{timestamp}      one tester chart run: algorithms, Combined Algo, chat, feedback (§1.10)
 
 # RL (shared, not per user) — rl_enhancer/config_db.py
 symptom_library/{disease_slug}                  {disease, symptoms[]}   append-only
@@ -751,11 +925,17 @@ all); only the server does. RL collections must not hold names or birth details.
 
 ## 11. Login, roles, privacy (short)
 
-- Clerk login (`AUTH_ENABLED=true`). Patients only see charts they generated;
-  ids in `ADMIN_CLERK_USER_IDS` see all. Role handling is planned to move into
-  a `role` field on `users/{id}`.
-- RL output is clinical and **admin/dev only** — never on the patient page.
+- Clerk login (`AUTH_ENABLED=true`). Patients only see charts they generated
+  (someone else's chart answers 404, and the attempt is logged); ids in
+  `ADMIN_CLERK_USER_IDS` see all and get the admin page (§1.9).
+- The server checks every Clerk token: signature, expiry, authorized party
+  (`FRONTEND_URL`), issuer and subject. The secret key stays on the server.
+- RL Report on the results page only per `RL_REPORT_VISIBLE_TO`
+  (set `admins`/`none` before real patients — its text is clinical).
+- Dev view of the results page needs `DEV_MODE_PASSWORD` (checked by the
+  server). It only hides the Dev cards; their data still reaches the browser.
 - RL never receives patient names; chat logs carry only `patient_id`.
+- Testers (§1.10) get the Dev view and a daily chart cap instead of the 2-chart rule; their chats are kept out of RL.
 
 ### 11.1 One chart per account (`chart_access.py`)
 
@@ -772,6 +952,10 @@ So nobody can resell readings from one account:
   below the chat (only on the active chart, until used) → confirmation →
   `/?correct=1` shows the form once. The previous chart is then hidden from
   the user (`patients/{id}.hidden`), kept for admins with its chats.
+- **Deleted charts don't count.** `get_allowance` checks that each counted
+  chart still exists; if the active chart was deleted (admin page, or by hand
+  in the Firestore console) the user gets the form back
+  (`[Allowance] user …: deleted chart(s) no longer count …`).
 
 ### 11.2 Reopening a chart and algorithm updates
 
@@ -854,12 +1038,21 @@ triplet loss). Where it can help here:
 
 ## 13. Known open items
 
-- LLM1 web search returns 403 (Serper) — plan: Gemini with Google Search grounding.
-- RAG knowledge base (`kb_chunks`) is empty — retrieval returns 0 chunks.
+- Chat **Dev Mode is on by default** (`results.html`, `devMode = true`): "Why
+  this question" shows organ and disease names to patients.
+- Chat sessions live in server memory: a restart loses chats in progress, and
+  more than one gunicorn worker breaks chats (§1.8). Fix: sessions in Firestore.
+- Chats in progress, RAG/RL reports and `chat_questions.json` are on disk only;
+  only finished chats reach Firestore (`chat_logs`).
+- Vertex AI often answers 429 (quota on the free-trial billing account) —
+  slower turns, simpler fallback questions. Ideas: `global` region fallback,
+  billing upgrade, skip calls that do nothing yet.
+- "How long / how often" questions are open questions scored as yes/no.
+- RAG knowledge base (`kb_chunks`) is empty — retrieval returns 0 chunks;
+  turn 1 has no RAG context. LLM1 web search (Serper) returns 403.
 - Combined Algo organ headings sometimes show the group name instead of the strongest organ.
 - `001`-style patient ids: two users with identical birth details share one folder.
 - `/rl` and `/api/*` are not behind login yet.
-- API keys in `config.py` should move to environment variables.
 
 ---
 

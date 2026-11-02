@@ -83,6 +83,13 @@
     border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; }
   .modal input:focus { outline: none; border-color: var(--gold); }
   .modal .actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .acc-panel { background: var(--card); border: 1px solid var(--border2); border-radius: 14px; margin-bottom: 22px; overflow: hidden; }
+  .acc-panel h2 { margin: 0; padding: 14px 20px; font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400;
+    color: var(--muted); background: var(--card2); }
+  .acc-panel .chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 20px 4px; }
+  .acc-panel .none { padding-top: 6px; }
+  .bar-cell { display: inline-block; width: 90px; height: 6px; border-radius: 999px; background: var(--bg2); vertical-align: middle; margin-right: 8px; overflow: hidden; }
+  .bar-cell i { display: block; height: 100%; background: var(--ok); }
   .report { margin-top: 6px; font-size: 0.86rem; line-height: 1.6; }
   .report .r-ok { color: var(--ok); } .report .r-kept { color: var(--muted); } .report .r-fail { color: var(--danger); }
   body { overflow-x: hidden; }
@@ -118,6 +125,8 @@
     <div class="option"><b>Reset allowance</b><p>Keeps all charts. Lets the user create a new chart again.</p></div>
     <div class="option warn"><b>Delete all data</b><p>Deletes all of this user's charts, chats and reports. Their login stays, so they can start fresh.</p></div>
   </div>
+
+  <div class="acc-panel" id="tester-accuracy" hidden></div>
 
   <div class="toolbar">
     <input id="search" type="search" placeholder="Search by email, name or patient id" aria-label="Search accounts">
@@ -198,6 +207,38 @@
       notice('Emails could not be loaded from Clerk, so accounts show their Clerk id instead.');
     }
     render();
+    loadAccuracy();
+  }
+
+  const pctOf = (n, d) => d ? Math.round(100 * n / d) : 0;
+  async function loadAccuracy() {
+    const box = $('tester-accuracy');
+    let data;
+    try {
+      const res = await fetch('/admin/api/tester-accuracy');
+      data = await res.json();
+      if (!res.ok || !data.success) { box.hidden = true; return; }
+    } catch (e) { box.hidden = true; return; }
+    const t = data.totals;
+    if (!t.testers) { box.hidden = true; return; }
+    const rows = data.algorithms.map(a => `<tr>
+        <td>${esc(a.algorithm)}</td><td>${a.rated}</td>
+        <td><span class="bar-cell"><i style="width:${pctOf(a.top1, a.rated)}%"></i></span>${a.top1} (${pctOf(a.top1, a.rated)}%)</td>
+        <td><span class="bar-cell"><i style="width:${pctOf(a.top3, a.rated)}%"></i></span>${a.top3} (${pctOf(a.top3, a.rated)}%)</td>
+        <td>${a.disease_rated ? `<span class="bar-cell"><i style="width:${pctOf(a.disease_hit || 0, a.disease_rated)}%"></i></span>${a.disease_hit || 0} of ${a.disease_rated} (${pctOf(a.disease_hit || 0, a.disease_rated)}%)` : '<span class="no">–</span>'}</td></tr>`).join('');
+    box.innerHTML = `<h2>Tester accuracy</h2>
+      <div class="chips">
+        <span class="chip">Testers <b>${t.testers}</b></span>
+        <span class="chip">Charts run <b>${t.runs}</b></span>
+        <span class="chip">Rated <b>${t.rated}</b></span>
+        <span class="chip">Organs marked correct <b>${t.organ_correct}</b> · partly <b>${t.organ_partly}</b> · wrong <b>${t.organ_wrong}</b></span>
+        <span class="chip">Diseases marked correct <b>${t.disease_correct}</b> · partly <b>${t.disease_partly}</b> · wrong <b>${t.disease_wrong}</b></span>
+        <span class="chip">Chat relevant: yes <b>${t.chat_relevant_yes}</b> · partly <b>${t.chat_relevant_partly}</b> · no <b>${t.chat_relevant_no}</b></span>
+      </div>
+      ${rows ? `<div class="table-wrap"><table><thead><tr><th>Algorithm</th><th>Rated charts</th><th>First organ correct</th><th>Right organ in top 3</th><th>Right disease listed</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <div class="none">"Right organ" = an organ the tester marked Correct, or the organ they said was missed. "Right disease listed" = the algorithm lists a disease the tester marked Correct. Only charts with that information count.</div>`
+        : '<div class="none">No algorithm accuracy yet: it appears once testers rate charts.</div>'}`;
+    box.hidden = false;
   }
 
   function matches(acc, q, filter) {
@@ -248,8 +289,11 @@
             <div class="acc-email">${esc(who)}${acc.is_admin ? '<span class="badge gold">Admin</span>' : ''}</div>
             <div class="acc-meta">${acc.name ? esc(acc.name) + ' · ' : ''}Signed up ${day(acc.created_at)} · Last sign-in ${day(acc.last_sign_in_at)}</div>
           </div>
-          <span class="badge ${full ? 'full' : 'ok'}">${acc.charts_used} of ${acc.max_charts} charts used</span>
+          ${acc.is_tester
+            ? `<span class="badge gold">Tester · ${acc.tester_charts_today} of ${acc.tester_daily_cap} new charts today · ${acc.tester_runs} saved run${acc.tester_runs === 1 ? '' : 's'}</span>`
+            : `<span class="badge ${full ? 'full' : 'ok'}">${acc.charts_used} of ${acc.max_charts} charts used</span>`}
           <div class="acc-actions">
+            ${acc.is_tester ? `<button class="btn small" type="button" data-remove-tester="${esc(acc.internal_user_id)}">Remove tester</button>` : ''}
             <button class="btn small" type="button" data-reset="${esc(acc.internal_user_id)}">Reset allowance</button>
             <button class="btn small danger" type="button" data-del-all="${esc(acc.internal_user_id)}">Delete all data</button>
           </div>
@@ -260,7 +304,7 @@
   }
 
   // ── Confirm box ──────────────────────────────────────────────────────
-  function ask({ title, text, items, askText, expected, danger, run }) {
+  function ask({ title, text, items, askText, expected, danger, okLabel, run }) {
     $('c-title').textContent = title;
     $('c-text').textContent = text;
     $('c-list').innerHTML = (items || []).map(i => `<li>${esc(i)}</li>`).join('');
@@ -269,7 +313,7 @@
     input.value = '';
     input.style.display = expected ? '' : 'none';
     ok.className = 'btn solid' + (danger ? ' danger' : '');
-    ok.textContent = danger ? 'Delete' : 'Reset';
+    ok.textContent = okLabel || (danger ? 'Delete' : 'Reset');
     ok.disabled = Boolean(expected);
     input.oninput = () => { ok.disabled = input.value.trim().toLowerCase() !== String(expected).toLowerCase(); };
     ok.onclick = async () => { ok.disabled = true; await run(input.value.trim()); close(); };
@@ -306,7 +350,7 @@
   $('accounts').addEventListener('click', async (e) => {
     const b = e.target.closest('button');
     if (!b) return;
-    const acc = state.accounts.find(a => a.internal_user_id === (b.dataset.uid || b.dataset.reset || b.dataset.delAll));
+    const acc = state.accounts.find(a => a.internal_user_id === (b.dataset.uid || b.dataset.reset || b.dataset.delAll || b.dataset.removeTester));
     const who = acc ? (acc.email || acc.clerk_user_id || acc.internal_user_id) : '';
     if (b.dataset.open) {
       try {
@@ -323,6 +367,11 @@
             items: ['the chart and its saved birth chart', 'its chats and the RAG / RL reports', 'the RL chat logs (training data)', 'the files on the server'],
             askText: `Type ${pid} to confirm.`,
             run: (typed) => act(`/admin/api/accounts/${encodeURIComponent(b.dataset.uid)}/charts/${encodeURIComponent(pid)}/delete`, typed, 'Delete chart ' + pid) });
+    } else if (b.dataset.removeTester) {
+      ask({ title: 'Remove tester', danger: false, okLabel: 'Remove', expected: null,
+            text: `${who} goes back to the normal chart limit (${acc.max_charts} charts). Their saved test charts, chats and feedback are kept until you delete them.`,
+            items: [], askText: '',
+            run: () => act(`/admin/api/accounts/${encodeURIComponent(b.dataset.removeTester)}/remove-tester`, 'remove', 'Remove tester ' + who) });
     } else if (b.dataset.reset) {
       ask({ title: 'Reset allowance', danger: false, expected: null,
             text: `Keeps all charts of ${who}. Lets the user create a new chart again (0 of ${acc.max_charts} used).`,

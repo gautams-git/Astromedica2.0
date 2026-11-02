@@ -1775,6 +1775,66 @@
       </div>
     </div>
 
+    <!-- Tester feedback: only for tester accounts (filled by the script below) -->
+    <style>
+      .tester-feedback { margin: 28px 0 0; padding: 22px 24px; border: 1px solid var(--border); border-radius: 12px; background: rgba(201,168,76,0.05); }
+      .tester-feedback[hidden] { display: none; }
+      .tester-feedback h3 { margin: 0 0 4px; font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--gold); font-weight: 500; }
+      .tester-feedback .tf-note { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.55; }
+      .tester-feedback .tf-q { margin: 16px 0 8px; font-size: 0.85rem; color: var(--text); }
+      .tester-feedback .tf-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+      .tester-feedback .tf-organ { font-size: 0.95rem; color: var(--text); font-weight: 500; }
+      .tester-feedback .tf-group { margin-bottom: 10px; }
+      .tester-feedback .tf-disease-row { padding-left: 18px; border-bottom: none; padding-top: 5px; padding-bottom: 5px; }
+      .tester-feedback .tf-disease { font-size: 0.86rem; color: var(--text-muted); flex: 1 1 200px; }
+      .tester-feedback .tf-disease-row .tf-choices span { padding: 3px 11px; font-size: 0.7rem; }
+      .tester-feedback .tf-choices { display: flex; gap: 6px; flex-wrap: wrap; }
+      .tester-feedback .tf-choices label { cursor: pointer; }
+      .tester-feedback .tf-choices input { position: absolute; opacity: 0; pointer-events: none; }
+      .tester-feedback .tf-choices span { display: inline-block; font-size: 0.74rem; letter-spacing: 0.06em; padding: 5px 14px; border-radius: 999px; border: 1px solid rgba(201,168,76,0.3); color: var(--text-muted); transition: 0.15s; }
+      .tester-feedback .tf-choices input:checked + span { color: #07080F; background: var(--gold); border-color: var(--gold); }
+      .tester-feedback .tf-choices input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 2px; }
+      .tester-feedback input[type=text], .tester-feedback textarea { width: 100%; font-family: inherit; font-size: 0.9rem; color: var(--text); background: rgba(255,255,255,0.04); border: 1px solid rgba(201,168,76,0.25); border-radius: 8px; padding: 9px 12px; }
+      .tester-feedback textarea { min-height: 70px; resize: vertical; }
+      .tester-feedback input:focus, .tester-feedback textarea:focus { outline: none; border-color: var(--gold); }
+      .tester-feedback .tf-actions { display: flex; align-items: center; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
+      .tester-feedback button.tf-save { font-family: inherit; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 22px; border-radius: 6px; border: 1px solid var(--gold); background: var(--gold); color: #07080F; cursor: pointer; }
+      .tester-feedback button.tf-save:disabled { opacity: 0.5; cursor: not-allowed; }
+      .tester-feedback .tf-status { font-size: 0.82rem; color: var(--text-muted); }
+      .tester-feedback .tf-status.ok { color: #3ec491; }
+      .tester-feedback .tf-status.bad { color: #ef6b6b; }
+      .tester-feedback a { color: var(--gold); font-size: 0.82rem; }
+    </style>
+    <div class="tester-feedback" id="tester-feedback" hidden>
+      <h3>Tester feedback</h3>
+      <div class="tf-note">Help us measure accuracy. Mark each organ the Combined Algo found, and the diseases it lists under it, then rate the chat. Do this at the end, after the chat. Everything is saved with this chart in <a href="/tester">My test charts</a>.</div>
+      <div id="tf-organs"></div>
+      <div class="tf-q">Which organ did we miss, if any?</div>
+      <input type="text" id="tf-missed" list="tf-organ-list" maxlength="80" placeholder="e.g. Kidney" autocomplete="off">
+      <datalist id="tf-organ-list">
+        <option value="Heart"><option value="Brain"><option value="Skin"><option value="Liver"><option value="Lungs">
+        <option value="Kidney"><option value="Bones"><option value="Spleen"><option value="Stomach"><option value="Spine">
+      </datalist>
+      <div class="tf-q">Were the chat's questions relevant to this person?</div>
+      <div class="tf-choices">
+        <label><input type="radio" name="tf-chat" value="yes"><span>Yes</span></label>
+        <label><input type="radio" name="tf-chat" value="partly"><span>Partly</span></label>
+        <label><input type="radio" name="tf-chat" value="no"><span>No</span></label>
+      </div>
+      <div class="tf-q">Did the chat's final plan match their situation?</div>
+      <div class="tf-choices">
+        <label><input type="radio" name="tf-plan" value="yes"><span>Yes</span></label>
+        <label><input type="radio" name="tf-plan" value="partly"><span>Partly</span></label>
+        <label><input type="radio" name="tf-plan" value="no"><span>No</span></label>
+      </div>
+      <div class="tf-q">Anything else? (optional)</div>
+      <textarea id="tf-note" maxlength="1000" placeholder="What was right, wrong or confusing?"></textarea>
+      <div class="tf-actions">
+        <button type="button" class="tf-save" id="tf-save">Save feedback</button>
+        <span class="tf-status" id="tf-status" role="status"></span>
+      </div>
+    </div>
+
     <!-- One correction per account: shown below the chat until it's used -->
     <div class="correct-details" id="correct-details" hidden>
       <span>Typed your birth details wrong?</span>
@@ -1962,6 +2022,13 @@
 
   // Public view order: chart, Combined Algo Summary, chat (+ correction box),
   // then everything else as before. Dev view keeps the original layout.
+  // The tester feedback card is always the last thing on the page, after the chat and reports.
+  function placeTesterFeedbackLast() {
+    const card = document.getElementById('tester-feedback');
+    const content = document.querySelector('.content');
+    if (card && content && content.lastElementChild !== card) content.appendChild(card);
+  }
+
   function positionPublicOrder() {
     const slot = document.getElementById('public-combined-slot');
     const chart = document.querySelector('.content > .chart-card');
@@ -1975,6 +2042,7 @@
       slot.innerHTML = '';
       content.appendChild(chat);
       if (correct) content.appendChild(correct);
+      placeTesterFeedbackLast();
       return;
     }
 
@@ -1989,6 +2057,7 @@
     }
     slot.insertAdjacentElement('afterend', chat);
     if (correct) chat.insertAdjacentElement('afterend', correct);
+    placeTesterFeedbackLast();
   }
 
   function getDiseaseLogicContainer(fallbackId) {
@@ -2100,6 +2169,98 @@
     } catch (e) {
       console.error('Could not check the chart allowance', e);
     }
+  });
+
+  // ── Tester mode ─────────────────────────────────────────────────────────
+  // Testers can open the Dev view without the password (every algorithm and the
+  // Combined Algo; the page itself opens in Public view), and get a feedback
+  // panel at the very bottom that tells us how accurate it was.
+  document.addEventListener('DOMContentLoaded', async () => {
+    await (window.astromedicaAuthReady || Promise.resolve());
+    const patientId = data && data.patient_id;
+    if (!patientId) return;
+    let info;
+    try {
+      const mine = await fetch('/my-chart');
+      if (!mine.ok || !(await mine.json()).is_tester) return;
+      const res = await fetch(`/tester/api/feedback/${encodeURIComponent(patientId)}`);
+      if (!res.ok) return;
+      info = await res.json();
+    } catch (e) {
+      console.error('Could not check tester mode', e);
+      return;
+    }
+    // Public view is the default; testers can switch to Dev any time without the password.
+    try { sessionStorage.setItem(DEV_UNLOCK_KEY, '1'); } catch (e) {}
+    if (!info.run) return;               // an older chart, made before tester mode
+
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const card = document.getElementById('tester-feedback');
+    const saved = info.run.feedback || {};
+    const choices = (name, current, attr) => `
+        <div class="tf-choices" ${attr}>
+          ${[['correct', 'Correct'], ['partly', 'Partly'], ['wrong', 'Wrong']].map(([value, label]) => `
+            <label><input type="radio" name="${name}" value="${value}" ${current === value ? 'checked' : ''}><span>${label}</span></label>`).join('')}
+        </div>`;
+    document.getElementById('tf-organs').innerHTML = (info.run.organs || []).map((item, i) => `
+      <div class="tf-group">
+        <div class="tf-row">
+          <div class="tf-organ">${esc(item.organ)}</div>
+          ${choices('tf-organ-' + i, (saved.organs || {})[item.organ], `data-organ="${esc(item.organ)}"`)}
+        </div>
+        ${(item.diseases || []).map((disease, j) => `
+        <div class="tf-row tf-disease-row">
+          <div class="tf-disease">${esc(disease)}</div>
+          ${choices(`tf-disease-${i}-${j}`, (saved.diseases || {})[item.organ + '::' + disease], `data-disease="${esc(item.organ + '::' + disease)}"`)}
+        </div>`).join('')}
+      </div>`).join('');
+    document.getElementById('tf-missed').value = saved.missed_organ || '';
+    document.getElementById('tf-note').value = saved.note || '';
+    for (const [field, name] of [['chat_relevant', 'tf-chat'], ['plan_matches', 'tf-plan']]) {
+      const input = card.querySelector(`input[name="${name}"][value="${saved[field] || ''}"]`);
+      if (input) input.checked = true;
+    }
+    card.hidden = false;
+    placeTesterFeedbackLast();
+
+    const statusEl = document.getElementById('tf-status');
+    const button = document.getElementById('tf-save');
+    button.addEventListener('click', async () => {
+      const organs = {}, diseases = {};
+      card.querySelectorAll('#tf-organs .tf-choices').forEach(group => {
+        const picked = group.querySelector('input:checked');
+        if (!picked) return;
+        if (group.dataset.organ) organs[group.dataset.organ] = picked.value;
+        else if (group.dataset.disease) diseases[group.dataset.disease] = picked.value;
+      });
+      const pick = (name) => (card.querySelector(`input[name="${name}"]:checked`) || {}).value || '';
+      button.disabled = true;
+      statusEl.className = 'tf-status';
+      statusEl.textContent = 'Saving…';
+      try {
+        const res = await fetch(`/tester/api/feedback/${encodeURIComponent(patientId)}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            organs,
+            diseases,
+            missed_organ: document.getElementById('tf-missed').value,
+            chat_relevant: pick('tf-chat'),
+            plan_matches: pick('tf-plan'),
+            note: document.getElementById('tf-note').value,
+          })
+        });
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok || !result.success) throw new Error(result.error || 'Could not save');
+        statusEl.className = 'tf-status ok';
+        statusEl.textContent = 'Saved. Thank you!';
+      } catch (err) {
+        statusEl.className = 'tf-status bad';
+        statusEl.textContent = err.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
   });
 
   async function refreshChartDataFromServer() {
