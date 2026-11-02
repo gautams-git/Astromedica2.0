@@ -161,7 +161,17 @@ def run_logic(patient_id: str) -> dict:
         chart, rule1_result, gender=gender_code)
     '''
     from agentic import run_agentic_analysis
-    hitlist_result = run_agentic_analysis(chart, rule1_result, gender=gender_code)
+    agentic_result = run_agentic_analysis(chart, rule1_result, gender=gender_code)
+    # The HitList output (top4, ...) is inside "engine_result"; everything else
+    # in the app reads top4 from the top level, so keep it there and put the
+    # agentic extras (summary, critique, guardrail...) under "agentic".
+    if "engine_result" in agentic_result:
+        hitlist_result = {
+            **(agentic_result["engine_result"] or {}),
+            "agentic": {k: v for k, v in agentic_result.items() if k != "engine_result"},
+        }
+    else:
+        hitlist_result = agentic_result
     from rashi_correlation_engine import run_rashi_correlation_analysis
     rashi_correlation_result = run_rashi_correlation_analysis(
         chart, rule1_result, gender=gender_code)

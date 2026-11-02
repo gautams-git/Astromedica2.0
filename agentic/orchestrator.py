@@ -88,7 +88,7 @@ class HitlistAgent:
         if not state.rule1_result:
             issues.append("rule1_result empty")
         gender = (state.gender or state.chart_data.get("gender") or "").lower()
-        if gender not in ("male", "female", ""):
+        if gender not in ("male", "female", "m", "f", ""):   # jataka_logic passes the M/F code
             issues.append(f"unknown gender '{gender}'")
         state.validation = {"ok": not issues, "issues": issues}
         if issues:
