@@ -725,6 +725,32 @@
   .footer-links a:hover { color: var(--gold); }
   .footer-copy { font-size: 0.78rem; color: var(--text-muted); }
 
+  /* Tester button (footer) and its password box */
+  .tester-btn {
+    font-family: inherit; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 7px 18px; border-radius: 999px; border: 1px solid var(--border); background: transparent;
+    color: var(--gold); cursor: pointer; transition: all 0.3s;
+  }
+  .tester-btn:hover { background: var(--gold); color: var(--bg); }
+  .tester-overlay { position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center;
+    padding: 16px; background: rgba(0,0,0,0.65); }
+  .tester-overlay[hidden] { display: none; }
+  .tester-box { width: 100%; max-width: 380px; background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px; }
+  .tester-title { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; color: var(--gold); margin-bottom: 4px; }
+  .tester-note { font-size: 0.85rem; color: var(--text-muted); line-height: 1.55; margin-bottom: 16px; }
+  .tester-box input { width: 100%; font-family: inherit; font-size: 0.95rem; color: var(--text); background: var(--bg3);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; outline: none; }
+  .tester-box input:focus { border-color: var(--gold); }
+  .tester-error { min-height: 20px; margin-top: 8px; font-size: 0.8rem; color: #ef4444; }
+  .tester-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+  .tester-actions button { font-family: inherit; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border); background: transparent;
+    color: var(--text-muted); cursor: pointer; }
+  .tester-actions button.primary { border-color: var(--gold); color: var(--gold); }
+  .tester-actions button.primary:hover { background: var(--gold); color: var(--bg); }
+  .tester-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
+
   /* ANIMATIONS */
   @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
   @keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
@@ -766,6 +792,7 @@
   <div style="display: flex; align-items: center;">
     <a href="#cta" class="nav-cta">Request Access</a>
     <a href="/admin" class="nav-cta" id="admin-link" hidden style="margin-left:14px;">Admin</a>
+    <a href="/tester" class="nav-cta" id="tester-link" hidden style="margin-left:14px;">My test charts</a>
     <div id="account-slot"></div>
     <button class="theme-toggle" id="theme-toggle" aria-label="Toggle Theme">
       <!-- Sun Icon (Lucide-like SVG) -->
@@ -1179,8 +1206,23 @@
     <li><a href="#">Contact</a></li>
     <li><a href="#">FAQ</a></li>
   </ul>
+  <button type="button" class="tester-btn" id="tester-btn">Tester</button>
   <div class="footer-copy">© 2025 AstroMedica. All rights reserved.</div>
 </footer>
+
+<!-- Tester access: early-access testers type the tester password (checked by /tester/unlock) -->
+<div class="tester-overlay" id="tester-overlay" hidden>
+  <form class="tester-box" id="tester-form" autocomplete="off">
+    <div class="tester-title">Tester access</div>
+    <div class="tester-note">For early-access testers: generate charts beyond the normal limit, see every algorithm and the chatbot, and tell us how accurate they are. Enter the tester password.</div>
+    <input type="password" id="tester-input" aria-label="Tester password" placeholder="Tester password">
+    <div class="tester-error" id="tester-error" role="alert"></div>
+    <div class="tester-actions">
+      <button type="button" id="tester-cancel">Cancel</button>
+      <button type="submit" class="primary" id="tester-submit">Enter</button>
+    </div>
+  </form>
+</div>
 
 <script>
   // Stars
@@ -1459,6 +1501,7 @@
     }
     // Admin page link: only for ADMIN_CLERK_USER_IDS (the server checks again).
     if (status.is_admin) document.getElementById('admin-link').hidden = false;
+    if (status.is_tester) document.getElementById('tester-link').hidden = false;
     if (!status.limited) return;        // admins and local testing: unlimited
 
     const form = document.querySelector('.birth-form');
@@ -1509,6 +1552,64 @@
     await applyChartAllowance();
     resumePendingGenerate();
   });
+</script>
+
+<script>
+  // ── Tester button ────────────────────────────────────────────────────────
+  // Not signed in -> sign in first (the daily cap is counted per account).
+  // Already a tester -> straight to "My test charts". Otherwise ask the password.
+  (function () {
+    const overlay = document.getElementById('tester-overlay');
+    const input   = document.getElementById('tester-input');
+    const error   = document.getElementById('tester-error');
+    const submit  = document.getElementById('tester-submit');
+
+    function closeBox() { overlay.hidden = true; }
+
+    document.getElementById('tester-btn').addEventListener('click', async () => {
+      await (window.astromedicaAuthReady || Promise.resolve());
+      if (window.astromedicaIsSignedIn && !window.astromedicaIsSignedIn()) {
+        if (window.Clerk) window.Clerk.openSignIn();   // reloads the page once signed in
+        return;
+      }
+      try {
+        const res = await fetch('/tester/api/status');
+        const status = await res.json().catch(() => ({}));
+        if (res.ok && status.is_tester) { window.location.href = '/tester'; return; }
+      } catch (e) { /* fall through to the password box */ }
+      error.textContent = '';
+      input.value = '';
+      overlay.hidden = false;
+      input.focus();
+    });
+
+    document.getElementById('tester-cancel').addEventListener('click', closeBox);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeBox(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) closeBox(); });
+
+    document.getElementById('tester-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      error.textContent = '';
+      submit.disabled = true;
+      try {
+        const res = await fetch('/tester/unlock', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ password: input.value })
+        });
+        const result = await res.json().catch(() => ({}));
+        if (res.ok && result.success) { window.location.href = '/tester'; return; }
+        error.textContent = res.status === 429
+          ? 'Too many tries. Please wait a few minutes.'
+          : (result.error || 'Could not check the password.');
+        input.select();
+      } catch (err) {
+        error.textContent = 'Could not reach the server.';
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  })();
 </script>
 </body>
 </html>

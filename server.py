@@ -79,6 +79,9 @@ app.register_blueprint(rl_bp)
 # Admin page (/admin): accounts, charts, delete / reset. Admin-only data.
 from admin_routes import admin_bp
 app.register_blueprint(admin_bp)
+from tester_routes import tester_bp
+app.register_blueprint(tester_bp)
+import tester_access
 
 init_rl()
 CORS(app)
@@ -1233,6 +1236,8 @@ def generate_chart():
 
         # One chart + one correction per account — checked before any Prokerala call.
         check_can_generate()
+        # Testers: a daily cap on NEW Prokerala charts (cached charts are not counted).
+        tester_access.check_daily_cap(name, dob, birth_time, lat, lng)
 
         print(f"\n{'='*50}")
         print(f"  Patient     : {name}")
@@ -1277,8 +1282,18 @@ def generate_chart():
             record_new_chart(patient_id)
         except Exception as e:
             print(f"[Allowance] [FAIL] could not record the chart for this account: {db_error_hint(e)}")
+        if tester_access.is_tester():
+            try:
+                tester_access.record_run(patient_id, birth, source)
+            except Exception as e:
+                print(f"[Tester] [FAIL] could not save this run: {db_error_hint(e)}")
         return jsonify(response)
 
+    except tester_access.TesterCapError:
+        cap = tester_access.daily_cap()
+        return jsonify({"success": False, "code": "tester_cap",
+                        "error": f"Daily limit reached: {cap} new charts per day. "
+                                 f"Charts you already made can be re-run any time, and the limit resets at midnight (IST)."}), 429
     except ChartLimitError:
         return jsonify({"success": False, "code": "chart_limit", "error": CHART_LIMIT_MESSAGE}), 403
     except ChartServiceError as e:
@@ -1699,6 +1714,10 @@ def start_consultation():
             patient_id,
             call_gemini
         )
+        if tester_access.is_tester():
+            # Tester chats are for reviewing the chatbot: saved with the tester's
+            # run (send_message) and kept out of RL's chat_logs (chat_module).
+            orchestrator.get_session(session_id)["skip_rl"] = True
 
         return jsonify({
             "success":  True,
@@ -1746,6 +1765,12 @@ def send_message():
             user_message,
             call_gemini
         )
+
+        if tester_access.is_tester():
+            try:
+                tester_access.sync_chat(orchestrator.get_session(session_id)["patient_id"])
+            except Exception as e:
+                print(f"[Tester] [FAIL] could not save the chat: {db_error_hint(e)}")
 
         # Deferred cleanup after final
         if result["is_final"]:
@@ -1805,6 +1830,12 @@ def combine_output():
                 "success": False, 
                 "error": "Aggregation engine failed to produce output."
             }), 500
+
+        if tester_access.is_tester():
+            try:
+                tester_access.sync_chat(patient_id)
+            except Exception as e:
+                print(f"[Tester] [FAIL] could not save the final report: {db_error_hint(e)}")
 
         return jsonify({
             "success": True,
