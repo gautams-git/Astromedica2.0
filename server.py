@@ -671,6 +671,12 @@ def index():
     return send_from_directory(
         ".", "astrohealth-landing.html")
 
+# The logo / "New Analysis" links on results.html and priority6.html use this file name.
+@app.route("/astrohealth-landing.html")
+def landing_html():
+    return send_from_directory(
+        ".", "astrohealth-landing.html")
+
 @app.route("/results")
 def results_page():
     return send_from_directory(
