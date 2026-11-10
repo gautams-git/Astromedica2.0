@@ -12,6 +12,9 @@ class LLMConfig:
     max_tokens: int = 1500
     api_key: Optional[str] = os.getenv("GEMINI_API_KEY")
     base_url: Optional[str] = None
+    # The Gemini client defaults to no timeout and 6 retries, so a blocked key looks like a hang.
+    timeout: float = float(os.getenv("LLM_TIMEOUT", "20"))
+    max_retries: int = int(os.getenv("LLM_MAX_RETRIES", "1"))
 
 
 @dataclass
@@ -33,6 +36,8 @@ def get_llm(config: LLMConfig):
             google_api_key=config.api_key,
             temperature=config.temperature,
             max_output_tokens=config.max_tokens,
+            timeout=config.timeout,
+            max_retries=config.max_retries,
         )
     if config.provider == "ollama":
         from langchain_community.chat_models import ChatOllama
