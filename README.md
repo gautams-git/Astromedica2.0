@@ -506,6 +506,53 @@ The median means an organ needs **at least 3 of the 5 algorithms** behind it to
 score well — one algorithm alone can't push it up. Combined Algo **v2**
 (`algorithm_comparison_v2.py`) only feeds the unused "New Priority Engine" page.
 
+### 3.4 Agentic layers around HitList, Disease First and Disease Compare
+
+Three of the five algorithms run through a small LangGraph "agent" (`jataka_logic.run_logic`).
+The scoring itself is still the plain, deterministic engine; the agent adds checks around it.
+
+| Folder | Wraps | Added by |
+|---|---|---|
+| `agentic/` | `hitlist_engine.py` | Abhishek (the re-score loop, timeout and critic fallback were fixed afterwards) |
+| `agentic_disease_first/` | `disease_first_logic.py` | same 9-file layout |
+| `agentic_disease_compare/` | `disease_compare_logic.py` | same 9-file layout |
+
+Each folder has `orchestrator.py` (the graph), `tools.py`, `profiles.py`, `critic.py`,
+`guardrails.py`, `memory.py`, `config.py`, `schemas.py`, `__init__.py`.
+
+```
+validate -> score -> critique -> (re-score if low confidence) -> summarize -> guardrail -> finalize
+```
+
+- **score** runs the engine. By default only the `clinical` profile (today's weights) runs, so
+  the result is **identical** to calling the engine directly. `AGENTIC_MULTI_PROFILE=true` also
+  tries `planet_heavy` / `rashi_heavy` (today's weights x1.5 on one layer, untested experiments)
+  and keeps the most stable one.
+- **critique** is rule-based in code (single-source diseases, close top-2, 11th-house fallback,
+  loose Disease Compare matches). With a live LLM (`GEMINI_API_KEY`) the model adds its own
+  review; if it fails, the rule-based audit is used, so a bad key never blocks a chart.
+- **summarize** asks the LLM for a 3-5 sentence summary; with no live LLM it is built in code.
+- **guardrail** rejects a summary that names a disease or organ that was not in the data (or breaks
+  the gender filter) and replaces it with the code-built summary. A disclaimer is always added.
+- **memory** keeps the top scores per chart in memory (per worker) and reports the change vs the
+  previous run.
+- A re-score only happens when there is another profile, and `max_replan_attempts` (2) really is
+  the limit. Worst case is 3 critic calls + 1 summary call; default (no live LLM) is 0 calls.
+- Weight profiles swap shared module tables, so every engine run takes one lock
+  (`agentic_disease_first.profiles.PROFILE_LOCK`, shared by both folders). Disease Compare imports
+  the same weight dicts as Disease First, so changing a profile changes both.
+- If the agent fails for any reason, the plain engine result is used and the error is stored.
+
+The engine output stays at the top level of `disease_first_logic` / `disease_compare_logic` in
+`processed_logic.json` (everything else reads it there); the agent's extras are under an
+`"agentic"` key (`summary`, `confidence`, `critique`, `guardrail`, `memory`, `profile_used`,
+`profile_scores`, `llm_used`). Nothing in the app reads them yet.
+
+Settings (`.env`): `LLM_PROVIDER`, `LLM_MODEL`, `GEMINI_API_KEY`, `LLM_TIMEOUT` (20 s),
+`LLM_MAX_RETRIES` (1), `AGENTIC_MULTI_PROFILE` (false), `AGENT_MEMORY_PATH` (optional JSON file),
+and `AGENTIC_DISEASE_LOGIC=false` to run Disease First / Compare as the plain engines again.
+`server.py` still calls the plain engines directly in its fallback payload builder.
+
 ---
 
 ## 4. How the chat decides
@@ -692,6 +739,7 @@ the endorsed questions become new (disease → symptom) training pairs.
 | `rl_integration.py` | Runs the RL enhancer inside Flask (replaces the standalone FastAPI `main.py`): `/rl` page, `/api/...` routes, worker thread, patient RL jobs, Firestore logs, training start + hourly scheduler. |
 | `config.py` | Reads keys from `.env` (none written in the file) and holds model names (Gemini model, embedding model/dim). |
 | `Dockerfile`, `docker-compose.prod.yml`, `gunicorn.conf.py`, `deploy/vm-startup.sh` | VM deployment (§1.8). |
+| `agentic/`, `agentic_disease_first/`, `agentic_disease_compare/` | LangGraph agent wrappers (critic, summary, guardrail, memory) around HitList, Disease First and Disease Compare; see 3.4. |
 | `jataka_fetch.py` / `jataka_logic.py` | Module A: Prokerala fetch + patient folder/ID allocation (`001`, `002` …) / runs the astrology rule set. |
 | `rules.py`, `knowledge_base.py`, `term_to_systems.py`, `parhora_table.py` | Astrology rules and lookup tables (planets/rashis/nakshatras → organs/diseases). |
 | `hitlist_engine*.py`, `rashi_correlation_engine*.py`, `organ_truth_correlation_engine*.py`, `disease_*_logic*.py`, `*_weighted_disease_priority.py`, `priority_cascade.py`, `algorithm_comparison*.py`, `zone_engine.py`, `second_ascendant.py`, `imp_rashi_distance.py`, `dasha_chat_priority.py`, `eleventh_lord_confirmation.py`, `related_house_severity_engine.py`, `rashi_truth_*.py`, `common_findings_engine.py`, `chart_specific_overrides.py` | The individual astrology algorithms whose outputs feed the Combined Algo. `*_v2` versions only feed the unused "New Priority Engine" page. |

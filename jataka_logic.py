@@ -15,6 +15,44 @@ from rules import (
 from knowledge_base import normalize_gender
 from chart_specific_overrides import apply_bhadravathi_overrides, apply_person2_overrides
 
+def _agentic_disease_logic_on() -> bool:
+    """AGENTIC_DISEASE_LOGIC=false runs Disease First / Compare as the plain engines."""
+    return os.getenv("AGENTIC_DISEASE_LOGIC", "true").strip().lower() not in ("0", "false", "no", "off")
+
+
+def _unwrap_agentic(agentic_result: dict) -> dict:
+    """The engine output stays at the top level (the app reads it there); the agentic extras
+    (summary, critique, guardrail, memory...) go under "agentic"."""
+    if "engine_result" not in agentic_result:
+        return agentic_result
+    return {
+        **(agentic_result["engine_result"] or {}),
+        "agentic": {k: v for k, v in agentic_result.items() if k != "engine_result"},
+    }
+
+
+def _run_disease_first(chart: dict, rule1_result: dict, gender_code) -> dict:
+    from disease_first_logic import run_disease_first_logic
+    if _agentic_disease_logic_on():
+        try:
+            from agentic_disease_first import run_agentic_disease_first
+            return _unwrap_agentic(run_agentic_disease_first(chart, rule1_result, gender=gender_code))
+        except Exception as exc:           # never lose a chart because of the agent
+            print(f"[Agentic] Disease First agent unavailable ({type(exc).__name__}: {exc}) - plain engine used")
+    return run_disease_first_logic(chart, rule1_result, gender=gender_code)
+
+
+def _run_disease_compare(chart: dict, rule1_result: dict, gender_code) -> dict:
+    from disease_compare_logic import run_disease_compare_logic
+    if _agentic_disease_logic_on():
+        try:
+            from agentic_disease_compare import run_agentic_disease_compare
+            return _unwrap_agentic(run_agentic_disease_compare(chart, rule1_result, gender=gender_code))
+        except Exception as exc:
+            print(f"[Agentic] Disease Compare agent unavailable ({type(exc).__name__}: {exc}) - plain engine used")
+    return run_disease_compare_logic(chart, rule1_result, gender=gender_code)
+
+
 def build_chart_dict(raw_chart: dict, raw_dasha: dict) -> dict:
     data = raw_chart.get("planet_position", {}).get("data", {})
     
@@ -178,14 +216,11 @@ def run_logic(patient_id: str) -> dict:
     from organ_truth_correlation_engine import run_organ_truth_correlation_analysis
     organ_truth_correlation_result = run_organ_truth_correlation_analysis(
         chart, rule1_result, gender=gender_code)
-    from disease_first_logic import run_disease_first_logic, build_current_dasha_priority_sources
-    disease_first_logic_result = run_disease_first_logic(
-        chart, rule1_result, gender=gender_code)
+    from disease_first_logic import build_current_dasha_priority_sources
+    disease_first_logic_result = _run_disease_first(chart, rule1_result, gender_code)
     current_dasha_priority_sources = build_current_dasha_priority_sources(
         chart, rule1_result, dasha_result, gender=gender_code)
-    from disease_compare_logic import run_disease_compare_logic
-    disease_compare_logic_result = run_disease_compare_logic(
-        chart, rule1_result, gender=gender_code)
+    disease_compare_logic_result = _run_disease_compare(chart, rule1_result, gender_code)
     from common_findings_engine import build_common_findings
     common_findings_result = build_common_findings(
         hitlist_result,
