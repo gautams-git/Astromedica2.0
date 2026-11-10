@@ -96,6 +96,10 @@ class HitlistAgent:
         return state
 
     def _node_score(self, state: AgentState) -> AgentState:
+        # Re-entering after the critic means this is a re-score: count it, or the
+        # max_replan_attempts limit never takes effect.
+        if state.critique is not None:
+            state.replan_count += 1
         profile_names = list(PROFILES.keys()) if self.cfg.enable_multi_profile else ["clinical"]
         results = {}
 
@@ -133,7 +137,8 @@ class HitlistAgent:
         return max(scores, key=scores.get)
 
     def _node_critique(self, state: AgentState) -> AgentState:
-        c = critique(self.llm, state.engine_result or {}, state.gender or "")
+        c = critique(self.llm, state.engine_result or {}, state.gender or "",
+                     fallback_confidence=self.cfg.confidence_threshold)
         state.critique = c.model_dump()
         state.confidence = c.confidence
 

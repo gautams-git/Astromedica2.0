@@ -276,7 +276,7 @@ their account as a tester (`users/{id}/account/tester`). After that the same but
 | Results page | Public view; Dev view needs `DEV_MODE_PASSWORD` | opens in **Public** view like everyone; the **Dev** toggle (all algorithms, Combined Algo, RAG + RL report) works without the password |
 | Chat | RL runs when it finishes | works the same, but **RL is not queued**, so tester chats never reach Abhishek's `chat_logs` |
 
-**Prokerala cost:** a brand-new chart is 4 calls (today's planets + planets + chart + birth details/dasha). Birth details already in
+**Prokerala cost:** a brand-new chart is 5 calls (today's planets, planet positions, chart picture, birth details, dasha periods). Birth details already in
 `charts_cache/` cost **1 call** — today's planet positions are fetched on every Generate — so they don't count towards the cap.
 
 **My test charts (`/tester`):** today's count (e.g. 12 of 30), a last-7-days summary (charts, rated, correct / partly / wrong,

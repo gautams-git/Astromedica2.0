@@ -8,7 +8,7 @@ home page and type TESTER_PASSWORD (.env). That marks their account as a tester
 
 Rules for a tester:
   - No 2-chart limit; instead TESTER_DAILY_CAP (default 30) NEW charts per day,
-    counted from midnight India time. A new chart costs 4 Prokerala calls; birth
+    counted from midnight India time. A new chart costs 5 Prokerala calls; birth
     details already in charts_cache cost only 1 (today's planet positions, which
     every Generate fetches), so those are never counted or blocked. Admins have no cap.
   - Every chart run is kept in Firestore until an admin deletes it:

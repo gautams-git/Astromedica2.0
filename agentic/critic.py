@@ -32,7 +32,8 @@ Return STRICT JSON ONLY:
 """
 
 
-def critique(llm, engine_result: Dict[str, Any], gender: str) -> CriticOutput:
+def critique(llm, engine_result: Dict[str, Any], gender: str,
+             fallback_confidence: float = 0.6) -> CriticOutput:
     # Trim the result to only what the critic needs (tokens matter)
     payload = {
         "top4": [
@@ -57,11 +58,12 @@ def critique(llm, engine_result: Dict[str, Any], gender: str) -> CriticOutput:
         parsed = json.loads(_extract_json(raw))
         return CriticOutput(**parsed)
     except Exception as e:
-        # Fail-safe: neutral critique so pipeline continues
+        # Fail-safe: neutral critique so pipeline continues. The caller passes its own
+        # confidence threshold, so a failed critic never triggers a re-score.
         return CriticOutput(
             issues=[f"critic_failed: {e}"],
-            confidence=0.6,
-            notes="Critic unavailable; falling back to default confidence.",
+            confidence=fallback_confidence,
+            notes="Critic unavailable; using the confidence threshold so no re-score is triggered.",
         )
 
 
