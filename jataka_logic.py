@@ -198,6 +198,7 @@ def run_logic(patient_id: str) -> dict:
     hitlist_result = run_hitlist_analysis(
         chart, rule1_result, gender=gender_code)
     '''
+
     from agentic import run_agentic_analysis
     agentic_result = run_agentic_analysis(chart, rule1_result, gender=gender_code)
     # The HitList output (top4, ...) is inside "engine_result"; everything else
@@ -210,12 +211,17 @@ def run_logic(patient_id: str) -> dict:
         }
     else:
         hitlist_result = agentic_result
+
     from rashi_correlation_engine import run_rashi_correlation_analysis
     rashi_correlation_result = run_rashi_correlation_analysis(
         chart, rule1_result, gender=gender_code)
+    '''
     from organ_truth_correlation_engine import run_organ_truth_correlation_analysis
     organ_truth_correlation_result = run_organ_truth_correlation_analysis(
         chart, rule1_result, gender=gender_code)
+    '''
+    from agentic_organ import run_agentic_organ_analysis
+    organ_truth_correlation_result = run_agentic_organ_analysis(chart, rule1_result, gender=gender_code)
     from disease_first_logic import build_current_dasha_priority_sources
     disease_first_logic_result = _run_disease_first(chart, rule1_result, gender_code)
     current_dasha_priority_sources = build_current_dasha_priority_sources(
@@ -290,6 +296,7 @@ def run_logic(patient_id: str) -> dict:
     build_chat_ai_context(patient_id, folder)
     print(f"[OK] Chat AI context saved to {os.path.join(folder, 'chat_ai_context.json')}")
     return processed
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
