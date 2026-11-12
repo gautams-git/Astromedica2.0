@@ -335,12 +335,36 @@ def build_combined_algo_summary(processed: dict) -> dict:
     }
 
 
+def _agentic_combined_on() -> bool:
+    """AGENTIC_COMBINED=false runs the Combined Algo as the plain function."""
+    return os.getenv("AGENTIC_COMBINED", "true").strip().lower() not in ("0", "false", "no", "off")
+
+
+def _combined_summary(processed: dict) -> dict:
+    """Combined Algo with the agentic checks around it. The result stays exactly what
+    build_combined_algo_summary returns (top_organs ...); the agent's extras (summary,
+    critique, guardrail, memory) are added under "agentic". Falls back to the plain
+    function if the agent is off or fails."""
+    if _agentic_combined_on():
+        try:
+            from agentic_combined import run_agentic_combined
+            agentic = run_agentic_combined(processed)
+            if "engine_result" in agentic:
+                return {
+                    **(agentic["engine_result"] or {}),
+                    "agentic": {k: v for k, v in agentic.items() if k != "engine_result"},
+                }
+        except Exception as exc:      # never lose a chart because of the agent
+            print(f"[Agentic] Combined Algo agent unavailable ({type(exc).__name__}: {exc}) - plain function used")
+    return build_combined_algo_summary(processed)
+
+
 def write_algorithm_comparison(folder: str, patient_id: str, processed: dict) -> dict:
     output = {
         "patient_id": patient_id,
         "generated_at": datetime.now().isoformat(),
         "algorithms": _algorithm_sections(processed),
-        "Combined Algo Summary": build_combined_algo_summary(processed),
+        "Combined Algo Summary": _combined_summary(processed),
     }
     output_file = os.path.join(folder, "algorithm_comparison.json")
     with open(output_file, "w") as file:
