@@ -221,7 +221,7 @@ def run_logic(patient_id: str) -> dict:
         chart, rule1_result, gender=gender_code)
     '''
     from agentic_organ import run_agentic_organ_analysis
-    organ_truth_correlation_result = run_agentic_organ_analysis(chart, rule1_result, gender=gender_code)
+    organ_truth_correlation_result = _unwrap_agentic(run_agentic_organ_analysis(chart, rule1_result, gender=gender_code))
     from disease_first_logic import build_current_dasha_priority_sources
     disease_first_logic_result = _run_disease_first(chart, rule1_result, gender_code)
     current_dasha_priority_sources = build_current_dasha_priority_sources(
