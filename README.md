@@ -516,6 +516,7 @@ The scoring itself is still the plain, deterministic engine; the agent adds chec
 | `agentic/` | `hitlist_engine.py` | Abhishek (the re-score loop, timeout and critic fallback were fixed afterwards) |
 | `agentic_disease_first/` | `disease_first_logic.py` | same 9-file layout |
 | `agentic_disease_compare/` | `disease_compare_logic.py` | same 9-file layout |
+| `agentic_combined/` | `algorithm_comparison.build_combined_algo_summary` (the Combined Algo) | 8 files: same layout without `profiles.py` |
 
 Each folder has `orchestrator.py` (the graph), `tools.py`, `profiles.py`, `critic.py`,
 `guardrails.py`, `memory.py`, `config.py`, `schemas.py`, `__init__.py`.
@@ -552,6 +553,17 @@ Settings (`.env`): `LLM_PROVIDER`, `LLM_MODEL`, `GEMINI_API_KEY`, `LLM_TIMEOUT` 
 `LLM_MAX_RETRIES` (1), `AGENTIC_MULTI_PROFILE` (false), `AGENT_MEMORY_PATH` (optional JSON file),
 and `AGENTIC_DISEASE_LOGIC=false` to run Disease First / Compare as the plain engines again.
 `server.py` still calls the plain engines directly in its fallback payload builder.
+
+**Combined Algo agent (`agentic_combined/`).** The Combined Algo is a fixed formula (rank score +
+median of the five algorithms), so there are no weights to try: no `profiles.py`, no lock and no
+re-score loop (`validate -> score -> critique -> summarize -> guardrail -> finalize`). It runs once per
+chart inside `algorithm_comparison.write_algorithm_comparison` (`_combined_summary`); the chat plan
+(`combined_algo_clusters`) still calls the plain function, so a chat start never runs the agent. The
+result is identical to the plain function, with the agent's extras under
+`"Combined Algo Summary" -> "agentic"`. The critic reports weak agreement (top organ named by fewer
+than 3 of 5 algorithms), a close top 2, and any algorithm that gave no ranking and so did not vote
+(this catches an algorithm agent whose output was left wrapped in `engine_result`). `AGENTIC_COMBINED=false`
+runs the plain function.
 
 ---
 
@@ -739,7 +751,7 @@ the endorsed questions become new (disease → symptom) training pairs.
 | `rl_integration.py` | Runs the RL enhancer inside Flask (replaces the standalone FastAPI `main.py`): `/rl` page, `/api/...` routes, worker thread, patient RL jobs, Firestore logs, training start + hourly scheduler. |
 | `config.py` | Reads keys from `.env` (none written in the file) and holds model names (Gemini model, embedding model/dim). |
 | `Dockerfile`, `docker-compose.prod.yml`, `gunicorn.conf.py`, `deploy/vm-startup.sh` | VM deployment (§1.8). |
-| `agentic/`, `agentic_disease_first/`, `agentic_disease_compare/` | LangGraph agent wrappers (critic, summary, guardrail, memory) around HitList, Disease First and Disease Compare; see 3.4. |
+| `agentic/`, `agentic_disease_first/`, `agentic_disease_compare/`, `agentic_combined/` | LangGraph agent wrappers (critic, summary, guardrail, memory) around HitList, Disease First, Disease Compare and the Combined Algo; see 3.4. |
 | `jataka_fetch.py` / `jataka_logic.py` | Module A: Prokerala fetch + patient folder/ID allocation (`001`, `002` …) / runs the astrology rule set. |
 | `rules.py`, `knowledge_base.py`, `term_to_systems.py`, `parhora_table.py` | Astrology rules and lookup tables (planets/rashis/nakshatras → organs/diseases). |
 | `hitlist_engine*.py`, `rashi_correlation_engine*.py`, `organ_truth_correlation_engine*.py`, `disease_*_logic*.py`, `*_weighted_disease_priority.py`, `priority_cascade.py`, `algorithm_comparison*.py`, `zone_engine.py`, `second_ascendant.py`, `imp_rashi_distance.py`, `dasha_chat_priority.py`, `eleventh_lord_confirmation.py`, `related_house_severity_engine.py`, `rashi_truth_*.py`, `common_findings_engine.py`, `chart_specific_overrides.py` | The individual astrology algorithms whose outputs feed the Combined Algo. `*_v2` versions only feed the unused "New Priority Engine" page. |
