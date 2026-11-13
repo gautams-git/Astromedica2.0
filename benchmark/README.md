@@ -37,15 +37,19 @@ The second command writes:
 
 ## Local server
 
+The chart folders are not in git. Copy the twelve folders you already have, each with `raw_chart.json` and `raw_dasha.json`, into `patients/` at the repository root. Folder names such as `001` … `012` are the patient ids. Do not put Prokerala keys in `.env` for this demo. With `AUTH_ENABLED=false` the home page lists those folders without Clerk.
+
 ```bash
 python server.py
 ```
 
 Then open:
 
-- `http://localhost:5000/` — the twelve benchmark patients are on the index
-- `http://localhost:5000/results?patient_id=BM01` — Rashi tracks on the results page
+- `http://localhost:5000/` — saved patients on the index
+- `http://localhost:5000/results?patient_id=001` — Rashi tracks on that saved chart
 - `http://localhost:5000/benchmark` — deviation explorer
+
+The server log for an open should say the algorithms were re-run on the saved chart and that Prokerala was not called. A missing folder is skipped. It is not fetched.
 
 `BENCHMARK_RASHI_WEIGHT_MODE` may be `mock` (default when `GEMINI_API_KEY` is unset), `live`, or `off`. Mock is a scripted 20% increase on the nakshatra layer and the P6 anchor. It is not a live model. Live proposals that fail the 50%–150% range check are not executed.
 
