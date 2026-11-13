@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AstroMedica — Priority Cascade Engine</title>
+<script src="/static/session.js" defer></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --bg:#faf8f4;
+    --bg-subtle:#f3efe7;
+    --text:#2e2a25;
+    --text-muted:#8a8275;
+    --border:#e6ddd0;
+    --accent:#cc785c;
+    --accent-soft:#f7e9e1;
+    --good:#1d7a46;
+    --warn:#b5390a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.5;
+  }
+  nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 32px;
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    background:rgba(250,248,244,0.92);
+    backdrop-filter:saturate(180%) blur(10px);
+    z-index:10;
+  }
+  .nav-logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:15px;
+    font-weight:600;
+    color:var(--text);
+    text-decoration:none;
+    letter-spacing:-0.01em;
+  }
+  .logo-mark{
+    width:22px;height:22px;border-radius:6px;
+    background:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:12px;font-weight:700;
+  }
+  .nav-tag{
+    font-size:12px;
+    color:var(--text-muted);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:4px 10px;
+  }
+
+  .page{max-width:980px;margin:0 auto;padding:40px 32px 80px;}
+
+  .hero{margin-bottom:36px;}
+  .hero-eyebrow{
+    font-size:12px;font-weight:600;letter-spacing:0.06em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:8px;
+  }
+  .hero h1{
+    font-size:32px;font-weight:600;letter-spacing:-0.02em;margin:0 0 8px;
+  }
+  .hero p{font-size:15px;color:var(--text-muted);margin:0;max-width:640px;}
+
+  .patient-strip{
+    display:flex;flex-wrap:wrap;gap:24px;
+    padding:18px 22px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:var(--bg-subtle);
+    margin-bottom:32px;
+  }
+  .patient-strip div{font-size:13px;}
+  .patient-strip span{display:block;color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px;}
+
+  section{margin-bottom:40px;}
+  .section-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    border-bottom:1px solid var(--border);
+    padding-bottom:10px;margin-bottom:18px;
+  }
+  .section-head h2{font-size:18px;font-weight:600;letter-spacing:-0.01em;margin:0;}
+  .section-head .hint{font-size:12px;color:var(--text-muted);}
+  .section-head.clickable{cursor:pointer;}
+  .section-head.clickable:hover h2{color:var(--accent);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+
+  .row-card{
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px 18px;
+    background:var(--bg);
+  }
+  .row-card.muted{opacity:0.45;}
+  .row-card .rank{
+    font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.04em;
+  }
+  .row-card .title{font-size:15px;font-weight:600;margin:4px 0 2px;}
+  .row-card .meta{font-size:12px;color:var(--text-muted);}
+  .row-card .weight{
+    display:inline-block;margin-top:8px;font-size:11px;
+    background:var(--accent-soft);color:var(--accent);
+    padding:2px 8px;border-radius:20px;font-weight:600;
+  }
+
+  .catalyst-card{
+    border:1px dashed var(--border);
+    border-radius:12px;padding:16px 18px;background:var(--bg-subtle);
+  }
+  .catalyst-tag{
+    display:inline-block;font-size:11px;font-weight:600;
+    color:var(--warn);background:#fdeee7;padding:2px 8px;border-radius:20px;
+    margin-bottom:6px;
+  }
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{
+    text-align:left;color:var(--text-muted);font-weight:500;font-size:11px;
+    text-transform:uppercase;letter-spacing:0.04em;
+    border-bottom:1px solid var(--border);padding:8px 10px;
+  }
+  td{padding:9px 10px;border-bottom:1px solid var(--border);}
+  tr:last-child td{border-bottom:none;}
+  #reference-table th:nth-child(7),
+  #reference-table td:nth-child(7){
+    min-width:340px;
+  }
+  #reference-table{min-width:1400px;}
+  tr.muted-row td{color:var(--text-muted);font-style:italic;}
+  tr.catalyst-row td{background:var(--bg-subtle);}
+  tr.catalyst-row td:nth-child(2){color:var(--warn);font-weight:600;}
+  td.rashi-secondary{
+    color:#9a6b00;background:#fff6e0;border-radius:6px;
+  }
+
+  .algo-card{
+    border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px;
+  }
+  .algo-card h3{font-size:14px;font-weight:600;margin:0 0 4px;}
+  .algo-card .subtitle{font-size:12px;color:var(--text-muted);margin:0 0 14px;}
+  .result-line{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;
+  }
+  .result-row:last-child .result-line{border-bottom:none;}
+  .result-line .label{font-weight:500;}
+  .result-line .score{color:var(--accent);font-weight:600;}
+  .result-line.clickable{cursor:pointer;}
+  .result-line.clickable:hover{background:var(--bg-subtle);}
+  .result-detail{
+    background:var(--bg-subtle);border-radius:8px;padding:10px 14px;margin:4px 0 8px;
+  }
+  .detail-line{
+    display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:5px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .detail-line:last-child{border-bottom:none;}
+  .detail-line strong{font-weight:600;color:var(--text);}
+  .detail-line span{color:var(--text-muted);text-align:right;}
+
+  .summary-card{
+    border:1px solid var(--accent);border-radius:14px;padding:22px 24px;margin-bottom:14px;
+    background:var(--accent-soft);
+  }
+  .summary-card.clickable{cursor:pointer;}
+  .summary-card .rank-badge{
+    font-size:11px;font-weight:700;color:#fff;background:var(--accent);
+    padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:8px;
+  }
+  .summary-card h3{font-size:20px;margin:0 0 4px;font-weight:600;}
+  .summary-card .consensus{font-size:13px;color:var(--text-muted);margin-bottom:10px;}
+  .pill-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .pill{
+    font-size:11px;border:1px solid var(--border);border-radius:20px;
+    padding:3px 9px;background:var(--bg);color:var(--text-muted);
+  }
+
+  .empty-state{
+    font-size:13px;color:var(--text-muted);padding:24px;text-align:center;
+    border:1px dashed var(--border);border-radius:12px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="astrohealth-landing.html" class="nav-logo">
+    <span class="logo-mark">A</span>
+    AstroMedica
+  </a>
+  <span class="nav-tag">Priority Cascade Engine · v2</span>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-eyebrow">Alternate Analysis</div>
+    <h1>Priority Cascade Engine</h1>
+    <p>Ranks 6th House Occupant, 11th House Occupant, 6th Lord, 6th Dispositor, and Asc/Moon (when related) on a single cascade — whichever is highest available becomes rank 1, with no gaps. Planetary aspects (Drishti) only strengthen a matching result; they never introduce their own diseases.</p>
+  </div>
+
+  <div class="patient-strip" id="patient-strip"></div>
+
+  <section>
+    <div class="section-head">
+      <h2>D1 · Rasi Chart</h2>
+      <span class="hint">From cached chart data</span>
+    </div>
+    <div id="chart-image" class="row-card" style="display:flex;justify-content:center;padding:24px;"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Chart Overview</h2>
+      <span class="hint">From cached chart data</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table id="planet-table">
+        <thead>
+          <tr><th>Planet</th><th>Sign</th><th>Nakshatra</th><th>House</th></tr>
+        </thead>
+        <tbody id="planet-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Priority Cascade</h2>
+      <span class="hint">Rank 1 is whichever source is actually present</span>
+    </div>
+    <div class="grid" id="cascade-grid"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Aspects (Drishti) — Catalyst Only</h2>
+      <span class="hint">Boosts matching cascade rows; never its own source</span>
+    </div>
+    <div class="grid" id="drishti-grid"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Disease-Driven Priority Logic</h2>
+      <span class="hint">No weights — ranked by hierarchy position, agreement, then organ overlap</span>
+    </div>
+    <div id="disease-priority-body"></div>
+  </section>
+
+  <section>
+    <div class="section-head clickable" id="organ-priority-toggle" style="cursor:pointer;">
+      <h2>Organ-Driven Priority <span id="organ-priority-arrow" style="font-size:12px;color:var(--text-muted);">▸ click to expand</span></h2>
+      <span class="hint">Derived from the disease ranking above — not a separate algorithm</span>
+    </div>
+    <div id="organ-priority-body" style="display:none;"></div>
+  </section>
+  <script>
+    document.getElementById('organ-priority-toggle').addEventListener('click', () => {
+      const body = document.getElementById('organ-priority-body');
+      const arrow = document.getElementById('organ-priority-arrow');
+      const isOpen = body.style.display !== 'none';
+      body.style.display = isOpen ? 'none' : 'block';
+      arrow.textContent = isOpen ? '▸ click to expand' : '▾ click to collapse';
+    });
+  </script>
+
+  <section>
+    <div class="section-head clickable" id="shadbala-priority-toggle" style="cursor:pointer;">
+      <h2>Shadbala-Weighted Disease Priority <span id="shadbala-priority-arrow" style="font-size:12px;color:var(--text-muted);">▸ click to expand</span></h2>
+      <span class="hint">Independent ranking — cascade tier position + producing planet's Shadbala strength</span>
+    </div>
+    <div id="shadbala-priority-body" style="display:none;"></div>
+  </section>
+  <script>
+    document.getElementById('shadbala-priority-toggle').addEventListener('click', () => {
+      const body = document.getElementById('shadbala-priority-body');
+      const arrow = document.getElementById('shadbala-priority-arrow');
+      const isOpen = body.style.display !== 'none';
+      body.style.display = isOpen ? 'none' : 'block';
+      arrow.textContent = isOpen ? '▸ click to expand' : '▾ click to collapse';
+    });
+  </script>
+
+  <section>
+    <div class="section-head">
+      <h2>Dasha-Weighted Disease Priority</h2>
+      <span class="hint">Independent ranking — cascade tier position + a boost for the currently running Mahadasha/Antardasha planet</span>
+    </div>
+    <div id="dasha-priority-body"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Current Dasha Period</h2>
+      <span class="hint">Vimshottari · Active Now</span>
+    </div>
+    <div id="dasha-body" class="row-card"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Complete Disease Reference Table</h2>
+      <span class="hint">Per priority cascade rank — planet, nakshatra, rashi sources</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table id="reference-table">
+        <thead>
+          <tr>
+            <th>Rank</th><th>Priority</th><th>Planet</th>
+            <th>Planet Organs</th><th>Nakshatra</th><th>Nakshatra Diseases</th>
+            <th>Related Disease Organs</th>
+            <th>Rashi</th><th>Rashi Organs</th>
+          </tr>
+        </thead>
+        <tbody id="reference-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head clickable" id="algos-toggle">
+      <h2>▸ All 5 Algorithms &amp; Combined Logic — v2</h2>
+      <span class="hint">Click to expand</span>
+    </div>
+    <div id="algos-and-combined-body" style="display:none;">
+      <div id="combined-body" style="margin-bottom:24px;"></div>
+      <div id="algos-body"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Shadbala</h2>
+      <span class="hint">Planetary strength, from uploaded chart</span>
+    </div>
+    <div id="shadbala-body"></div>
+  </section>
+
+</div>
+
+<script>
+  function qs(name){
+    return new URLSearchParams(window.location.search).get(name);
+  }
+
+  function escapeHtml(value){
+    return String(value ?? '').replace(/[&<>"']/g, (c) => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  async function loadPatient(){
+    const patientId = qs('patient_id');
+    if(!patientId){
+      document.querySelector('.page').innerHTML = '<div class="empty-state">No patient_id provided. Open this page from the Results page button.</div>';
+      return;
+    }
+
+    let res, payload;
+    try{
+      res = await fetch(`/priority6-data/${patientId}`);
+      payload = await res.json();
+    }catch(e){
+      document.querySelector('.page').innerHTML = '<div class="empty-state">Could not reach server.</div>';
+      return;
+    }
+
+    if(!payload || !payload.success){
+      document.querySelector('.page').innerHTML = `<div class="empty-state">${escapeHtml(payload && payload.error || 'Patient data not found')}</div>`;
+      return;
+    }
+
+    renderPatientStrip(payload);
+    renderChartImage(payload.chart.svg_raw || '');
+    renderPlanetTable(payload.chart.planets || []);
+    renderCascade(payload.cascade_view || []);
+    renderReferenceTable(payload.cascade_view || [], payload.cascade_detail || [], payload.drishti_detail || [], payload.ascendant_reference || null, payload.second_house_reference || []);
+    renderDrishti(payload.combined_algo_summary_v2);
+    renderDiseasePriorityCascade(payload.disease_priority_cascade_v2 || payload.disease_priority_cascade || {});
+    renderOrganPriority(payload.organ_priority_v2 || {});
+    renderShadbalaWeightedPriority(payload.shadbala_weighted_priority || {});
+    renderDashaWeightedPriority(payload.dasha_weighted_priority || {});
+    renderDasha(payload.chart.dasha || {});
+    renderAlgos(payload.combined_algo_summary_v2.raw_outputs || {});
+    renderCombined(payload.combined_algo_summary_v2);
+    renderShadbala(payload.shadbala || {});
+
+    const algosToggle = document.getElementById('algos-toggle');
+    const algosAndCombinedBody = document.getElementById('algos-and-combined-body');
+    algosToggle.addEventListener('click', () => {
+      const isOpen = algosAndCombinedBody.style.display !== 'none';
+      algosAndCombinedBody.style.display = isOpen ? 'none' : 'block';
+      algosToggle.querySelector('h2').textContent = (isOpen ? '▸ ' : '▾ ') + 'All 5 Algorithms & Combined Logic — v2';
+      algosToggle.querySelector('.hint').textContent = isOpen ? 'Click to expand' : 'Click to collapse';
+    });
+  }
+
+  function renderPatientStrip(payload){
+    const c = payload.chart || {};
+    document.getElementById('patient-strip').innerHTML = `
+      <div><span>Name</span>${escapeHtml(c.name || '—')}</div>
+      <div><span>DOB</span>${escapeHtml(c.dob || '—')}</div>
+      <div><span>Birth Time</span>${escapeHtml(c.birth_time || '—')}</div>
+      <div><span>Birth Place</span>${escapeHtml(c.birth_place || '—')}</div>
+      <div><span>Ascendant</span>${escapeHtml((c.ascendant || {}).name || '—')}</div>
+    `;
+  }
+
+  function renderPlanetTable(planets){
+    const rows = planets.map(p => {
+      const sign = (p.sign && p.sign.name) || p.sign || '—';
+      const nk = (p.nakshatra && p.nakshatra.name) || '—';
+      return `<tr>
+        <td>${escapeHtml(p.name)}</td>
+        <td>${escapeHtml(sign)}</td>
+        <td>${escapeHtml(nk)}</td>
+        <td>${escapeHtml(p.house ?? '—')}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('planet-tbody').innerHTML = rows || '<tr><td colspan="4">No planetary data</td></tr>';
+  }
+
+  function renderDiseaseOrganBreakdown(breakdown){
+    if(!breakdown || !breakdown.length) return '—';
+    return breakdown.map(b => `<div style="margin-bottom:4px;"><strong>${escapeHtml(b.disease)}</strong> → ${escapeHtml((b.organs || []).join(', '))}</div>`).join('');
+  }
+
+  function renderReferenceTable(cascadeView, cascadeDetail, drishtiDetail, ascendantReference, secondHouseReference){
+    const detailByTier = {};
+    cascadeDetail.forEach(t => { detailByTier[t.tier_id] = t; });
+
+    const rows = [];
+
+    const rashiCellClass = (highlight) => highlight ? '' : ' class="rashi-secondary"';
+
+    cascadeView.forEach(view => {
+      if(!view.present){
+        rows.push(`<tr class="muted-row">
+          <td>—</td><td>${escapeHtml(view.label)}</td><td>Absent</td>
+          <td colspan="6">Not present in this chart</td>
+        </tr>`);
+        return;
+      }
+      const detail = detailByTier[view.tier_id];
+      if(!detail) return;
+      const isSixthOccupant = view.tier_id === 'sixth_occupant';
+      (detail.planets || []).forEach(p => {
+        rows.push(`<tr>
+          <td>Rank ${view.rank}</td>
+          <td>${escapeHtml(view.label)}</td>
+          <td>${escapeHtml(p.planet)}</td>
+          <td>${escapeHtml((p.planet_terms || []).join(', ') || '—')}</td>
+          <td>${escapeHtml(p.nakshatra || '—')}${p.pada ? ` (Pada ${p.pada})` : ''}</td>
+          <td>${escapeHtml((p.nakshatra_diseases || []).join(', ') || '—')}</td>
+          <td>${renderDiseaseOrganBreakdown(p.disease_organ_breakdown)}</td>
+          <td>${escapeHtml(p.sign || '—')}</td>
+          <td${rashiCellClass(isSixthOccupant)}>${escapeHtml((p.rashi_organs || []).join(', ') || '—')}</td>
+        </tr>`);
+      });
+    });
+
+    if(secondHouseReference && secondHouseReference.length){
+      secondHouseReference.forEach(h => {
+        const roleLabel = h.related ? `Related (${escapeHtml(h.connected_role || '')})` : 'Not Related';
+        rows.push(`<tr>
+          <td>—</td><td>2nd House Occupant · ${roleLabel}</td>
+          <td>${escapeHtml(h.planet)}</td>
+          <td>${escapeHtml((h.planet_terms || []).join(', ') || '—')}</td>
+          <td>${escapeHtml(h.nakshatra || '—')}${h.pada ? ` (Pada ${h.pada})` : ''}</td>
+          <td>${escapeHtml((h.nakshatra_diseases || []).join(', ') || '—')}</td>
+          <td>${renderDiseaseOrganBreakdown(h.disease_organ_breakdown)}</td>
+          <td>${escapeHtml(h.sign || '—')}</td>
+          <td${rashiCellClass(false)}>${escapeHtml((h.rashi_organs || []).join(', ') || '—')}</td>
+        </tr>`);
+      });
+    } else {
+      rows.push(`<tr class="muted-row"><td>—</td><td>2nd House Occupant</td><td colspan="7">No occupant in the 2nd house for this chart</td></tr>`);
+    }
+
+    if(drishtiDetail && drishtiDetail.length){
+      drishtiDetail.forEach(d => {
+        rows.push(`<tr class="catalyst-row">
+          <td>—</td><td>Drishti (Catalyst) · ${escapeHtml(d.aspect_type || 'aspect')}</td>
+          <td>${escapeHtml(d.planet)}</td>
+          <td>${escapeHtml((d.planet_terms || []).join(', ') || '—')}</td>
+          <td>${escapeHtml(d.nakshatra || '—')}${d.pada ? ` (Pada ${d.pada})` : ''}</td>
+          <td>${escapeHtml((d.nakshatra_diseases || []).join(', ') || '—')}</td>
+          <td>${renderDiseaseOrganBreakdown(d.disease_organ_breakdown)}</td>
+          <td>${escapeHtml(d.sign || '—')}</td>
+          <td${rashiCellClass(false)}>${escapeHtml((d.rashi_organs || []).join(', ') || '—')}</td>
+        </tr>`);
+      });
+    } else {
+      rows.push(`<tr class="muted-row"><td>—</td><td>Drishti (Catalyst)</td><td colspan="7">No aspects on the 6th house in this chart</td></tr>`);
+    }
+
+    if(ascendantReference){
+      const asc = ascendantReference.ascendant || {};
+      rows.push(`<tr>
+        <td>—</td><td>Ascendant Rashi</td><td>—</td>
+        <td>—</td><td>—</td><td>—</td><td>—</td>
+        <td>${escapeHtml(asc.sign || '—')}</td>
+        <td${rashiCellClass(true)}>${escapeHtml((asc.rashi_organs || []).join(', ') || '—')}</td>
+      </tr>`);
+
+      const lord = ascendantReference.ascendant_lord;
+      if(lord){
+        rows.push(`<tr>
+          <td>—</td><td>Ascendant Lord</td>
+          <td>${escapeHtml(lord.planet)}</td>
+          <td>${escapeHtml((lord.planet_terms || []).join(', ') || '—')}</td>
+          <td>${escapeHtml(lord.nakshatra || '—')}${lord.pada ? ` (Pada ${lord.pada})` : ''}</td>
+          <td>${escapeHtml((lord.nakshatra_diseases || []).join(', ') || '—')}</td>
+          <td>${renderDiseaseOrganBreakdown(lord.disease_organ_breakdown)}</td>
+          <td>${escapeHtml(lord.sign || '—')}</td>
+          <td${rashiCellClass(false)}>${escapeHtml((lord.rashi_organs || []).join(', ') || '—')}</td>
+        </tr>`);
+      }
+    }
+
+    document.getElementById('reference-tbody').innerHTML = rows.join('') || '<tr><td colspan="8">No reference data for this chart.</td></tr>';
+  }
+
+  function renderCascade(cascadeView){
+    if(!cascadeView || !cascadeView.length){
+      document.getElementById('cascade-grid').innerHTML = '<div class="empty-state">No cascade tiers resolved for this chart.</div>';
+      return;
+    }
+    document.getElementById('cascade-grid').innerHTML = cascadeView.map(t => {
+      if(!t.present){
+        return `<div class="row-card muted">
+          <div class="rank">Absent</div>
+          <div class="title">${escapeHtml(t.label)}</div>
+          <div class="meta">Not present in this chart</div>
+        </div>`;
+      }
+      const planets = t.planets && t.planets.length ? t.planets : [{name: '—'}];
+      return planets.map(p => `
+        <div class="row-card">
+          <div class="rank">Rank ${t.rank}</div>
+          <div class="title">${escapeHtml(t.label)}${t.tier_id === 'asc_moon' ? ` · ${escapeHtml(p.name === 'Moon' ? 'Moon' : 'Ascendant Lord')}` : ''}</div>
+          <div class="meta">${escapeHtml(p.name)}</div>
+          ${p.relation_reason ? `<div class="meta" style="margin-top:4px;font-style:italic;">${escapeHtml(p.relation_reason)}</div>` : ''}
+          <span class="weight">Weight ${t.weight}</span>
+        </div>
+      `).join('');
+    }).join('');
+  }
+
+  function renderChartImage(svgRaw){
+    const container = document.getElementById('chart-image');
+    if(svgRaw){
+      container.innerHTML = svgRaw;
+      const svgEl = container.querySelector('svg');
+      if(svgEl){
+        svgEl.style.width = '100%';
+        svgEl.style.height = 'auto';
+        svgEl.style.maxWidth = '420px';
+        svgEl.style.display = 'block';
+      }
+    } else {
+      container.innerHTML = '<div class="empty-state">Chart image not cached for this patient.</div>';
+    }
+  }
+
+  function renderDrishti(combined){
+    const groups = (combined.raw_outputs && combined.raw_outputs.disease_first_logic && combined.raw_outputs.disease_first_logic.all_diseases) || [];
+    const seen = new Set();
+    const catalystEntries = [];
+    groups.forEach(d => {
+      (d.catalyst_matches || []).forEach(cm => {
+        (cm.matches || []).forEach(m => {
+          const key = `${cm.tier}::${m.planet}`;
+          if(seen.has(key)) return;
+          seen.add(key);
+          catalystEntries.push({ tier: cm.tier, planet: m.planet, aspect: m.aspect_type, shared: m.shared_terms });
+        });
+      });
+    });
+    if(!catalystEntries.length){
+      document.getElementById('drishti-grid').innerHTML = '<div class="empty-state">No aspects currently catalyzing any cascade row in this chart.</div>';
+      return;
+    }
+    document.getElementById('drishti-grid').innerHTML = catalystEntries.slice(0, 6).map(e => `
+      <div class="catalyst-card">
+        <span class="catalyst-tag">Catalyst</span>
+        <div class="title" style="font-size:14px;">${escapeHtml(e.planet)} boosts ${escapeHtml(e.tier)}</div>
+        <div class="meta">${escapeHtml(e.aspect)} · shared: ${escapeHtml((e.shared || []).join(', '))}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderDasha(dasha){
+    const maha = (dasha.mahadasha || {}).planet || '—';
+    const antar = (dasha.antardasha || {}).planet || '—';
+    const pratyantar = (dasha.pratyantardasha || {}).planet || '—';
+    document.getElementById('dasha-body').innerHTML = `
+      <div class="result-line"><span class="label">Mahadasha</span><span class="score">${escapeHtml(maha)}</span></div>
+      <div class="result-line"><span class="label">Antardasha</span><span class="score">${escapeHtml(antar)}</span></div>
+      <div class="result-line"><span class="label">Pratyantardasha</span><span class="score">${escapeHtml(pratyantar)}</span></div>
+    `;
+  }
+
+  function renderAlgos(raw){
+    const sections = [
+      { key: 'hitlist', title: 'System Priority (HitList) v2', items: (raw.hitlist || {}).top4 || [], labelKey: 'label' },
+      { key: 'rashi_correlation', title: 'Rashi Priority Correlation v2', items: (raw.rashi_correlation || {}).top3 || [], labelKey: 'label' },
+      { key: 'organ_truth_correlation', title: 'Organ Truth Correlation v2', items: (raw.organ_truth_correlation || {}).top_organs || [], labelKey: 'organ' },
+      { key: 'disease_first_logic', title: 'Disease First Logic v2', items: (raw.disease_first_logic || {}).top_diseases || [], labelKey: 'disease' },
+      { key: 'disease_compare_logic', title: 'Disease Compare Logic v2', items: (raw.disease_compare_logic || {}).top_diseases || [], labelKey: 'disease' },
+    ];
+
+    document.getElementById('algos-body').innerHTML = sections.map((s, sIdx) => `
+      <div class="algo-card">
+        <h3>${escapeHtml(s.title)}</h3>
+        <p class="subtitle">${s.items.length} result${s.items.length === 1 ? '' : 's'} · click a row for detail</p>
+        ${
+          s.items.length
+            ? s.items.slice(0, 5).map((item, iIdx) => `
+                <div class="result-row">
+                  <div class="result-line clickable" data-toggle="detail-${sIdx}-${iIdx}">
+                    <span class="label">▸ ${escapeHtml(item[s.labelKey] || '—')}</span>
+                    <span class="score">${item.score}</span>
+                  </div>
+                  <div class="result-detail" id="detail-${sIdx}-${iIdx}" style="display:none;">
+                    ${renderAlgoDetail(s.key, item)}
+                  </div>
+                </div>
+              `).join('')
+            : '<div class="empty-state">No results for this chart.</div>'
+        }
+      </div>
+    `).join('');
+
+    document.querySelectorAll('[data-toggle]').forEach(row => {
+      row.addEventListener('click', () => {
+        const target = document.getElementById(row.dataset.toggle);
+        const isOpen = target.style.display !== 'none';
+        target.style.display = isOpen ? 'none' : 'block';
+        const arrow = row.querySelector('.label');
+        arrow.textContent = (isOpen ? '▸ ' : '▾ ') + arrow.textContent.replace(/^[▸▾]\s*/, '');
+      });
+    });
+  }
+
+  function renderAlgoDetail(algoKey, item){
+    if(algoKey === 'hitlist' || algoKey === 'rashi_correlation'){
+      const trail = item.trail || [];
+      if(!trail.length) return '<div class="empty-state">No trail recorded.</div>';
+      return trail.slice(0, 12).map(t => {
+        if(algoKey === 'hitlist'){
+          return `<div class="detail-line"><strong>${escapeHtml(t.term)}</strong><span>${escapeHtml(t.source)} · weight ${t.weight}</span></div>`;
+        }
+        return `<div class="detail-line"><strong>${escapeHtml(t.evidence_term)}</strong><span>${escapeHtml(t.tier)} matched ${escapeHtml(t.anchor)} (${escapeHtml(t.anchor_term)}) · ${escapeHtml(t.match_type)} · weight ${t.weight}</span></div>`;
+      }).join('');
+    }
+
+    if(algoKey === 'organ_truth_correlation'){
+      const tiers = (item.tier_labels || []).join(', ') || '—';
+      const diseases = item.related_diseases || [];
+      return `
+        <div class="detail-line"><strong>Contributing tiers</strong><span>${escapeHtml(tiers)}</span></div>
+        ${diseases.slice(0, 6).map(d => `<div class="detail-line"><strong>${escapeHtml(d.disease)}</strong><span>score ${d.score} · ${escapeHtml((d.tier_labels || []).join(', '))}</span></div>`).join('')}
+      `;
+    }
+
+    if(algoKey === 'disease_first_logic'){
+      const tiers = (item.tier_labels || []).join(', ') || '—';
+      const organs = item.supporting_organs || [];
+      return `
+        <div class="detail-line"><strong>Contributing tiers</strong><span>${escapeHtml(tiers)}</span></div>
+        ${organs.slice(0, 8).map(o => `<div class="detail-line"><strong>${escapeHtml(o.organ)}</strong><span>score ${o.score} · ${(o.supports || []).map(sp => escapeHtml(sp.source)).join(', ')}</span></div>`).join('')}
+      `;
+    }
+
+    if(algoKey === 'disease_compare_logic'){
+      const tiers = (item.tier_labels || []).join(', ') || '—';
+      const matches = item.source_disease_matches || [];
+      return `
+        <div class="detail-line"><strong>Contributing tiers</strong><span>${escapeHtml(tiers)}</span></div>
+        ${matches.slice(0, 8).map(m => `<div class="detail-line"><strong>${escapeHtml(m.source_disease)} → ${escapeHtml(m.matched_disease)}</strong><span>similarity ${m.similarity} · shared: ${escapeHtml((m.shared_organs || []).join(', '))} · ${escapeHtml(m.tier)}</span></div>`).join('')}
+      `;
+    }
+
+    return '<div class="empty-state">No detail available.</div>';
+  }
+
+  function renderCombined(combined){
+    const top = combined.top_organs || [];
+    if(!top.length){
+      document.getElementById('combined-body').innerHTML = '<div class="empty-state">No combined result for this chart.</div>';
+      return;
+    }
+    document.getElementById('combined-body').innerHTML = `
+      <p style="font-size:12px;color:var(--text-muted);margin-top:0;">${escapeHtml(combined.method || '')}</p>
+      ${top.map((o, idx) => `
+        <div class="summary-card">
+          <span class="rank-badge">Rank ${idx + 1}</span>
+          <h3>${escapeHtml(o.organ)}</h3>
+          <div class="consensus">Consensus score ${o.consensus_score} · ${o.algorithm_support_count} of 5 algorithms</div>
+          <div class="pill-row">
+            ${(o.supporting_algorithms || []).map(a => `<span class="pill">${escapeHtml(a)}</span>`).join('')}
+          </div>
+          ${(o.top_diseases || []).length ? `
+            <div style="margin-top:12px;">
+              <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);margin-bottom:6px;">Top Diseases</div>
+              ${o.top_diseases.map(d => `
+                <div class="result-line">
+                  <span class="label">${escapeHtml(d.disease)}</span>
+                  <span class="score">${d.score}</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `).join('')}
+    `;
+  }
+
+  function renderDiseasePriorityCascade(dpc){
+    const diseases = dpc.ranked_diseases || [];
+    if(!diseases.length){
+      document.getElementById('disease-priority-body').innerHTML = '<div class="empty-state">No diseases resolved from the priority cascade for this chart.</div>';
+      return;
+    }
+
+    document.getElementById('disease-priority-body').innerHTML = `
+      <p style="font-size:12px;color:var(--text-muted);margin-top:0;">${escapeHtml(dpc.subtitle || '')}</p>
+      ${diseases.slice(0, 6).map((d, idx) => `
+        <div class="summary-card clickable" data-toggle="dpc-detail-${idx}">
+          <span class="rank-badge">Rank ${d.rank}</span>
+          ${d.is_anchor === false ? '<span class="hint" style="margin-left:8px;">Unmatched (lower tier)</span>' : (d.confirmed ? '<span class="hint" style="margin-left:8px;color:var(--accent);">✓ Confirmed by lower tier</span>' : '<span class="hint" style="margin-left:8px;">Standalone — no match below</span>')}
+          <h3>${escapeHtml(d.disease)}</h3>
+          <div style="margin-top:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);">Related Organs</div>
+          <div class="meta">${escapeHtml((d.disease_organs || []).join(', ') || '—')}</div>
+          ${(d.related_diseases || []).length ? `
+            <div style="margin-top:10px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);">Related Similar Diseases (matched via shared organ)</div>
+            ${d.related_diseases.map(r => `
+              <div class="result-line" style="border-bottom:none;padding:4px 0;display:block;">
+                <span class="label">${escapeHtml(r.disease)}</span>
+                <span class="meta" style="font-size:11px;">${escapeHtml((r.disease_organs || []).join(', ') || '—')}</span>
+                <div style="font-size:11px;color:var(--accent);">matched on: ${escapeHtml((r.matched_organs || []).join(', ') || '—')}</div>
+              </div>
+            `).join('')}
+          ` : ''}
+          <div style="font-size:11px;color:var(--accent);margin-top:10px;">▸ Click to see backend trail</div>
+          <div id="dpc-detail-${idx}" class="result-detail" style="display:none;margin-top:10px;">
+            <div class="detail-line"><strong>Sourced from</strong><span>${escapeHtml(d.sourced_from.map(s => s.label).join(', '))}</span></div>
+            <div class="detail-line"><strong>Agreement</strong><span>${d.agreement_count} tier${d.agreement_count === 1 ? '' : 's'}</span></div>
+            <div class="detail-line"><strong>Drishti</strong><span>${d.drishti_confirmed ? '✓ Confirmed' : 'Not Confirmed'}</span></div>
+            ${d.drishti_confirmed ? d.drishti_confirmations.map(c => `
+              <div class="detail-line"><strong>${escapeHtml(c.planet)} (${escapeHtml(c.aspect_type)})</strong><span>via ${escapeHtml(c.confirmed_via_tier)} — shared: ${escapeHtml((c.shared_terms || []).join(', '))}</span></div>
+            `).join('') : ''}
+            <div class="detail-line"><strong>Planet Organs (supporting)</strong><span>${escapeHtml((d.supporting_planet_organs || []).join(', ') || '—')}</span></div>
+            <div class="detail-line"><strong>Rashi Organs (supporting)</strong><span>${escapeHtml((d.supporting_rashi_organs || []).join(', ') || '—')}</span></div>
+          </div>
+        </div>
+      `).join('')}
+    `;
+
+    document.querySelectorAll('#disease-priority-body [data-toggle]').forEach(card => {
+      card.addEventListener('click', () => {
+        const target = document.getElementById(card.dataset.toggle);
+        const isOpen = target.style.display !== 'none';
+        target.style.display = isOpen ? 'none' : 'block';
+        const hint = card.querySelector('div[style*="color:var(--accent)"]');
+        if(hint) hint.textContent = (isOpen ? '▸ Click to see' : '▾ Click to hide') + ' backend trail';
+      });
+    });
+  }
+
+  function renderOrganPriority(op){
+    const organs = op.ranked_organs || [];
+    if(!organs.length){
+      document.getElementById('organ-priority-body').innerHTML = '<div class="empty-state">No organs resolved from the disease priority ranking for this chart.</div>';
+      return;
+    }
+
+    document.getElementById('organ-priority-body').innerHTML = `
+      <p style="font-size:12px;color:var(--text-muted);margin-top:0;">${escapeHtml(op.subtitle || '')}</p>
+      ${organs.slice(0, 10).map((o, idx) => `
+        <div class="summary-card clickable" data-toggle="op-detail-${idx}">
+          <span class="rank-badge">Rank ${o.rank}</span>
+          ${o.confirmed ? '<span class="hint" style="margin-left:8px;color:var(--accent);">✓ Confirmed by cross-tier match</span>' : '<span class="hint" style="margin-left:8px;">Supporting context only</span>'}
+          <h3>${escapeHtml(o.organ)}</h3>
+          <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">From disease Rank ${o.best_disease_rank}${(o.confirming_diseases || []).length ? ` · confirmed via ${escapeHtml(o.confirming_diseases.join(', '))}` : ''}</div>
+          <div style="font-size:11px;color:var(--accent);margin-top:10px;">▸ Click to see backend trail</div>
+          <div id="op-detail-${idx}" class="result-detail" style="display:none;margin-top:10px;">
+            ${(o.appeared_in_diseases || []).map(a => `
+              <div class="detail-line"><strong>${escapeHtml(a.disease)} (Rank ${a.rank})</strong><span>${a.confirmed ? '✓ matched here' : 'supporting only'}</span></div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    `;
+
+    document.querySelectorAll('#organ-priority-body [data-toggle]').forEach(card => {
+      card.addEventListener('click', () => {
+        const target = document.getElementById(card.dataset.toggle);
+        const isOpen = target.style.display !== 'none';
+        target.style.display = isOpen ? 'none' : 'block';
+        const hint = card.querySelector('div[style*="color:var(--accent)"]');
+        if(hint) hint.textContent = (isOpen ? '▸ Click to see' : '▾ Click to hide') + ' backend trail';
+      });
+    });
+  }
+
+  function renderShadbalaWeightedPriority(swp){
+    const diseases = swp.ranked_diseases || [];
+    if(!diseases.length){
+      document.getElementById('shadbala-priority-body').innerHTML = '<div class="empty-state">No Shadbala-weighted ranking resolved for this chart (upload Shadbala data to enable planet marks).</div>';
+      return;
+    }
+
+    document.getElementById('shadbala-priority-body').innerHTML = `
+      <p style="font-size:12px;color:var(--text-muted);margin-top:0;">${escapeHtml(swp.subtitle || '')}</p>
+      ${diseases.slice(0, 10).map((d, idx) => `
+        <div class="summary-card clickable" data-toggle="swp-detail-${idx}">
+          <span class="rank-badge">Rank ${d.rank}</span>
+          <h3>${escapeHtml(d.disease)}</h3>
+          <div style="margin-top:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);">Related Organs</div>
+          <div class="meta">${escapeHtml((d.disease_organs || []).join(', ') || '—')}</div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-muted);">Best via <strong>${escapeHtml(d.best_source.planet)}</strong> (${escapeHtml(d.best_source.tier_label)}) — Shadbala Rank ${d.best_source.shadbala_rank ?? '—'}</div>
+          <div style="font-size:11px;color:var(--accent);margin-top:10px;">▸ Click to see backend trail</div>
+          <div id="swp-detail-${idx}" class="result-detail" style="display:none;margin-top:10px;">
+            ${d.sources.map(s => `
+              <div class="detail-line"><strong>${escapeHtml(s.planet)} · ${escapeHtml(s.tier_label)}</strong><span>Shadbala Rank ${s.shadbala_rank ?? '—'}</span></div>
+              <div style="font-size:11px;color:var(--text-muted);margin:2px 0 8px;">${escapeHtml(s.nakshatra || '—')}${s.pada ? ` (Pada ${s.pada})` : ''} diseases: ${escapeHtml((s.nakshatra_diseases || []).join(', ') || '—')}</div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    `;
+
+    document.querySelectorAll('#shadbala-priority-body [data-toggle]').forEach(card => {
+      card.addEventListener('click', () => {
+        const target = document.getElementById(card.dataset.toggle);
+        const isOpen = target.style.display !== 'none';
+        target.style.display = isOpen ? 'none' : 'block';
+        const hint = card.querySelector('div[style*="color:var(--accent)"]');
+        if(hint) hint.textContent = (isOpen ? '▸ Click to see' : '▾ Click to hide') + ' backend trail';
+      });
+    });
+  }
+
+  function renderDashaWeightedPriority(dwp){
+    const diseases = dwp.ranked_diseases || [];
+    if(!diseases.length){
+      document.getElementById('dasha-priority-body').innerHTML = '<div class="empty-state">No Dasha-weighted ranking resolved for this chart.</div>';
+      return;
+    }
+
+    document.getElementById('dasha-priority-body').innerHTML = `
+      <p style="font-size:12px;color:var(--text-muted);margin-top:0;">${escapeHtml(dwp.subtitle || '')}</p>
+      ${diseases.slice(0, 10).map((d, idx) => `
+        <div class="summary-card clickable" data-toggle="dwp-detail-${idx}">
+          <span class="rank-badge">Rank ${d.rank}</span>
+          <h3>${escapeHtml(d.disease)}</h3>
+          <div style="margin-top:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);">Related Organs</div>
+          <div class="meta">${escapeHtml((d.disease_organs || []).join(', ') || '—')}</div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-muted);">Best via <strong>${escapeHtml(d.best_source.planet)}</strong> (${escapeHtml(d.best_source.tier_label)})${(d.best_source.dasha_roles || []).length ? ` — ${escapeHtml(d.best_source.dasha_roles.join(' + '))}` : ' — no current Dasha boost'}</div>
+          <div style="font-size:11px;color:var(--accent);margin-top:10px;">▸ Click to see backend trail</div>
+          <div id="dwp-detail-${idx}" class="result-detail" style="display:none;margin-top:10px;">
+            ${d.sources.map(s => `
+              <div class="detail-line"><strong>${escapeHtml(s.planet)} · ${escapeHtml(s.tier_label)}</strong><span>${(s.dasha_roles || []).length ? escapeHtml(s.dasha_roles.join(' + ')) : 'no Dasha boost'}</span></div>
+              <div style="font-size:11px;color:var(--text-muted);margin:2px 0 8px;">${escapeHtml(s.nakshatra || '—')}${s.pada ? ` (Pada ${s.pada})` : ''} diseases: ${escapeHtml((s.nakshatra_diseases || []).join(', ') || '—')}</div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    `;
+
+    document.querySelectorAll('#dasha-priority-body [data-toggle]').forEach(card => {
+      card.addEventListener('click', () => {
+        const target = document.getElementById(card.dataset.toggle);
+        const isOpen = target.style.display !== 'none';
+        target.style.display = isOpen ? 'none' : 'block';
+        const hint = card.querySelector('div[style*="color:var(--accent)"]');
+        if(hint) hint.textContent = (isOpen ? '▸ Click to see' : '▾ Click to hide') + ' backend trail';
+      });
+    });
+  }
+
+  function renderShadbala(shadbala){
+    const virupas = shadbala.virupas || {};
+    const rupas = shadbala.rupas || {};
+    const planets = Object.keys(virupas);
+
+    if(!planets.length){
+      document.getElementById('shadbala-body').innerHTML = '<div class="empty-state">No Shadbala data uploaded for this chart yet.</div>';
+      return;
+    }
+
+    // Rank 1 = strongest planet (highest Rupas -- falls back to Virupas if
+    // Rupas is missing for a planet). Display-only ranking, no change to
+    // the disease/organ cascade algorithm.
+    const ranked = [...planets].sort((a, b) => {
+      const rb = rupas[b] ?? virupas[b] ?? -Infinity;
+      const ra = rupas[a] ?? virupas[a] ?? -Infinity;
+      return rb - ra;
+    });
+
+    document.getElementById('shadbala-body').innerHTML = `
+      ${shadbala.source ? `<p style="font-size:12px;color:var(--text-muted);margin-top:0;">${escapeHtml(shadbala.source)}</p>` : ''}
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Planet</th><th>Virupas</th><th>Rupas</th></tr>
+          </thead>
+          <tbody>
+            ${ranked.map((p, idx) => `
+              <tr>
+                <td>${idx + 1}</td>
+                <td>${escapeHtml(p)}</td>
+                <td>${escapeHtml(virupas[p] ?? '—')}</td>
+                <td>${escapeHtml(rupas[p] ?? '—')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  loadPatient();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AstroMedica — Celestial Health Intelligence</title>
+<script src="/static/session.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root, [data-theme='dark'] {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-dim: rgba(201,168,76,0.15);
+    --bg: #07080F;
+    --bg2: #0D0F1C;
+    --bg3: #111425;
+    --text: #EAE6DC;
+    --text-muted: #8A8699;
+    --accent: #7B6FFF;
+    --accent2: #4FC3C3;
+    --border: rgba(201,168,76,0.2);
+    --card-shadow: rgba(0, 0, 0, 0.4);
+    --nav-gradient: rgba(7, 8, 15, 0.95);
+    --glass-bg: rgba(255, 255, 255, 0.03);
+  }
+
+  [data-theme='light'] {
+    --gold: #A8832A;
+    --gold-light: #C9A84C;
+    --gold-dim: rgba(168,131,42,0.1);
+    --bg: #F8F9FA;
+    --bg2: #FFFFFF;
+    --bg3: #F1F3F5;
+    --text: #1A1A1C;
+    --text-muted: #5A5A66;
+    --accent: #5D51E5;
+    --accent2: #3E9B9B;
+    --border: rgba(168,131,42,0.15);
+    --card-shadow: rgba(0, 0, 0, 0.08);
+    --nav-gradient: rgba(248, 249, 250, 0.95);
+    --glass-bg: rgba(0, 0, 0, 0.02);
+  }
+
+  /* Theme Toggle Styles */
+  .theme-toggle {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--gold);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: none;
+    transition: all 0.3s ease;
+    margin-left: 20px;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .theme-toggle:hover {
+    background: var(--gold-dim);
+    transform: scale(1.05);
+    border-color: var(--gold);
+  }
+  .theme-toggle svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+    stroke: currentColor;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  [data-theme='light'] .theme-toggle .sun-icon { display: none; }
+  [data-theme='dark'] .theme-toggle .moon-icon { display: none; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed; width: 10px; height: 10px;
+    background: var(--gold); border-radius: 50%;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: transform 0.1s, width 0.3s, height 0.3s, opacity 0.3s;
+  }
+  .cursor-ring {
+    position: fixed; width: 36px; height: 36px;
+    border: 1px solid rgba(201,168,76,0.5); border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    transform: translate(-50%,-50%);
+    transition: transform 0.15s ease, width 0.3s, height 0.3s;
+  }
+
+  /* Stars canvas */
+  #stars { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 60px;
+    background: linear-gradient(180deg, var(--nav-gradient) 0%, transparent 100%);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    animation: fadeDown 0.8s ease both;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem; font-weight: 600; letter-spacing: 0.05em;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .nav-logo .logo-icon {
+    width: 34px; height: 34px;
+    background: conic-gradient(from 0deg, var(--gold), var(--accent), var(--gold));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    animation: spin 20s linear infinite;
+  }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a {
+    color: var(--text-muted); text-decoration: none;
+    font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta {
+    padding: 10px 24px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    background: transparent;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: none; text-decoration: none;
+    transition: background 0.3s, color 0.3s;
+  }
+  .nav-cta:hover { background: var(--gold); color: var(--bg); }
+
+  /* Clerk sign-in slot (static/session.js fills it): a "Sign in" button, or
+     the user's avatar once signed in. Empty when login is off. */
+  #account-slot { display: flex; align-items: center; margin-left: 14px; }
+  #account-slot:empty { display: none; }
+  #account-slot button {
+    padding: 10px 24px;
+    border: 1px solid var(--gold);
+    background: var(--gold);
+    color: var(--bg);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: none;
+    transition: background 0.3s, color 0.3s;
+  }
+  #account-slot button:hover { background: transparent; color: var(--gold); }
+  #account-slot button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  /* HERO */
+  .hero {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 40px 80px;
+    overflow: hidden;
+  }
+
+  .hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+  }
+  .orb1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(123,111,255,0.12), transparent 70%); top: -100px; left: -100px; }
+  .orb2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(201,168,76,0.1), transparent 70%); bottom: 0; right: -100px; }
+  .orb3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(79,195,195,0.08), transparent 70%); top: 40%; left: 50%; transform: translate(-50%,-50%); }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 16px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gold); background: var(--gold-dim);
+    margin-bottom: 32px;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  .badge-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: pulse 2s infinite; }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.2rem, 8vw, 7rem);
+    font-weight: 300; line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    animation: fadeUp 0.8s 0.35s ease both;
+  }
+  .hero-title em { font-style: italic; color: var(--gold); }
+  .hero-title .line2 { display: block; font-weight: 600; }
+
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--text-muted); max-width: 580px;
+    line-height: 1.7; margin: 20px auto 44px;
+    animation: fadeUp 0.8s 0.5s ease both;
+  }
+
+  .hero-actions {
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.8s 0.65s ease both;
+  }
+  .btn-primary {
+    padding: 16px 40px;
+    background: linear-gradient(135deg, var(--gold), #A8832A);
+    color: var(--bg);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem; font-weight: 500; letter-spacing: 0.06em;
+    border: none; cursor: none; text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.3s;
+    box-shadow: 0 0 40px rgba(201,168,76,0.25);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 60px rgba(201,168,76,0.4); }
+  .btn-secondary {
+    padding: 16px 40px;
+    background: transparent;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem; font-weight: 400; letter-spacing: 0.06em;
+    border: 1px solid rgba(234,230,220,0.2); cursor: none; text-decoration: none;
+    transition: border-color 0.3s, color 0.3s;
+  }
+  .btn-secondary:hover { border-color: var(--text); }
+
+  .hero-scroll {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    animation: fadeUp 1s 1s ease both;
+  }
+  .scroll-line { width: 1px; height: 50px; background: linear-gradient(180deg, var(--gold), transparent); animation: scrollPulse 2s infinite; }
+
+  /* CHART DEMO */
+  .chart-demo {
+    position: relative; z-index: 1;
+    display: flex; justify-content: center;
+    margin-top: 60px;
+    animation: fadeUp 1s 0.8s ease both;
+  }
+  .chart-ring {
+    position: relative; width: 260px; height: 260px;
+  }
+  .chart-ring svg { width: 100%; height: 100%; animation: spin 60s linear infinite; }
+  .chart-center {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    text-align: center;
+  }
+  .chart-center .birth-icon { font-size: 2.4rem; }
+  .chart-center p { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+
+  /* STATS */
+  .stats-bar {
+    position: relative; z-index: 1;
+    display: flex; justify-content: center; flex-wrap: wrap; gap: 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin: 80px 0 0;
+    background: rgba(13,15,28,0.6);
+    backdrop-filter: blur(10px);
+  }
+  .stat-item {
+    flex: 1; min-width: 180px;
+    padding: 40px 30px; text-align: center;
+    border-right: 1px solid var(--border);
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-item.visible { opacity: 1; transform: translateY(0); }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem; font-weight: 300; color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label { font-size: 0.78rem; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 8px; }
+
+  /* SECTION BASE */
+  section { position: relative; z-index: 1; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 60px; }
+  .section-label {
+    font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::before { content:''; display:block; width:30px; height:1px; background:var(--gold); }
+
+  /* HOW IT WORKS */
+  .how { padding: 120px 0; }
+  .how-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: center; margin-top: 60px;
+  }
+  .how-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+    font-weight: 300; line-height: 1.15;
+  }
+  .how-title strong { font-weight: 600; }
+  .how-text { color: var(--text-muted); line-height: 1.8; margin-top: 20px; font-size: 0.95rem; }
+
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step {
+    display: flex; gap: 24px; padding: 28px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    opacity: 0; transform: translateX(30px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .step.visible { opacity:1; transform:translateX(0); }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.4rem; font-weight: 300; color: var(--gold);
+    line-height: 1; min-width: 50px;
+  }
+  .step-content h4 { font-size: 1rem; font-weight: 500; margin-bottom: 6px; }
+  .step-content p { font-size: 0.87rem; color: var(--text-muted); line-height: 1.7; }
+
+  /* FEATURES */
+  .features { padding: 120px 0; background: linear-gradient(180deg, transparent, var(--bg2), transparent); }
+  .features-header { text-align: center; margin-bottom: 70px; }
+  .features-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 4vw, 3.2rem); font-weight: 300;
+  }
+  .features-title em { font-style: italic; color: var(--gold); }
+  .features-sub { color: var(--text-muted); margin-top: 16px; font-size: 0.95rem; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  .feat-card {
+    background: var(--bg3);
+    padding: 44px 36px;
+    border: 1px solid var(--border);
+    transition: border-color 0.4s, transform 0.3s;
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.6s, transform 0.6s, border-color 0.4s;
+    position: relative; overflow: hidden;
+  }
+  .feat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0; transition: opacity 0.4s;
+  }
+  .feat-card:hover::before { opacity: 1; }
+  .feat-card:hover { border-color: var(--border); transform: translateY(-4px); }
+  .feat-card.visible { opacity: 1; transform: translateY(0); }
+  .feat-card:hover { transform: translateY(-4px); }
+  .feat-icon {
+    width: 48px; height: 48px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; margin-bottom: 24px;
+    background: var(--gold-dim);
+  }
+  .feat-card h3 { font-size: 1.05rem; font-weight: 500; margin-bottom: 12px; }
+  .feat-card p { font-size: 0.87rem; color: var(--text-muted); line-height: 1.75; }
+
+  /* PREVIEW */
+  .preview { padding: 120px 0; }
+  .preview-inner {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: center;
+  }
+  .preview-ui {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+  }
+  .ui-topbar {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(201,168,76,0.05);
+  }
+  .ui-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .ui-title { font-size: 0.78rem; color: var(--text-muted); letter-spacing: 0.08em; margin-left: 10px; }
+  .ui-body { padding: 28px; }
+  .ui-profile {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 28px; padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ui-avatar {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--gold), var(--accent), var(--accent2), var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+  }
+  .ui-name { font-size: 0.95rem; font-weight: 500; }
+  .ui-dob { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+  .ui-planets { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+  .planet-tag {
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 0.72rem; letter-spacing: 0.06em;
+    background: var(--gold-dim); color: var(--gold-light);
+  }
+
+  .ui-risks { display: flex; flex-direction: column; gap: 12px; }
+  .risk-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .risk-label { font-size: 0.82rem; color: var(--text-muted); min-width: 140px; }
+  .risk-bar { flex: 1; height: 4px; background: var(--glass-bg); border-radius: 2px; overflow: hidden; }
+  .risk-fill { height: 100%; border-radius: 2px; }
+  .risk-fill.high { background: linear-gradient(90deg, #FF6B6B, #FF4444); width: 78%; }
+  .risk-fill.med { background: linear-gradient(90deg, var(--gold), #A8832A); width: 52%; }
+  .risk-fill.low { background: linear-gradient(90deg, var(--accent2), #2A9B9B); width: 28%; }
+  .risk-pct { font-size: 0.78rem; color: var(--text-muted); min-width: 36px; text-align: right; }
+
+  .preview-content .section-label { margin-bottom: 20px; }
+  .preview-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 300; line-height: 1.2;
+  }
+  .preview-title strong { font-weight: 600; }
+  .preview-text { color: var(--text-muted); line-height: 1.8; margin-top: 20px; font-size: 0.95rem; }
+  .preview-list { list-style: none; margin-top: 28px; display: flex; flex-direction: column; gap: 12px; }
+  .preview-list li {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 0.9rem; color: var(--text-muted);
+  }
+  .preview-list li::before { content:'✦'; color: var(--gold); font-size: 0.6rem; flex-shrink: 0; }
+
+  /* TESTIMONIALS */
+  .testimonials { padding: 120px 0; background: linear-gradient(180deg, transparent, var(--bg2), transparent); }
+  .test-header { text-align: center; margin-bottom: 60px; }
+  .test-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 300;
+  }
+  .test-title em { font-style: italic; color: var(--gold); }
+  .test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .test-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 36px; position: relative;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .test-card.visible { opacity:1; transform:translateY(0); }
+  .test-quote { font-family: 'Cormorant Garamond', serif; font-size: 4rem; color: var(--gold); line-height: 0.5; opacity: 0.4; margin-bottom: 16px; }
+  .test-text { font-size: 0.92rem; color: var(--text-muted); line-height: 1.8; font-style: italic; }
+  .test-author { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .test-name { font-size: 0.9rem; font-weight: 500; }
+  .test-role { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; }
+  .test-stars { color: var(--gold); font-size: 0.75rem; margin-bottom: 16px; }
+
+  /* CTA */
+  .cta-section {
+    padding: 140px 0;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .cta-bg {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 800px; height: 400px;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 300; line-height: 1.1;
+    position: relative;
+  }
+  .cta-title em { font-style: italic; color: var(--gold); }
+  .cta-sub { color: var(--text-muted); max-width: 480px; margin: 20px auto 44px; line-height: 1.75; }
+  .cta-form {
+    display: flex; gap: 0; max-width: 460px; margin: 0 auto;
+    border: 1px solid var(--border);
+  }
+  .cta-input {
+    flex: 1; padding: 16px 20px;
+    background: var(--bg2); border: none; outline: none;
+    color: var(--text); font-family: 'Outfit', sans-serif; font-size: 0.9rem;
+  }
+  .cta-input::placeholder { color: var(--text-muted); }
+  .cta-submit {
+    padding: 16px 28px;
+    background: var(--gold); color: var(--bg);
+    border: none; cursor: none;
+    font-family: 'Outfit', sans-serif; font-size: 0.85rem;
+    font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+    transition: background 0.3s;
+    white-space: nowrap;
+  }
+  .cta-submit:hover { background: var(--gold-light); }
+  .cta-note { font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; opacity: 0.7; }
+
+  /* BIRTH DETAILS FORM */
+  .birth-form {
+    max-width: 560px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  /* One chart per account: "continue" card and the one-correction banner */
+  .chart-ready {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 32px 28px;
+    border: 1px solid var(--border);
+    background: rgba(201,168,76,0.05);
+    text-align: center;
+  }
+  .chart-ready-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .chart-ready-sub { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px; }
+  .correct-banner {
+    max-width: 560px;
+    margin: 0 auto 20px;
+    padding: 14px 18px;
+    border: 1px solid var(--gold);
+    background: rgba(201,168,76,0.08);
+    color: var(--text);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-align: left;
+  }
+  .correct-banner strong { color: var(--gold); font-weight: 500; }
+  .birth-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .birth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .birth-field.full { grid-column: 1 / -1; }
+  .birth-field label {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  .birth-field input, .birth-field select {
+    padding: 14px 18px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    outline: none;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    border-radius: 2px;
+  }
+  .birth-field select {
+    cursor: pointer;
+  }
+  .birth-field input::placeholder { color: var(--text-muted); }
+  .birth-field input:focus, .birth-field select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+  }
+  .birth-field input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.6) sepia(1) saturate(2) hue-rotate(5deg);
+    cursor: pointer;
+  }
+  .birth-submit {
+    margin-top: 8px;
+    padding: 16px 28px;
+    background: linear-gradient(135deg, var(--gold), #A8832A);
+    color: var(--bg);
+    border: none;
+    cursor: none;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: transform 0.2s, box-shadow 0.3s;
+    box-shadow: 0 0 40px rgba(201,168,76,0.2);
+    width: 100%;
+  }
+  .birth-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 40px rgba(201,168,76,0.35);
+  }
+
+  /* RECENT PATIENTS BAR */
+  .recent-bar {
+    max-width: 560px;
+    margin: 0 auto 28px;
+    display: none;
+  }
+  .recent-bar-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .recent-bar-label button {
+    font-size: 0.65rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    padding: 0;
+  }
+  .recent-bar-label button:hover { opacity: 1; color: #ef4444; }
+  .recent-cards {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .recent-card {
+    flex: 1;
+    min-width: 140px;
+    max-width: 200px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: border-color 0.25s, background 0.25s, transform 0.2s;
+    position: relative;
+  }
+  .recent-card:hover {
+    border-color: var(--gold);
+    background: var(--gold-dim);
+    transform: translateY(-2px);
+  }
+  .recent-card-name {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+  }
+  .recent-card-meta {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .recent-card-del {
+    position: absolute;
+    top: 8px; right: 8px;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    opacity: 0;
+    transition: opacity 0.2s;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
+  .recent-card:hover .recent-card-del { opacity: 0.6; }
+  .recent-card-del:hover { opacity: 1 !important; color: #ef4444; }
+  .recent-fill-badge {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 8px;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 24px;
+    position: relative; z-index: 1;
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem; font-weight: 600; color: var(--text);
+  }
+  .footer-logo span { color: var(--gold); }
+  .footer-links { display: flex; gap: 28px; list-style: none; }
+  .footer-links a { font-size: 0.8rem; color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
+  .footer-links a:hover { color: var(--gold); }
+  .footer-copy { font-size: 0.78rem; color: var(--text-muted); }
+
+  /* Tester button (footer) and its password box */
+  .tester-btn {
+    font-family: inherit; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 7px 18px; border-radius: 999px; border: 1px solid var(--border); background: transparent;
+    color: var(--gold); cursor: pointer; transition: all 0.3s;
+  }
+  .tester-btn:hover { background: var(--gold); color: var(--bg); }
+  .tester-overlay { position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center;
+    padding: 16px; background: rgba(0,0,0,0.65); }
+  .tester-overlay[hidden] { display: none; }
+  .tester-box { width: 100%; max-width: 380px; background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px; }
+  .tester-title { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; color: var(--gold); margin-bottom: 4px; }
+  .tester-note { font-size: 0.85rem; color: var(--text-muted); line-height: 1.55; margin-bottom: 16px; }
+  .tester-box input { width: 100%; font-family: inherit; font-size: 0.95rem; color: var(--text); background: var(--bg3);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; outline: none; }
+  .tester-box input:focus { border-color: var(--gold); }
+  .tester-error { min-height: 20px; margin-top: 8px; font-size: 0.8rem; color: #ef4444; }
+  .tester-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+  .tester-actions button { font-family: inherit; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border); background: transparent;
+    color: var(--text-muted); cursor: pointer; }
+  .tester-actions button.primary { border-color: var(--gold); color: var(--gold); }
+  .tester-actions button.primary:hover { background: var(--gold); color: var(--bg); }
+  .tester-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+  @keyframes scrollPulse { 0%,100%{opacity:0.4;} 50%{opacity:1;} }
+
+  @media (max-width: 900px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    .container { padding: 0 24px; }
+    .how-grid, .preview-inner { grid-template-columns: 1fr; gap: 50px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .test-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; text-align: center; padding: 40px 24px; }
+    .stats-bar { flex-direction: column; }
+    .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="logo-icon">✦</div>
+    AstroMedica
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#preview">Platform</a></li>
+    <li><a href="#testimonials">Testimonials</a></li>
+  </ul>
+  <div style="display: flex; align-items: center;">
+    <a href="#cta" class="nav-cta">Request Access</a>
+    <a href="/admin" class="nav-cta" id="admin-link" hidden style="margin-left:14px;">Admin</a>
+    <a href="/tester" class="nav-cta" id="tester-link" hidden style="margin-left:14px;">My test charts</a>
+    <div id="account-slot"></div>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle Theme">
+      <!-- Sun Icon (Lucide-like SVG) -->
+      <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+      </svg>
+      <!-- Moon Icon (Lucide-like SVG) -->
+      <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<script>
+  // --- Theme Management ---
+  const themeToggle = document.getElementById('theme-toggle');
+  const root = document.documentElement;
+
+  // Initialize theme
+  const currentTheme = localStorage.getItem('theme') || 'dark';
+  root.setAttribute('data-theme', currentTheme);
+
+  themeToggle.addEventListener('click', () => {
+    const newTheme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+  });
+</script>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-orb orb3"></div>
+
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    Ancient Wisdom · Modern Medicine
+  </div>
+
+  <h1 class="hero-title">
+    Your Stars Hold<br>
+    <em>Health</em> <span class="line2">Secrets</span>
+  </h1>
+
+  <p class="hero-sub">
+    Decode your natal chart to uncover health predispositions across every stage of your life. Powered by millennia of astrological research and precision celestial calculations.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#cta" class="btn-primary">Generate My Report</a>
+    <a href="#how" class="btn-secondary">Learn How It Works</a>
+  </div>
+
+  <div class="chart-demo">
+    <div class="chart-ring">
+      <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer ring -->
+        <circle cx="100" cy="100" r="96" stroke="rgba(201,168,76,0.2)" stroke-width="1"/>
+        <!-- Middle ring -->
+        <circle cx="100" cy="100" r="70" stroke="rgba(201,168,76,0.15)" stroke-width="0.5" stroke-dasharray="4 4"/>
+        <!-- Inner ring -->
+        <circle cx="100" cy="100" r="44" stroke="rgba(123,111,255,0.25)" stroke-width="1"/>
+        <!-- House lines -->
+        <line x1="100" y1="4" x2="100" y2="196" stroke="rgba(201,168,76,0.08)" stroke-width="0.5"/>
+        <line x1="4" y1="100" x2="196" y2="100" stroke="rgba(201,168,76,0.08)" stroke-width="0.5"/>
+        <line x1="32" y1="32" x2="168" y2="168" stroke="rgba(201,168,76,0.06)" stroke-width="0.5"/>
+        <line x1="168" y1="32" x2="32" y2="168" stroke="rgba(201,168,76,0.06)" stroke-width="0.5"/>
+        <!-- Planet dots -->
+        <circle cx="100" cy="8" r="4" fill="#C9A84C"/>
+        <circle cx="162" cy="38" r="3" fill="#7B6FFF"/>
+        <circle cx="190" cy="100" r="4" fill="#4FC3C3"/>
+        <circle cx="162" cy="162" r="3" fill="#C9A84C" opacity="0.6"/>
+        <circle cx="100" cy="192" r="4" fill="#7B6FFF" opacity="0.8"/>
+        <circle cx="38" cy="162" r="3" fill="#4FC3C3" opacity="0.6"/>
+        <circle cx="10" cy="100" r="4" fill="#C9A84C" opacity="0.5"/>
+        <circle cx="38" cy="38" r="3" fill="#7B6FFF" opacity="0.7"/>
+        <!-- Aspect lines -->
+        <line x1="100" y1="8" x2="190" y2="100" stroke="rgba(201,168,76,0.2)" stroke-width="0.5"/>
+        <line x1="162" y1="38" x2="100" y2="192" stroke="rgba(123,111,255,0.2)" stroke-width="0.5"/>
+        <line x1="190" y1="100" x2="38" y2="162" stroke="rgba(79,195,195,0.2)" stroke-width="0.5"/>
+        <line x1="100" y1="8" x2="38" y2="162" stroke="rgba(201,168,76,0.15)" stroke-width="0.5"/>
+        <!-- Glyph labels -->
+        <text x="96" y="22" fill="rgba(201,168,76,0.7)" font-size="8" font-family="serif">☉</text>
+        <text x="157" y="52" fill="rgba(123,111,255,0.8)" font-size="8" font-family="serif">☽</text>
+        <text x="182" y="104" fill="rgba(79,195,195,0.8)" font-size="8" font-family="serif">♄</text>
+        <text x="156" y="170" fill="rgba(201,168,76,0.6)" font-size="8" font-family="serif">♃</text>
+        <text x="95" y="188" fill="rgba(123,111,255,0.7)" font-size="8" font-family="serif">♂</text>
+        <text x="30" y="170" fill="rgba(79,195,195,0.6)" font-size="8" font-family="serif">♀</text>
+        <text x="4" y="104" fill="rgba(201,168,76,0.5)" font-size="8" font-family="serif">☿</text>
+        <text x="31" y="48" fill="rgba(123,111,255,0.7)" font-size="8" font-family="serif">⛢</text>
+      </svg>
+      <div class="chart-center">
+        <div class="birth-icon">✦</div>
+        <p>Natal Chart</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>Explore</span>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar" id="stats">
+  <div class="stat-item">
+    <div class="stat-num">5,000+</div>
+    <div class="stat-label">Astrological Rules</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">12</div>
+    <div class="stat-label">Life Stage Periods</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">98%</div>
+    <div class="stat-label">Chart Accuracy</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">40+</div>
+    <div class="stat-label">Health Categories</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="how-grid">
+      <div>
+        <div class="section-label">The Process</div>
+        <h2 class="how-title">Ancient science meets <strong>modern precision</strong></h2>
+        <p class="how-text">
+          Every person born under a unique constellation of planetary alignments carries within them a celestial blueprint. AstroMedica decodes this blueprint against decades of compiled astrological health research to reveal your personalized health timeline.
+        </p>
+      </div>
+      <div class="steps">
+        <div class="step reveal-x">
+          <div class="step-num">01</div>
+          <div class="step-content">
+            <h4>Enter Your Birth Details</h4>
+            <p>Provide your date, exact time, and place of birth. This data is used to compute your precise natal chart with Swiss Ephemeris accuracy.</p>
+          </div>
+        </div>
+        <div class="step reveal-x">
+          <div class="step-num">02</div>
+          <div class="step-content">
+            <h4>Chart Calculation</h4>
+            <p>Your planetary positions, house placements, dashas, and yogas are computed and cross-matched against our proprietary health mapping database.</p>
+          </div>
+        </div>
+        <div class="step reveal-x">
+          <div class="step-num">03</div>
+          <div class="step-content">
+            <h4>Receive Your Health Timeline</h4>
+            <p>View a detailed report of potential health predispositions organized by life stage, body system, and risk level — uniquely yours.</p>
+          </div>
+        </div>
+        <div class="step reveal-x">
+          <div class="step-num">04</div>
+          <div class="step-content">
+            <h4>Monitor & Prepare</h4>
+            <p>Use your report to guide preventive care decisions, share with your physician, and stay ahead of your health journey.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="features-header">
+      <div class="section-label" style="justify-content:center;">Capabilities</div>
+      <h2 class="features-title">Everything you need to understand your <em>celestial health</em></h2>
+      <p class="features-sub">A complete platform built on the intersection of astrology and preventive medicine.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">☉</div>
+        <h3>Full Natal Chart Analysis</h3>
+        <p>Complete Vedic or Western chart computation including all 9 planets, 12 houses, ascendant, moon sign, and lunar nakshatras.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⏳</div>
+        <h3>Dasha Period Mapping</h3>
+        <p>Vimshottari dasha timeline overlay showing which planetary period governs each phase of your life and what health risks it brings.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">♥</div>
+        <h3>40+ Health Categories</h3>
+        <p>From cardiovascular and neurological to endocrine and musculoskeletal — every body system mapped to celestial indicators.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <h3>Risk Level Scoring</h3>
+        <p>Each health predisposition is scored Low, Medium, or High based on the strength and confluence of multiple astrological factors.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📄</div>
+        <h3>Downloadable PDF Reports</h3>
+        <p>Generate a clean, printable health report to share with your doctor, wellness coach, or for personal reference.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔒</div>
+        <h3>Private & Encrypted</h3>
+        <p>All birth data and health reports are encrypted and never shared. Your celestial profile belongs only to you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PREVIEW -->
+<section class="preview" id="preview">
+  <div class="container">
+    <div class="preview-inner">
+      <!-- Mock UI -->
+      <div class="preview-ui">
+        <div class="ui-topbar">
+          <div class="ui-dot" style="background:#FF6B6B;"></div>
+          <div class="ui-dot" style="background:#FFD93D;"></div>
+          <div class="ui-dot" style="background:#6BCB77;"></div>
+          <span class="ui-title">Health Intelligence Report</span>
+        </div>
+        <div class="ui-body">
+          <div class="ui-profile">
+            <div class="ui-avatar">♈</div>
+            <div>
+              <div class="ui-name">Arjun Mehta</div>
+              <div class="ui-dob">Apr 14, 1988 · 06:42 AM · Mumbai</div>
+            </div>
+          </div>
+          <div class="ui-planets">
+            <span class="planet-tag">☉ Aries</span>
+            <span class="planet-tag">☽ Scorpio</span>
+            <span class="planet-tag">♄ 6th House</span>
+            <span class="planet-tag">Asc. Pisces</span>
+            <span class="planet-tag">Saturn Dasha</span>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;">Risk Assessment · Ages 35–48</div>
+          <div class="ui-risks">
+            <div class="risk-row">
+              <div class="risk-label">Cardiovascular</div>
+              <div class="risk-bar"><div class="risk-fill high"></div></div>
+              <div class="risk-pct">High</div>
+            </div>
+            <div class="risk-row">
+              <div class="risk-label">Digestive</div>
+              <div class="risk-bar"><div class="risk-fill med"></div></div>
+              <div class="risk-pct">Med</div>
+            </div>
+            <div class="risk-row">
+              <div class="risk-label">Neurological</div>
+              <div class="risk-bar"><div class="risk-fill low"></div></div>
+              <div class="risk-pct">Low</div>
+            </div>
+            <div class="risk-row">
+              <div class="risk-label">Skeletal</div>
+              <div class="risk-bar"><div class="risk-fill med"></div></div>
+              <div class="risk-pct">Med</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="preview-content">
+        <div class="section-label">The Platform</div>
+        <h2 class="preview-title">A report as <strong>unique as your birth moment</strong></h2>
+        <p class="preview-text">
+          No two people share the exact same celestial configuration. Your report is generated entirely from your specific planetary positions — not generic sun sign generalizations.
+        </p>
+        <ul class="preview-list">
+          <li>Age-specific health window predictions (0–80 years)</li>
+          <li>Current dasha period health focus highlighted</li>
+          <li>Body system breakdown with planetary rulers</li>
+          <li>Remedial suggestions aligned to your chart</li>
+          <li>Printable PDF for your healthcare provider</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials">
+  <div class="container">
+    <div class="test-header">
+      <div class="section-label" style="justify-content:center;">Testimonials</div>
+      <h2 class="test-title">Trusted by those who <em>seek clarity</em></h2>
+    </div>
+    <div class="test-grid">
+      <div class="test-card">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-quote">"</div>
+        <p class="test-text">The cardiovascular risk flagged for my Saturn dasha period prompted me to get a checkup. My doctor found early-stage hypertension. I genuinely believe this report helped me catch it in time.</p>
+        <div class="test-author">
+          <div class="test-name">Dr. Priya Nair</div>
+          <div class="test-role">Cardiologist, Chennai</div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-quote">"</div>
+        <p class="test-text">As someone trained in both Ayurveda and modern medicine, I was skeptical. The depth of this system — how it maps dashas to organ systems — is remarkable. I now recommend it to patients.</p>
+        <div class="test-author">
+          <div class="test-name">Vikram Sharma</div>
+          <div class="test-role">Integrative Medicine Practitioner</div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-quote">"</div>
+        <p class="test-text">I've used many astrology apps but nothing combines celestial precision with health intelligence like this. The interface is beautiful and the report is something I actually share with my doctor.</p>
+        <div class="test-author">
+          <div class="test-name">Meera Joshi</div>
+          <div class="test-role">Wellness Coach, Pune</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="cta-bg"></div>
+  <div class="container" style="position:relative;">
+    <div class="section-label" style="justify-content:center;">Early Access</div>
+    <h2 class="cta-title">Begin your<br><em>health odyssey</em></h2>
+    <p class="cta-sub">Join the waitlist for early access. Be among the first to receive your personalized celestial health report.</p>
+    <!-- DEMO PATIENTS BAR -->
+    <div class="recent-bar" id="recent-bar">
+      <div class="recent-bar-label">
+        <span>✦Patients List</span>
+      </div>
+      <div class="recent-cards" id="recent-cards"></div>
+    </div>
+
+    <!-- Returning users (one chart per account): shown instead of the form -->
+    <div class="chart-ready" id="chart-ready" hidden>
+      <div class="chart-ready-title">Your birth chart is ready — continue your health chat.</div>
+      <p class="chart-ready-sub">Your chart is saved to your account, so you can come back and chat any time.</p>
+      <button class="birth-submit" id="chart-ready-btn" type="button">Continue your health chat ✦</button>
+    </div>
+
+    <!-- Shown above the form when the user is using their one correction -->
+    <div class="correct-banner" id="correct-banner" hidden>
+      <strong>Correct your birth details.</strong>
+      This is your one correction — the new chart replaces your current one and can't be changed again.
+    </div>
+
+    <form class="birth-form" onsubmit="return false;">
+      <div class="birth-field full">
+        <label for="full-name">Full Name</label>
+        <input id="full-name" type="text" placeholder="e.g. Arjun Mehta" autocomplete="name" required />
+      </div>
+      <div class="birth-form-row" style="grid-template-columns:1fr 1fr;">
+        <div class="birth-field">
+          <label for="dob">Date of Birth</label>
+          <input id="dob" type="date" required />
+        </div>
+        <div class="birth-field">
+          <label for="birth-time">Birth Time</label>
+          <input id="birth-time" type="time" placeholder="HH:MM" required />
+        </div>
+      </div>
+      <div class="birth-form-row">
+        <div class="birth-field full">
+          <label for="gender">Gender</label>
+          <select id="gender" required>
+            <option value="" disabled selected>Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+      </div>
+      <div class="birth-form-row" style="grid-template-columns:1fr;">
+        <div class="birth-field full">
+          <label for="birth-place">Birth Place</label>
+          <input id="birth-place" type="text" placeholder="e.g. Mumbai, India" required autocomplete="off" />
+          <input type="hidden" id="birth_lat" name="birth_lat" />
+          <input type="hidden" id="birth_lng" name="birth_lng" />
+          <div id="geo-status"></div>
+        </div>
+      </div>
+      <div class="birth-form-row">
+        <div class="birth-field">
+          <label for="father-name">Father's Name</label>
+          <input id="father-name" type="text" placeholder="Father's full name" />
+        </div>
+        <div class="birth-field">
+          <label for="mother-name">Mother's Name</label>
+          <input id="mother-name" type="text" placeholder="Mother's full name" />
+        </div>
+      </div>
+      <button class="birth-submit" id="birth-submit-btn" type="submit">Generate My Health Report ✦</button>
+    </form>
+    <p class="cta-note">Your data is encrypted and never shared. 100% private.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Astro<span>Medica</span></div>
+  <ul class="footer-links">
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Terms</a></li>
+    <li><a href="#">Contact</a></li>
+    <li><a href="#">FAQ</a></li>
+  </ul>
+  <button type="button" class="tester-btn" id="tester-btn">Tester</button>
+  <div class="footer-copy">© 2025 AstroMedica. All rights reserved.</div>
+</footer>
+
+<!-- Tester access: early-access testers type the tester password (checked by /tester/unlock) -->
+<div class="tester-overlay" id="tester-overlay" hidden>
+  <form class="tester-box" id="tester-form" autocomplete="off">
+    <div class="tester-title">Tester access</div>
+    <div class="tester-note">For early-access testers: generate charts beyond the normal limit, see every algorithm and the chatbot, and tell us how accurate they are. Enter the tester password.</div>
+    <input type="password" id="tester-input" aria-label="Tester password" placeholder="Tester password">
+    <div class="tester-error" id="tester-error" role="alert"></div>
+    <div class="tester-actions">
+      <button type="button" id="tester-cancel">Cancel</button>
+      <button type="submit" class="primary" id="tester-submit">Enter</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Stars
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 200; i++) {
+      stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, r: Math.random() * 1.2, o: Math.random(), speed: Math.random() * 0.003 + 0.001 });
+    }
+  }
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      s.o += s.speed; if (s.o > 1) s.speed = -Math.abs(s.speed); if (s.o < 0) s.speed = Math.abs(s.speed);
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,240,${s.o * 0.6})`; ctx.fill();
+    });
+    requestAnimationFrame(drawStars);
+  }
+  resize(); initStars(); drawStars();
+  window.addEventListener('resize', () => { resize(); initStars(); });
+
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; });
+  function animRing() { rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12; ring.style.left = rx + 'px'; ring.style.top = ry + 'px'; requestAnimationFrame(animRing); }
+  animRing();
+  document.querySelectorAll('a, button, input').forEach(el => {
+    el.addEventListener('mouseenter', () => { ring.style.width = '60px'; ring.style.height = '60px'; cursor.style.opacity = '0.5'; });
+    el.addEventListener('mouseleave', () => { ring.style.width = '36px'; ring.style.height = '36px'; cursor.style.opacity = '1'; });
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => { if (e.isIntersecting) { setTimeout(() => e.target.classList.add('visible'), i * 120); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.stat-item, .feat-card, .test-card, .step').forEach(el => observer.observe(el));
+
+  // ── Birth Place Geocoding ─────────────────────────────────────────
+  (function () {
+    const birthPlaceInput = document.getElementById('birth-place');
+    const geoStatus       = document.getElementById('geo-status');
+    const latField        = document.getElementById('birth_lat');
+    const lngField        = document.getElementById('birth_lng');
+    const submitBtn       = document.getElementById('birth-submit-btn');
+
+    // Styles shared across states
+    const BASE_BOX = 'border-radius:6px;padding:10px 14px;margin-top:6px;font-size:12px;line-height:1.6;';
+    const SUCCESS_STYLE = BASE_BOX + 'background:rgba(255,255,255,0.05);border:1px solid rgba(240,180,41,0.3);color:#94a3b8;';
+    const ERROR_STYLE   = BASE_BOX + 'background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);color:#f87171;';
+    const LOADING_STYLE = BASE_BOX + 'background:transparent;border:none;color:#94a3b8;padding-left:0;';
+
+    let debounceTimer  = null;
+    let lastCallTime   = 0;   // rate-limit guard (1 req/sec)
+    const DEBOUNCE_MS  = 1000;
+    const MIN_INTERVAL = 1000;
+
+    function clearGeo() {
+      geoStatus.innerHTML = '';
+      latField.value = '';
+      lngField.value = '';
+    }
+
+    function showLoading() {
+      geoStatus.innerHTML = `<div style="${LOADING_STYLE}">🔍 Looking up coordinates...</div>`;
+    }
+
+    function showSuccess(displayName, lat, lng) {
+      const short = displayName.length > 50 ? displayName.slice(0, 50) + '…' : displayName;
+      geoStatus.innerHTML =
+        `<div style="${SUCCESS_STYLE}">
+          ✅ Location confirmed<br>
+          📍 ${short}<br>
+          Lat: ${parseFloat(lat).toFixed(6)}&nbsp;&nbsp;·&nbsp;&nbsp;Lng: ${parseFloat(lng).toFixed(6)}
+        </div>`;
+      latField.value = lat;
+      lngField.value = lng;
+    }
+
+    function showError() {
+      geoStatus.innerHTML =
+        `<div style="${ERROR_STYLE}">
+          ⚠️ City not found. Try adding state name.<br>
+          e.g. &quot;Mysuru, Karnataka&quot; or &quot;Pune, Maharashtra&quot;
+        </div>`;
+      latField.value = '';
+      lngField.value = '';
+    }
+
+    async function geocode(city) {
+      const now = Date.now();
+      if (now - lastCallTime < MIN_INTERVAL) return; // rate-limit guard
+      lastCallTime = now;
+
+      showLoading();
+
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city + ', India')}&format=json&limit=1`;
+        const res  = await fetch(url, { headers: { 'User-Agent': 'astromedica-app' } });
+        const data = await res.json();
+
+        if (data && data.length > 0) {
+          showSuccess(data[0].display_name, data[0].lat, data[0].lon);
+        } else {
+          showError();
+        }
+      } catch (e) {
+        showError();
+      }
+    }
+
+    // Debounced input listener
+    birthPlaceInput.addEventListener('input', function () {
+      clearGeo();
+      clearTimeout(debounceTimer);
+      const val = this.value.trim();
+      if (!val) return;
+      debounceTimer = setTimeout(() => geocode(val), DEBOUNCE_MS);
+    });
+
+    // Also fire on blur (Tab out)
+    birthPlaceInput.addEventListener('blur', function () {
+      clearTimeout(debounceTimer);
+      const val = this.value.trim();
+      if (!val || latField.value) return; // skip if already resolved
+      geocode(val);
+    });
+
+    // Form submit — POST to Flask backend
+    const form = birthPlaceInput.closest('form');
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      // Validate lat/lng populated
+      if (!latField.value || !lngField.value) {
+        alert('Please wait for city coordinates to load.\nMake sure your city name is correct.');
+        birthPlaceInput.focus();
+        return;
+      }
+
+      // Validate name and dob
+      const nameVal = document.getElementById('full-name').value.trim();
+      const dobVal  = document.getElementById('dob').value;
+      if (!nameVal) {
+        alert('Please enter your full name.');
+        return;
+      }
+      if (!dobVal) {
+        alert('Please enter your date of birth.');
+        return;
+      }
+
+      // Show loading state on button
+      submitBtn.textContent    = '⏳ Generating Chart...';
+      submitBtn.disabled       = true;
+      submitBtn.style.opacity  = '0.7';
+
+      // Collect all form data
+      // Format birth_time as HH:MM (strip seconds if browser adds them)
+      const rawTime   = document.getElementById('birth-time').value || '08:00';
+      const birthTime = rawTime.slice(0, 5);  // "HH:MM"
+
+      const payload = {
+        name:        nameVal,
+        dob:         dobVal,
+        birth_time:  birthTime,
+        birth_place: document.getElementById('birth-place').value.trim(),
+        lat:         parseFloat(latField.value),
+        lng:         parseFloat(lngField.value),
+        father_name: document.getElementById('father-name').value.trim(),
+        mother_name: document.getElementById('mother-name').value.trim(),
+        gender:      document.getElementById('gender').value
+      };
+
+      try {
+        const response = await fetch('/generate-chart', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (data.code === 'chart_limit') {
+          // Allowance used up (one chart + one correction): show the saved chart instead.
+          alert(data.error);
+          window.location.href = '/';
+          return;
+        }
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Server error');
+        }
+
+        // Save to sessionStorage and navigate to results
+        sessionStorage.setItem('chartData', JSON.stringify(data));
+
+        window.location.href = '/results';
+
+      } catch (err) {
+        alert('Error: ' + err.message);
+        // Reset button
+        submitBtn.textContent   = 'Generate My Health Report ✦';
+        submitBtn.disabled      = false;
+        submitBtn.style.opacity = '1';
+      }
+    });
+  })();
+
+  // ── Demo Patients (server-cached, same for every visitor) ──────────────
+  async function renderRecentBar() {
+    const bar    = document.getElementById('recent-bar');
+    const cardsEl = document.getElementById('recent-cards');
+
+    let list = [];
+    try {
+      const res = await fetch('/patients-list');
+      const payload = await res.json();
+      if (payload && payload.success) list = payload.patients || [];
+    } catch (e) {
+      console.error('Could not load demo patients', e);
+    }
+
+    if (!list.length) { bar.style.display = 'none'; return; }
+    bar.style.display = 'block';
+    cardsEl.innerHTML = '';
+    list.forEach((p) => {
+      const card = document.createElement('div');
+      card.className = 'recent-card';
+      const date = p.dob ? new Date(p.dob).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+      card.innerHTML = `
+        <div class="recent-card-name">${p.name}</div>
+        <div class="recent-card-meta">${date}<br>${p.birth_place || '—'}</div>
+        <div class="recent-fill-badge">View report</div>
+      `;
+      card.addEventListener('click', () => {
+        window.location.href = '/results?patient_id=' + encodeURIComponent(p.patient_id);
+      });
+      cardsEl.appendChild(card);
+    });
+  }
+
+  // ── One chart per account ───────────────────────────────────────────────
+  // Signed-in users who already have a chart get "continue your health chat"
+  // instead of the form; /?correct=1 opens the form once for their correction.
+  // The server enforces the same rule on /generate-chart.
+  async function openMyChart(patientId) {
+    const btn = document.getElementById('chart-ready-btn');
+    btn.disabled = true;
+    btn.textContent = 'Opening your chart…';
+    try {
+      const res = await fetch('/patient-data/' + encodeURIComponent(patientId));
+      const payload = await res.json();
+      if (!res.ok || !payload.success) throw new Error(payload.error || 'Could not open your chart');
+      sessionStorage.setItem('chartData', JSON.stringify({ patient_id: patientId, ...payload.data }));
+      window.location.href = '/results';
+    } catch (err) {
+      alert(err.message);
+      btn.disabled = false;
+      btn.textContent = 'Continue your health chat ✦';
+    }
+  }
+
+  async function applyChartAllowance() {
+    let status;
+    try {
+      const res = await fetch('/my-chart');
+      if (!res.ok) return;              // signed out or server issue: leave the form as is
+      status = await res.json();
+    } catch (e) {
+      return;
+    }
+    // Admin page link: only for ADMIN_CLERK_USER_IDS (the server checks again).
+    if (status.is_admin) document.getElementById('admin-link').hidden = false;
+    if (status.is_tester) document.getElementById('tester-link').hidden = false;
+    if (!status.limited) return;        // admins and local testing: unlimited
+
+    const form = document.querySelector('.birth-form');
+    const correcting = new URLSearchParams(window.location.search).get('correct') === '1';
+
+    if (status.has_chart && !(correcting && status.can_correct)) {
+      form.style.display = 'none';    // its CSS display:flex would override the hidden attribute
+      document.getElementById('recent-bar').style.display = 'none';
+      const card = document.getElementById('chart-ready');
+      card.hidden = false;
+      document.getElementById('chart-ready-btn')
+        .addEventListener('click', () => openMyChart(status.active_patient_id));
+      return;
+    }
+
+    if (correcting && status.can_correct) {
+      document.getElementById('correct-banner').hidden = false;
+      document.getElementById('recent-bar').style.display = 'none';
+      document.getElementById('birth-submit-btn').textContent = 'Create my corrected chart ✦';
+      document.getElementById('cta').scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  // Details typed before signing in (saved by session.js): put them back and
+  // continue the Generate the user had clicked - unless this account already
+  // has its chart, in which case the "chart ready" card is shown instead.
+  function resumePendingGenerate() {
+    const saved = window.astromedicaTakePendingBirthForm && window.astromedicaTakePendingBirthForm();
+    if (!saved) return;
+    const form = document.querySelector('.birth-form');
+    if (!form || form.style.display === 'none') return;
+    Object.entries(saved.fields).forEach(([id, value]) => {
+      const el = document.getElementById(id);
+      if (el && form.contains(el)) el.value = value;
+    });
+    const geo = document.getElementById('geo-status');
+    if (geo && saved.geoStatus) geo.innerHTML = saved.geoStatus;
+    document.getElementById('cta').scrollIntoView({ behavior: 'smooth' });
+    if (window.astromedicaIsSignedIn && window.astromedicaIsSignedIn()) {
+      setTimeout(() => form.requestSubmit(), 400);
+    }
+  }
+
+  // Render on page load, once requests can carry the login token
+  document.addEventListener('DOMContentLoaded', async () => {
+    await (window.astromedicaAuthReady || Promise.resolve());
+    renderRecentBar();
+    await applyChartAllowance();
+    resumePendingGenerate();
+  });
+</script>
+
+<script>
+  // ── Tester button ────────────────────────────────────────────────────────
+  // Not signed in -> sign in first (the daily cap is counted per account).
+  // Already a tester -> straight to "My test charts". Otherwise ask the password.
+  (function () {
+    const overlay = document.getElementById('tester-overlay');
+    const input   = document.getElementById('tester-input');
+    const error   = document.getElementById('tester-error');
+    const submit  = document.getElementById('tester-submit');
+
+    function closeBox() { overlay.hidden = true; }
+
+    document.getElementById('tester-btn').addEventListener('click', async () => {
+      await (window.astromedicaAuthReady || Promise.resolve());
+      if (window.astromedicaIsSignedIn && !window.astromedicaIsSignedIn()) {
+        if (window.Clerk) window.Clerk.openSignIn();   // reloads the page once signed in
+        return;
+      }
+      try {
+        const res = await fetch('/tester/api/status');
+        const status = await res.json().catch(() => ({}));
+        if (res.ok && status.is_tester) { window.location.href = '/tester'; return; }
+      } catch (e) { /* fall through to the password box */ }
+      error.textContent = '';
+      input.value = '';
+      overlay.hidden = false;
+      input.focus();
+    });
+
+    document.getElementById('tester-cancel').addEventListener('click', closeBox);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeBox(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) closeBox(); });
+
+    document.getElementById('tester-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      error.textContent = '';
+      submit.disabled = true;
+      try {
+        const res = await fetch('/tester/unlock', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ password: input.value })
+        });
+        const result = await res.json().catch(() => ({}));
+        if (res.ok && result.success) { window.location.href = '/tester'; return; }
+        error.textContent = res.status === 429
+          ? 'Too many tries. Please wait a few minutes.'
+          : (result.error || 'Could not check the password.');
+        input.select();
+      } catch (err) {
+        error.textContent = 'Could not reach the server.';
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  })();
+</script>
+</body>
+</html>

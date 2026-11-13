@@ -1,0 +1,61 @@
+# Production compose for the Compute Engine VM.
+# Secrets are supplied by the environment or Secret Manager, not by this file.
+#
+# The env file below must also contain (see README §1.8):
+#   WEB_CONCURRENCY=1              one gunicorn worker - chat sessions live in
+#   GUNICORN_CMD_ARGS=--threads 8  memory; a 2nd worker gives "Session not found"
+#
+# Admin page (README §1.9): http(s)://<vm-address>/admin, or the "Admin" button on
+# the home page. Only Clerk ids listed in the env file can use it:
+#   ADMIN_CLERK_USER_IDS=user_aaa,user_bbb      (comma-separated, no spaces)
+# Find an id in the Clerk dashboard (Users -> User ID) or in the log line
+# "[Auth] Signed in: user_... -> patient". After editing the env file:
+#   sudo docker compose -f docker-compose.prod.yml up -d --force-recreate
+# The log then shows "[Auth] Admins (see all patients): N in ADMIN_CLERK_USER_IDS".
+# Tester button (README §1.10): add these to the same env file, then recreate:
+#   TESTER_PASSWORD=<the password you give early-access testers>
+#   TESTER_DAILY_CAP=30            (new charts per tester per day; optional)
+services:
+  api:
+    image: ${APP_IMAGE:-astrohealth-api:local}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - /etc/astrohealth.env
+    environment:
+      APP_ENV: production
+      PORT: "8000"
+      TRUST_CLOUDFLARE: "true"
+      TRUST_PROXY: "true"
+    volumes:
+      - patient_data:/app/patients
+      - chart_cache:/app/charts_cache
+      - rl_outputs:/app/rl_enhancer/data/outputs
+      - rl_api_cache:/app/rl_enhancer/data/api_cache
+      - rl_weights:/app/rl_enhancer/weights
+      - rl_uploads:/app/rl_enhancer/data/uploads
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 2g
+    cpus: 2.0
+    restart: unless-stopped
+
+volumes:
+  patient_data:
+  chart_cache:
+  rl_outputs:
+  rl_api_cache:
+  rl_weights:
+    external: true
+    name: astrohealth_rl_weights
+  rl_uploads:
+    external: true
+    name: astrohealth_rl_uploads

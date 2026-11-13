@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# Data and Cache
+cache_index.json
+counter.txt
+dasha_test_out.txt
+*.log
+
+# Patient data — real names, birth details and chats. Never in git.
+patients/
+charts_cache/
+_db_stub/
+chart_data.json
+raw_chart.json
+raw_dasha.json
+
+# RL runtime data — uploads/outputs can hold patient names; weights are
+# retrained every hour on each machine.
+rl_enhancer/data/
+rl_enhancer/weights/*.pt
+tmp/
+
+# Secrets — real keys live only in .env (copy .env.example)
+.env
+*credentials*.json
+*service-account*.json
+
+# Old scripts with API keys written in them
+test_details.py
+test_gemini.py
+test_gemini_connection.py
+test_models.py
+
+# IDEs
+.claude/
+.vscode/
+.idea/
+.trae/
+
+# OS
+.DS_Store
+Thumbs.db

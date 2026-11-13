@@ -1,0 +1,896 @@
+{
+  "Ashwini": {
+    "1": [
+      "Injury in the head",
+      "Congestion in the brain",
+      "Cerebral     anaemia",
+      "Fainting",
+      "Epilepsy",
+      "Violence",
+      "Spasms",
+      "Sever headache on any one side",
+      "Neuralgia,coma",
+      "Cerebral haemorrhages",
+      "Paralytic stroke",
+      "Smallpox"
+    ],
+    "2": [
+      "Injury in the head",
+      "Congestion in the brain",
+      "Cerebral     anaemia",
+      "Fainting",
+      "Epilepsy",
+      "Violence",
+      "Spasms",
+      "Sever headache on any one side",
+      "Neuralgia,coma",
+      "Cerebral haemorrhages",
+      "Paralytic stroke",
+      "Smallpox"
+    ],
+    "3": [
+      "Injury in the head",
+      "Congestion in the brain",
+      "Cerebral     anaemia",
+      "Fainting",
+      "Epilepsy",
+      "Violence",
+      "Spasms",
+      "Sever headache on any one side",
+      "Neuralgia,coma",
+      "Cerebral haemorrhages",
+      "Paralytic stroke",
+      "Smallpox"
+    ],
+    "4": [
+      "Injury in the head",
+      "Congestion in the brain",
+      "Cerebral     anaemia",
+      "Fainting",
+      "Epilepsy",
+      "Violence",
+      "Spasms",
+      "Sever headache on any one side",
+      "Neuralgia,coma",
+      "Cerebral haemorrhages",
+      "Paralytic stroke",
+      "Smallpox"
+    ]
+  },
+  "Bharani": {
+    "1": [
+      "Injury in the head mostly in the fore head,just around the eyes,",
+      "Cold",
+      "Veneral distemper",
+      "Syphilis affectingtube and vision",
+      "Weakness"
+    ],
+    "2": [
+      "Injury in the head mostly in the fore head,just around the eyes,",
+      "Cold",
+      "Veneral distemper",
+      "Syphilis affectingtube and vision",
+      "Weakness"
+    ],
+    "3": [
+      "Injury in the head mostly in the fore head,just around the eyes,",
+      "Cold",
+      "Veneral distemper",
+      "Syphilis affectingtube and vision",
+      "Weakness"
+    ],
+    "4": [
+      "Injury in the head mostly in the fore head,just around the eyes,",
+      "Cold",
+      "Veneral distemper",
+      "Syphilis affectingtube and vision",
+      "Weakness"
+    ]
+  },
+  "Kruthika": {
+    "1": [
+      "Sharp fever",
+      "Malaria",
+      "Filaria",
+      "Plague",
+      "Small pox",
+      "Wounds",
+      "Brain fever",
+      "Accident includind fire accidents"
+    ],
+    "2": [
+      "Pimples",
+      "Cuts",
+      "Reddish eyes",
+      "Eye sore",
+      "Throat infections",
+      "Tumours in the knees",
+      "Neck problems",
+      "Polips of nose"
+    ],
+    "3": [
+      "Pimples",
+      "Cuts",
+      "Reddish eyes",
+      "Eye sore",
+      "Throat infections",
+      "Tumours in the knees",
+      "Neck problems",
+      "Polips of nose"
+    ],
+    "4": [
+      "Pimples",
+      "Cuts",
+      "Reddish eyes",
+      "Eye sore",
+      "Throat infections",
+      "Tumours in the knees",
+      "Neck problems",
+      "Polips of nose"
+    ]
+  },
+  "Rohini": {
+    "1": [
+      "Sore throat",
+      "Cold & Cough",
+      "Pain in the legs & feets",
+      "Irregular menses",
+      "Pain in the breasts"
+    ],
+    "2": [
+      "Sore throat",
+      "Cold & Cough",
+      "Pain in the legs & feets",
+      "Irregular menses",
+      "Pain in the breasts"
+    ],
+    "3": [
+      "Sore throat",
+      "Cold & Cough",
+      "Pain in the legs & feets",
+      "Irregular menses",
+      "Pain in the breasts"
+    ],
+    "4": [
+      "Sore throat",
+      "Cold & Cough",
+      "Pain in the legs & feets",
+      "Irregular menses",
+      "Pain in the breasts"
+    ]
+  },
+  "Mrigashira": {
+    "1": [
+      "Pimples",
+      "Injury in the face",
+      "Pain in the throat",
+      "Diphtheria",
+      "Weakness",
+      "Veneral distemper",
+      "Polipus"
+    ],
+    "2": [
+      "Pimples",
+      "Injury in the face",
+      "Pain in the throat",
+      "Diphtheria",
+      "Weakness",
+      "Veneral distemper",
+      "Polipus"
+    ],
+    "3": [
+      "Corrupted blood",
+      "Itches",
+      "Wounds & Fracture of arms",
+      "Collar bone fracture",
+      "pains in the shoulders"
+    ],
+    "4": [
+      "Corrupted blood",
+      "Itches",
+      "Wounds & Fracture of arms",
+      "Collar bone fracture",
+      "pains in the shoulders"
+    ]
+  },
+  "Aridra": {
+    "1": [
+      "Septic throat",
+      "Asthama",
+      "Dry coughs",
+      "Diphtheria",
+      "Ear infections",
+      "Puss in the ear",
+      "Eosonophilia"
+    ],
+    "2": [
+      "Septic throat",
+      "Asthama",
+      "Dry coughs",
+      "Diphtheria",
+      "Ear infections",
+      "Puss in the ear",
+      "Eosonophilia"
+    ],
+    "3": [
+      "Septic throat",
+      "Asthama",
+      "Dry coughs",
+      "Diphtheria",
+      "Ear infections",
+      "Puss in the ear",
+      "Eosonophilia"
+    ],
+    "4": [
+      "Septic throat",
+      "Asthama",
+      "Dry coughs",
+      "Diphtheria",
+      "Ear infections",
+      "Puss in the ear",
+      "Eosonophilia"
+    ]
+  },
+  "Punarvasu": {
+    "1": [
+      "Swelling and pain in the ear",
+      "Goitre due to Iodine defficiency",
+      "Pulmonary apoplexy"
+    ],
+    "2": [
+      "Swelling and pain in the ear",
+      "Goitre due to Iodine defficiency",
+      "Pulmonary apoplexy"
+    ],
+    "3": [
+      "Swelling and pain in the ear",
+      "Goitre due to Iodine defficiency",
+      "Pulmonary apoplexy"
+    ],
+    "4": [
+      "Dropsy",
+      "Beri beri",
+      "Stomach upset",
+      "Tuberculosis",
+      "Pneumonia",
+      "Liver complaint & problems"
+    ]
+  },
+  "Pushya": {
+    "1": [
+      "Tuberculosis",
+      "Ulceratives in the respiratory system",
+      "Gastric ulcer",
+      "Gallstones",
+      "Cancer",
+      "Cough & hiccups",
+      "Eczema"
+    ],
+    "2": [
+      "Tuberculosis",
+      "Ulceratives in the respiratory system",
+      "Gastric ulcer",
+      "Gallstones",
+      "Cancer",
+      "Cough & hiccups",
+      "Eczema"
+    ],
+    "3": [
+      "Tuberculosis",
+      "Ulceratives in the respiratory system",
+      "Gastric ulcer",
+      "Gallstones",
+      "Cancer",
+      "Cough & hiccups",
+      "Eczema"
+    ],
+    "4": [
+      "Tuberculosis",
+      "Ulceratives in the respiratory system",
+      "Gastric ulcer",
+      "Gallstones",
+      "Cancer",
+      "Cough & hiccups",
+      "Eczema"
+    ]
+  },
+  "Ashlesha": {
+    "1": [
+      "Vitamin 'B' deficiency",
+      "Stomach pain",
+      "Pains in knee &legs",
+      "Nervous prblems",
+      "Indigestion"
+    ],
+    "2": [
+      "Vitamin 'B' deficiency",
+      "Stomach pain",
+      "Pains in knee &legs",
+      "Nervous prblems",
+      "Indigestion"
+    ],
+    "3": [
+      "Vitamin 'B' deficiency",
+      "Stomach pain",
+      "Pains in knee &legs",
+      "Nervous prblems",
+      "Indigestion"
+    ],
+    "4": [
+      "Vitamin 'B' deficiency",
+      "Stomach pain",
+      "Pains in knee &legs",
+      "Nervous prblems",
+      "Indigestion"
+    ]
+  },
+  "Magha": {
+    "1": [
+      "Heart affected by sudden shock",
+      "Grief of poison",
+      "pain in the back",
+      "Kidney stone",
+      "Spinal Meningities"
+    ],
+    "2": [
+      "Heart affected by sudden shock",
+      "Grief of poison",
+      "pain in the back",
+      "Kidney stone",
+      "Spinal Meningities"
+    ],
+    "3": [
+      "Heart affected by sudden shock",
+      "Grief of poison",
+      "pain in the back",
+      "Kidney stone",
+      "Spinal Meningities"
+    ],
+    "4": [
+      "Heart affected by sudden shock",
+      "Grief of poison",
+      "pain in the back",
+      "Kidney stone",
+      "Spinal Meningities"
+    ]
+  },
+  "Purvaphalguni": {
+    "1": [
+      "Heart affected due to disappointment of love affairs",
+      "Heart affects due to loss of children",
+      "Swelling of ankle",
+      "Blood pressure",
+      "Heart Valves affected",
+      "Curvature of spine"
+    ],
+    "2": [
+      "Heart affected due to disappointment of love affairs",
+      "Heart affects due to loss of children",
+      "Swelling of ankle",
+      "Blood pressure",
+      "Heart Valves affected",
+      "Curvature of spine"
+    ],
+    "3": [
+      "Heart affected due to disappointment of love affairs",
+      "Heart affects due to loss of children",
+      "Swelling of ankle",
+      "Blood pressure",
+      "Heart Valves affected",
+      "Curvature of spine"
+    ],
+    "4": [
+      "Heart affected due to disappointment of love affairs",
+      "Heart affects due to loss of children",
+      "Swelling of ankle",
+      "Blood pressure",
+      "Heart Valves affected",
+      "Curvature of spine"
+    ]
+  },
+  "Uttara phalguni": {
+    "1": [
+      "Pains in the back & head.",
+      "Spotted fever",
+      "Plague",
+      "Hyperaemia",
+      "Blood pressure",
+      "Become Mad temporarily due to clotting of blood in the capillary of brain",
+      "Palpitation",
+      "Back ache"
+    ],
+    "2": [
+      "Tumours in the bowels",
+      "Stomach disorder",
+      "Sorethroat",
+      "Swellin in the neck"
+    ],
+    "3": [
+      "Tumours in the bowels",
+      "Stomach disorder",
+      "Sorethroat",
+      "Swellin in the neck"
+    ],
+    "4": [
+      "Tumours in the bowels",
+      "Stomach disorder",
+      "Sorethroat",
+      "Swellin in the neck"
+    ]
+  },
+  "Hastha": {
+    "1": [
+      "Vitamin 'B' deficiency",
+      "Gas formation",
+      "Loose bowel",
+      "Pain & disorder in the bowels",
+      "Weakness of arms and shoulder",
+      "Breathing problems",
+      "Worm infestations",
+      "Typhoid",
+      "Bacillary dysentry",
+      "Hysteria"
+    ],
+    "2": [
+      "Vitamin 'B' deficiency",
+      "Gas formation",
+      "Loose bowel",
+      "Pain & disorder in the bowels",
+      "Weakness of arms and shoulder",
+      "Breathing problems",
+      "Worm infestations",
+      "Typhoid",
+      "Bacillary dysentry",
+      "Hysteria"
+    ],
+    "3": [
+      "Vitamin 'B' deficiency",
+      "Gas formation",
+      "Loose bowel",
+      "Pain & disorder in the bowels",
+      "Weakness of arms and shoulder",
+      "Breathing problems",
+      "Worm infestations",
+      "Typhoid",
+      "Bacillary dysentry",
+      "Hysteria"
+    ],
+    "4": [
+      "Vitamin 'B' deficiency",
+      "Gas formation",
+      "Loose bowel",
+      "Pain & disorder in the bowels",
+      "Weakness of arms and shoulder",
+      "Breathing problems",
+      "Worm infestations",
+      "Typhoid",
+      "Bacillary dysentry",
+      "Hysteria"
+    ]
+  },
+  "Chitha": {
+    "1": [
+      "Ulcers",
+      "Acute pains in the body",
+      "Choleric humours",
+      "Irritation & itching",
+      "Wounds from insects"
+    ],
+    "2": [
+      "Ulcers",
+      "Acute pains in the body",
+      "Choleric humours",
+      "Irritation & itching",
+      "Wounds from insects"
+    ],
+    "3": [
+      "Problems in kidney & bladder",
+      "Excess of urine and kidney problem",
+      "Sun stroke",
+      "Brain fever"
+    ],
+    "4": [
+      "Problems in kidney & bladder",
+      "Excess of urine and kidney problem",
+      "Sun stroke",
+      "Brain fever"
+    ]
+  },
+  "Swathi": {
+    "1": [
+      "Leprosy",
+      "Puss formation",
+      "skin problems",
+      "Urinary infection",
+      "Eczema"
+    ],
+    "2": [
+      "Leprosy",
+      "Puss formation",
+      "skin problems",
+      "Urinary infection",
+      "Eczema"
+    ],
+    "3": [
+      "Leprosy",
+      "Puss formation",
+      "skin problems",
+      "Urinary infection",
+      "Eczema"
+    ],
+    "4": [
+      "Leprosy",
+      "Puss formation",
+      "skin problems",
+      "Urinary infection",
+      "Eczema"
+    ]
+  },
+  "Vishaka": {
+    "1": [
+      "Deficiency of adrenal secretion",
+      "Diabetics,insulin deficiency",
+      "Congestion of brain"
+    ],
+    "2": [
+      "Deficiency of adrenal secretion",
+      "Diabetics,insulin deficiency",
+      "Congestion of brain"
+    ],
+    "3": [
+      "Deficiency of adrenal secretion",
+      "Diabetics,insulin deficiency",
+      "Congestion of brain"
+    ],
+    "4": [
+      "Diseases of womb",
+      "Fibroid tumour",
+      "Prostate gland enlargement",
+      "Urinary trouble",
+      "Frequent micturisation",
+      "Abnormal bleeding during menses"
+    ]
+  },
+  "Anuradha": {
+    "1": [
+      "Suppression of menses,poor bleeding & severe pain",
+      "Piles",
+      "Phelgm",
+      "Sore throat",
+      "fracture of hip bone"
+    ],
+    "2": [
+      "Suppression of menses,poor bleeding & severe pain",
+      "Piles",
+      "Phelgm",
+      "Sore throat",
+      "fracture of hip bone"
+    ],
+    "3": [
+      "Suppression of menses,poor bleeding & severe pain",
+      "Piles",
+      "Phelgm",
+      "Sore throat",
+      "fracture of hip bone"
+    ],
+    "4": [
+      "Suppression of menses,poor bleeding & severe pain",
+      "Piles",
+      "Phelgm",
+      "Sore throat",
+      "fracture of hip bone"
+    ]
+  },
+  "Jyesta": {
+    "1": [
+      "Leucorrhoea",
+      "piles,fistula",
+      "Affliction of bowels",
+      "Pains in  arms and shoulder"
+    ],
+    "2": [
+      "Leucorrhoea",
+      "piles,fistula",
+      "Affliction of bowels",
+      "Pains in  arms and shoulder"
+    ],
+    "3": [
+      "Leucorrhoea",
+      "piles,fistula",
+      "Affliction of bowels",
+      "Pains in  arms and shoulder"
+    ],
+    "4": [
+      "Leucorrhoea",
+      "piles,fistula",
+      "Affliction of bowels",
+      "Pains in  arms and shoulder"
+    ]
+  },
+  "Moola": {
+    "1": [
+      "Locomotor ataxia",
+      "Rheumatism",
+      "Hip diseases",
+      "Pulmonary troubles"
+    ],
+    "2": [
+      "Locomotor ataxia",
+      "Rheumatism",
+      "Hip diseases",
+      "Pulmonary troubles"
+    ],
+    "3": [
+      "Locomotor ataxia",
+      "Rheumatism",
+      "Hip diseases",
+      "Pulmonary troubles"
+    ],
+    "4": [
+      "Locomotor ataxia",
+      "Rheumatism",
+      "Hip diseases",
+      "Pulmonary troubles"
+    ]
+  },
+  "Poorvashada": {
+    "1": [
+      "Diabetics",
+      "Respiratory diseases",
+      "Swelling above the knees"
+    ],
+    "2": [
+      "Diabetics",
+      "Respiratory diseases",
+      "Swelling above the knees"
+    ],
+    "3": [
+      "Diabetics",
+      "Respiratory diseases",
+      "Swelling above the knees"
+    ],
+    "4": [
+      "Diabetics",
+      "Respiratory diseases",
+      "Swelling above the knees"
+    ]
+  },
+  "Uttaraashada": {
+    "1": [
+      "Paralysis of limbs",
+      "Pulmonary diseases",
+      "Affected eyes"
+    ],
+    "2": [
+      "Skine diseases",
+      "Leprosy",
+      "Digestive disorders",
+      "Gas in stomach",
+      "Palpitation of heart",
+      "Cardiac thrombosis"
+    ],
+    "3": [
+      "Skine diseases",
+      "Leprosy",
+      "Digestive disorders",
+      "Gas in stomach",
+      "Palpitation of heart",
+      "Cardiac thrombosis"
+    ],
+    "4": [
+      "Skine diseases",
+      "Leprosy",
+      "Digestive disorders",
+      "Gas in stomach",
+      "Palpitation of heart",
+      "Cardiac thrombosis"
+    ]
+  },
+  "Shravana": {
+    "1": [
+      "Filaria",
+      "Eczema",
+      "Skin diseases",
+      "tuberculosis",
+      "Poor digestion"
+    ],
+    "2": [
+      "Filaria",
+      "Eczema",
+      "Skin diseases",
+      "tuberculosis",
+      "Poor digestion"
+    ],
+    "3": [
+      "Filaria",
+      "Eczema",
+      "Skin diseases",
+      "tuberculosis",
+      "Poor digestion"
+    ],
+    "4": [
+      "Filaria",
+      "Eczema",
+      "Skin diseases",
+      "tuberculosis",
+      "Poor digestion"
+    ]
+  },
+  "Dhanishta": {
+    "1": [
+      "Leg injury",
+      "Esonophilis",
+      "Dry cough",
+      "hiccups",
+      "Amputation"
+    ],
+    "2": [
+      "Leg injury",
+      "Esonophilis",
+      "Dry cough",
+      "hiccups",
+      "Amputation"
+    ],
+    "3": [
+      "Fracture of legs",
+      "Blood poisoning",
+      "Heart failure",
+      "Cardiac thrombosis",
+      "High                            Blood pressure",
+      "Over heated blood",
+      "Palpitation"
+    ],
+    "4": [
+      "Fracture of legs",
+      "Blood poisoning",
+      "Heart failure",
+      "Cardiac thrombosis",
+      "High                            Blood pressure",
+      "Over heated blood",
+      "Palpitation"
+    ]
+  },
+  "Shathabhisha": {
+    "1": [
+      "Rheumatism",
+      "Rheumatic heart diaeases",
+      "Leprosy",
+      "High                            Blood pressure",
+      "Fracture",
+      "worm             infestation"
+    ],
+    "2": [
+      "Rheumatism",
+      "Rheumatic heart diaeases",
+      "Leprosy",
+      "High                            Blood pressure",
+      "Fracture",
+      "worm             infestation"
+    ],
+    "3": [
+      "Rheumatism",
+      "Rheumatic heart diaeases",
+      "Leprosy",
+      "High                            Blood pressure",
+      "Fracture",
+      "worm             infestation"
+    ],
+    "4": [
+      "Rheumatism",
+      "Rheumatic heart diaeases",
+      "Leprosy",
+      "High                            Blood pressure",
+      "Fracture",
+      "worm             infestation"
+    ]
+  },
+  "Poorvabhadrapada": {
+    "1": [
+      "Apoplexy",
+      "Irregular heart beats",
+      "Dropsy",
+      "Milk leg",
+      "Swollen ankles",
+      "Dilated heart",
+      "Low blood pressure"
+    ],
+    "2": [
+      "Apoplexy",
+      "Irregular heart beats",
+      "Dropsy",
+      "Milk leg",
+      "Swollen ankles",
+      "Dilated heart",
+      "Low blood pressure"
+    ],
+    "3": [
+      "Apoplexy",
+      "Irregular heart beats",
+      "Dropsy",
+      "Milk leg",
+      "Swollen ankles",
+      "Dilated heart",
+      "Low blood pressure"
+    ],
+    "4": [
+      "Swelling in body",
+      "Perspiring feet",
+      "Enlarged Liver",
+      "Abdominala tumour",
+      "Intestinal disorders",
+      "Jaundice"
+    ]
+  },
+  "Uttara  bhadrapada": {
+    "1": [
+      "Rheumatic pains",
+      "Indigestion",
+      "constipation",
+      "Hernia",
+      "Cold foot",
+      "Fracture in foot",
+      "Tuberculosis",
+      "Dropsy"
+    ],
+    "2": [
+      "Rheumatic pains",
+      "Indigestion",
+      "constipation",
+      "Hernia",
+      "Cold foot",
+      "Fracture in foot",
+      "Tuberculosis",
+      "Dropsy"
+    ],
+    "3": [
+      "Rheumatic pains",
+      "Indigestion",
+      "constipation",
+      "Hernia",
+      "Cold foot",
+      "Fracture in foot",
+      "Tuberculosis",
+      "Dropsy"
+    ],
+    "4": [
+      "Rheumatic pains",
+      "Indigestion",
+      "constipation",
+      "Hernia",
+      "Cold foot",
+      "Fracture in foot",
+      "Tuberculosis",
+      "Dropsy"
+    ]
+  },
+  "Revathi": {
+    "1": [
+      "Abnominal disorders",
+      "Intestainal Ulcers mostly due to alchohal & Drugs",
+      "Nephrities",
+      "Deafness",
+      "Pus in the ears"
+    ],
+    "2": [
+      "Abnominal disorders",
+      "Intestainal Ulcers mostly due to alchohal & Drugs",
+      "Nephrities",
+      "Deafness",
+      "Pus in the ears"
+    ],
+    "3": [
+      "Abnominal disorders",
+      "Intestainal Ulcers mostly due to alchohal & Drugs",
+      "Nephrities",
+      "Deafness",
+      "Pus in the ears"
+    ],
+    "4": [
+      "Abnominal disorders",
+      "Intestainal Ulcers mostly due to alchohal & Drugs",
+      "Nephrities",
+      "Deafness",
+      "Pus in the ears"
+    ]
+  }
+}

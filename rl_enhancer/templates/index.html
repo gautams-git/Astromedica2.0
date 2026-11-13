@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Medical Report Enhancer</title>
+  <link rel="stylesheet" href="/static/styles.css?v={{ build_id }}" />
+</head>
+<body>
+  <header>
+    <h1>🩺 Medical Report Enhancer</h1>
+    <p class="subtitle">
+      Paste a wrapper object with <code>conditions</code> and <code>chat_log</code>,
+      or upload a <code>.json</code> file.
+    </p>
+    <div class="badge">build {{ build_id }}</div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>1. Input JSON</h2>
+      <p class="hint">
+        Shape: <code>{"conditions": [{"Organ": ["Disease"]}], "chat_log": [{...}]}</code>
+      </p>
+      <textarea id="jsonInput" class="json-input" spellcheck="false">{
+  "patient_id": "001",
+  "patient_name": "Ravi Sharma",
+  "conditions": [
+    {"Kidney":   ["Chronic Kidney Disease"]},
+    {"Pancreas": ["Diabetes Type 2"]},
+    {"Blood":    ["Anemia"]}
+  ],
+  "chat_log": []
+}</textarea>
+      <div class="row">
+        <button id="submitBtn" type="button">Enhance Report</button>
+        <label class="file-label">
+          Upload .json
+          <input type="file" id="fileInput" accept=".json,application/json" hidden />
+        </label>
+        <button id="clearBtn" class="ghost-btn" type="button">Clear</button>
+      </div>
+      <p id="errorBox" class="error hidden"></p>
+    </section>
+
+    <section class="card">
+      <h2>2. Preview</h2>
+      <ul id="previewList" class="conditions-list">
+        <li class="hint">Submit JSON to preview.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>3. Job status</h2>
+      <div id="jobBox" class="hidden">
+        <div class="job-meta">
+          <span>Job: <code id="jobId">—</code></span>
+          <span id="jobStatus" class="status">—</span>
+        </div>
+        <div class="progress"><div id="progressBar" class="bar"></div></div>
+        <p id="jobMessage" class="message">—</p>
+        <div class="actions">
+          <a id="downloadBtn" class="btn disabled" href="#" download>⬇ Download Enhanced JSON</a>
+          <a id="viewBtn" class="btn ghost-btn disabled" href="#" target="_blank">View result</a>
+        </div>
+      </div>
+      <p id="noJob" class="hint">No job yet.</p>
+    </section>
+
+    <section class="card">
+      <h2>4. Model training</h2>
+      <p class="hint">
+        Two long-running jobs. 20 epochs each by default.
+        Once trained, generated symptom lists are preferred over the
+        curated library.
+      </p>
+
+      <div class="train-status">
+        <span class="badge badge-muted" id="pretrainBadge">ANN: not trained</span>
+        <span class="badge badge-muted" id="ppoBadge">PPO: not trained</span>
+        <span class="badge badge-muted" id="deviceBadge">device: —</span>
+      </div>
+
+      <div class="row" style="margin-top: 12px;">
+        <button id="pretrainBtn" class="train-btn" type="button">
+          🧠 Pre-train CustomANN (20 epochs)
+        </button>
+        <button id="ppoBtn" class="train-btn" type="button">
+          🎯 Run PPO Training (20 epochs)
+        </button>
+        <button id="refreshTrainBtn" class="ghost-btn" type="button">
+          ↻ Refresh status
+        </button>
+      </div>
+
+      <div id="trainJobBox" class="hidden" style="margin-top: 14px;">
+        <div class="job-meta">
+          <span>Train job: <code id="trainJobId">—</code></span>
+          <span id="trainJobStatus" class="status">—</span>
+        </div>
+        <div class="progress"><div id="trainProgressBar" class="bar"></div></div>
+        <p id="trainJobMessage" class="message">—</p>
+      </div>
+
+      <p id="trainError" class="error hidden"></p>
+    </section>
+  </main>
+
+  <script src="/static/app.js?v={{ build_id }}"></script>
+</body>
+</html>

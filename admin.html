@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AstroMedica Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07091a; --bg2: #0e1124; --card: #141936; --card2: #1a2042;
+    --border: rgba(201,168,76,0.22); --border2: rgba(255,255,255,0.08);
+    --gold: #C9A84C; --gold-dim: rgba(201,168,76,0.14);
+    --text: #ECEAF4; --muted: #9A98B0;
+    --danger: #ef6b6b; --danger-dim: rgba(239,107,107,0.12);
+    --ok: #3ec491; --ok-dim: rgba(62,196,145,0.12);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; }
+  a { color: var(--gold); }
+  header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 16px;
+    padding: 14px 32px; background: rgba(7,9,26,0.92); border-bottom: 1px solid var(--border2); backdrop-filter: blur(8px); }
+  .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--text); text-decoration: none; }
+  .logo span { color: var(--gold); }
+  .tag { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold);
+    border: 1px solid var(--border); padding: 3px 10px; border-radius: 999px; }
+  header .spacer { flex: 1; }
+  #account-slot button, .btn { font-family: inherit; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--gold); cursor: pointer;
+    text-decoration: none; display: inline-block; }
+  .btn:hover { background: var(--gold-dim); }
+  .btn.danger { color: var(--danger); border-color: rgba(239,107,107,0.4); }
+  .btn.danger:hover { background: var(--danger-dim); }
+  .btn.solid { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+  .btn.solid.danger { background: var(--danger); color: #1a0606; border-color: var(--danger); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.small { padding: 5px 11px; font-size: 0.7rem; }
+  main { max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
+  h1 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 2.4rem; margin: 0 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 26px; }
+  .options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 26px; }
+  .option { background: var(--card); border: 1px solid var(--border2); border-radius: 12px; padding: 16px 18px; }
+  .option b { display: block; margin-bottom: 4px; font-weight: 500; }
+  .option p { margin: 0; color: var(--muted); font-size: 0.88rem; line-height: 1.5; }
+  .option.warn b { color: var(--danger); }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 18px; }
+  .toolbar input, .toolbar select { font-family: inherit; font-size: 0.92rem; color: var(--text); background: var(--bg2);
+    border: 1px solid var(--border2); border-radius: 8px; padding: 10px 14px; }
+  .toolbar input { flex: 1; min-width: 240px; }
+  .toolbar input:focus, .toolbar select:focus { outline: none; border-color: var(--gold); }
+  .chip { font-size: 0.8rem; color: var(--muted); background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 999px; padding: 6px 12px; }
+  .chip b { color: var(--text); font-weight: 500; }
+  #notice { display: none; margin-bottom: 18px; padding: 14px 18px; border-radius: 10px; border: 1px dashed var(--border); background: var(--gold-dim); }
+  .account { background: var(--card); border: 1px solid var(--border2); border-radius: 14px; margin-bottom: 16px; overflow: hidden; }
+  .acc-head { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; padding: 16px 20px; background: var(--card2); }
+  .acc-who { flex: 1; min-width: 240px; }
+  .acc-email { font-size: 1.05rem; font-weight: 500; word-break: break-all; }
+  .acc-meta { color: var(--muted); font-size: 0.8rem; margin-top: 3px; }
+  .badge { display: inline-block; font-size: 0.7rem; letter-spacing: 0.06em; padding: 2px 9px; border-radius: 999px;
+    border: 1px solid var(--border2); color: var(--muted); margin-left: 6px; vertical-align: middle; }
+  .badge.gold { color: var(--gold); border-color: var(--border); }
+  .badge.ok { color: var(--ok); border-color: rgba(62,196,145,0.35); background: var(--ok-dim); }
+  .badge.full { color: var(--danger); border-color: rgba(239,107,107,0.35); background: var(--danger-dim); }
+  .acc-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th { text-align: left; font-weight: 400; color: var(--muted); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 10px 20px; border-bottom: 1px solid var(--border2); }
+  td { padding: 11px 20px; border-bottom: 1px solid var(--border2); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  .none { padding: 14px 20px; color: var(--muted); font-size: 0.88rem; }
+  .pid { font-family: Consolas, monospace; color: var(--gold); }
+  .yes { color: var(--ok); } .no { color: var(--muted); }
+  .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+  .overlay { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,0.6); }
+  .overlay[hidden] { display: none; }
+  .modal { width: 100%; max-width: 460px; background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .modal h2 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 1.6rem; margin: 0 0 8px; }
+  .modal p { color: var(--muted); line-height: 1.55; margin: 0 0 12px; font-size: 0.92rem; }
+  .modal ul { margin: 0 0 14px 18px; padding: 0; color: var(--text); font-size: 0.86rem; line-height: 1.6; }
+  .modal input { width: 100%; font-family: inherit; font-size: 0.95rem; color: var(--text); background: var(--card); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; }
+  .modal input:focus { outline: none; border-color: var(--gold); }
+  .modal .actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .acc-panel { background: var(--card); border: 1px solid var(--border2); border-radius: 14px; margin-bottom: 22px; overflow: hidden; }
+  .acc-panel h2 { margin: 0; padding: 14px 20px; font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400;
+    color: var(--muted); background: var(--card2); }
+  .acc-panel .chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 20px 4px; }
+  .acc-panel .none { padding-top: 6px; }
+  .bar-cell { display: inline-block; width: 90px; height: 6px; border-radius: 999px; background: var(--bg2); vertical-align: middle; margin-right: 8px; overflow: hidden; }
+  .bar-cell i { display: block; height: 100%; background: var(--ok); }
+  .report { margin-top: 6px; font-size: 0.86rem; line-height: 1.6; }
+  .report .r-ok { color: var(--ok); } .report .r-kept { color: var(--muted); } .report .r-fail { color: var(--danger); }
+  body { overflow-x: hidden; }
+  @media (max-width: 760px) {
+    header { padding: 10px 16px; gap: 10px; flex-wrap: wrap; }
+    .logo { font-size: 1.25rem; }
+    main { padding: 24px 16px 60px; }
+    h1 { font-size: 2rem; }
+    .options { grid-template-columns: 1fr; }
+    .toolbar input { min-width: 0; flex-basis: 100%; }
+    .acc-head { padding: 14px 16px; }
+    .acc-who { min-width: 0; flex-basis: 100%; }
+    th:nth-child(3), td:nth-child(3), th:nth-child(4), td:nth-child(4), th:nth-child(6), td:nth-child(6) { display: none; }
+    td, th { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Astro<span>Medica</span></a>
+  <span class="tag">Admin</span>
+  <span class="spacer"></span>
+  <a class="btn" href="/">Home</a>
+  <div id="account-slot"></div>
+</header>
+
+<main>
+  <h1>Accounts and charts</h1>
+  <p class="sub">Every account, its charts and its chart allowance. Only admins can see this page.</p>
+
+  <div class="options">
+    <div class="option warn"><b>Delete chart</b><p>Deletes this chart and everything linked to it. The user can create a new chart.</p></div>
+    <div class="option"><b>Reset allowance</b><p>Keeps all charts. Lets the user create a new chart again.</p></div>
+    <div class="option warn"><b>Delete all data</b><p>Deletes all of this user's charts, chats and reports. Their login stays, so they can start fresh.</p></div>
+  </div>
+
+  <div class="acc-panel" id="tester-accuracy" hidden></div>
+
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="Search by email, name or patient id" aria-label="Search accounts">
+    <select id="filter" aria-label="Filter accounts">
+      <option value="all">All accounts</option>
+      <option value="charts">With charts</option>
+      <option value="nocharts">Without charts</option>
+      <option value="full">Allowance used up</option>
+    </select>
+    <span class="chip">Accounts <b id="t-accounts">–</b></span>
+    <span class="chip">Charts <b id="t-charts">–</b></span>
+    <button class="btn" id="refresh" type="button">Refresh</button>
+  </div>
+
+  <div id="notice"></div>
+  <div id="accounts"></div>
+</main>
+
+<div class="overlay" id="confirm" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="c-title">
+    <h2 id="c-title"></h2>
+    <p id="c-text"></p>
+    <ul id="c-list"></ul>
+    <p id="c-ask"></p>
+    <input id="c-input" autocomplete="off" aria-label="Type to confirm">
+    <div class="actions">
+      <button class="btn" id="c-cancel" type="button">Cancel</button>
+      <button class="btn solid" id="c-ok" type="button" disabled>Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/session.js"></script>
+<script>
+  const state = { accounts: [] };
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const day = (v) => {
+    if (!v) return '–';
+    const d = typeof v === 'number' ? new Date(v) : new Date(v);
+    return isNaN(d) ? '–' : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
+
+  function notice(html) {
+    const n = $('notice');
+    n.style.display = html ? 'block' : 'none';
+    n.innerHTML = html || '';
+  }
+
+  async function load() {
+    notice('');
+    $('accounts').innerHTML = '<div class="none">Loading accounts…</div>';
+    let res, data;
+    try {
+      res = await fetch('/admin/api/accounts');
+      data = await res.json().catch(() => ({}));
+    } catch (e) {
+      $('accounts').innerHTML = '';
+      return notice("Couldn't reach the server. Check your connection and press Refresh.");
+    }
+    if (res.status === 401) {
+      $('accounts').innerHTML = '';
+      notice('Please sign in with an admin account. <button class="btn small" type="button" onclick="window.Clerk && window.Clerk.openSignIn()">Sign in</button>');
+      return;
+    }
+    if (res.status === 404) {
+      $('accounts').innerHTML = '';
+      return notice('This page is for admins only.');
+    }
+    if (!res.ok || !data.success) {
+      $('accounts').innerHTML = '';
+      return notice('Could not load the accounts: ' + esc(data.error || res.status));
+    }
+    state.accounts = data.accounts;
+    $('t-accounts').textContent = data.totals.accounts;
+    $('t-charts').textContent = data.totals.charts;
+    if (!data.emails_available && data.accounts.length) {
+      notice('Emails could not be loaded from Clerk, so accounts show their Clerk id instead.');
+    }
+    render();
+    loadAccuracy();
+  }
+
+  const pctOf = (n, d) => d ? Math.round(100 * n / d) : 0;
+  async function loadAccuracy() {
+    const box = $('tester-accuracy');
+    let data;
+    try {
+      const res = await fetch('/admin/api/tester-accuracy');
+      data = await res.json();
+      if (!res.ok || !data.success) { box.hidden = true; return; }
+    } catch (e) { box.hidden = true; return; }
+    const t = data.totals;
+    if (!t.testers) { box.hidden = true; return; }
+    const rows = data.algorithms.map(a => `<tr>
+        <td>${esc(a.algorithm)}</td><td>${a.rated}</td>
+        <td><span class="bar-cell"><i style="width:${pctOf(a.top1, a.rated)}%"></i></span>${a.top1} (${pctOf(a.top1, a.rated)}%)</td>
+        <td><span class="bar-cell"><i style="width:${pctOf(a.top3, a.rated)}%"></i></span>${a.top3} (${pctOf(a.top3, a.rated)}%)</td>
+        <td>${a.disease_rated ? `<span class="bar-cell"><i style="width:${pctOf(a.disease_hit || 0, a.disease_rated)}%"></i></span>${a.disease_hit || 0} of ${a.disease_rated} (${pctOf(a.disease_hit || 0, a.disease_rated)}%)` : '<span class="no">–</span>'}</td></tr>`).join('');
+    box.innerHTML = `<h2>Tester accuracy</h2>
+      <div class="chips">
+        <span class="chip">Testers <b>${t.testers}</b></span>
+        <span class="chip">Charts run <b>${t.runs}</b></span>
+        <span class="chip">Rated <b>${t.rated}</b></span>
+        <span class="chip">Organs marked correct <b>${t.organ_correct}</b> · partly <b>${t.organ_partly}</b> · wrong <b>${t.organ_wrong}</b></span>
+        <span class="chip">Diseases marked correct <b>${t.disease_correct}</b> · partly <b>${t.disease_partly}</b> · wrong <b>${t.disease_wrong}</b></span>
+        <span class="chip">Chat relevant: yes <b>${t.chat_relevant_yes}</b> · partly <b>${t.chat_relevant_partly}</b> · no <b>${t.chat_relevant_no}</b></span>
+      </div>
+      ${rows ? `<div class="table-wrap"><table><thead><tr><th>Algorithm</th><th>Rated charts</th><th>First organ correct</th><th>Right organ in top 3</th><th>Right disease listed</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <div class="none">"Right organ" = an organ the tester marked Correct, or the organ they said was missed. "Right disease listed" = the algorithm lists a disease the tester marked Correct. Only charts with that information count.</div>`
+        : '<div class="none">No algorithm accuracy yet: it appears once testers rate charts.</div>'}`;
+    box.hidden = false;
+  }
+
+  function matches(acc, q, filter) {
+    if (filter === 'charts' && !acc.charts.length) return false;
+    if (filter === 'nocharts' && acc.charts.length) return false;
+    if (filter === 'full' && acc.charts_used < acc.max_charts) return false;
+    if (!q) return true;
+    const hay = [acc.email, acc.name, acc.clerk_user_id, acc.internal_user_id,
+                 ...acc.charts.flatMap(c => [c.patient_id, c.name, c.birth_place])].join(' ').toLowerCase();
+    return hay.includes(q);
+  }
+
+  function chartRows(acc) {
+    if (!acc.charts.length) return '<div class="none">No charts yet.</div>';
+    const statusBadge = { active: 'badge ok', replaced: 'badge', saved: 'badge gold' };
+    return `<div class="table-wrap"><table><thead><tr>
+        <th>Patient</th><th>Name</th><th>Born</th><th>Place</th><th>Status</th><th>Last chat</th><th>Reports</th><th></th>
+      </tr></thead><tbody>${acc.charts.map(c => `
+      <tr>
+        <td class="pid">${esc(c.patient_id)}</td>
+        <td>${esc(c.name || '–')}</td>
+        <td>${esc(c.dob || '–')}</td>
+        <td>${esc(c.birth_place || '–')}</td>
+        <td><span class="${statusBadge[c.status] || 'badge'}">${esc(c.status)}</span></td>
+        <td>${c.last_chat_at ? day(c.last_chat_at) + (c.chat_completed ? '' : ' <span class="no">(not finished)</span>') : '<span class="no">none</span>'}</td>
+        <td><span class="${c.rag_report ? 'yes' : 'no'}">RAG ${c.rag_report ? '✓' : '–'}</span> · <span class="${c.rl_report ? 'yes' : 'no'}">RL ${c.rl_report ? '✓' : '–'}</span></td>
+        <td><div class="row-actions">
+          <button class="btn small" type="button" data-open="${esc(c.patient_id)}" ${c.on_disk ? '' : 'disabled title="No files on this server"'}>Open</button>
+          <button class="btn small danger" type="button" data-del-chart="${esc(c.patient_id)}" data-uid="${esc(acc.internal_user_id)}">Delete</button>
+        </div></td>
+      </tr>`).join('')}</tbody></table></div>`;
+  }
+
+  function render() {
+    const q = $('search').value.trim().toLowerCase();
+    const filter = $('filter').value;
+    const list = state.accounts.filter(a => matches(a, q, filter));
+    if (!list.length) {
+      $('accounts').innerHTML = '<div class="none">No accounts match.</div>';
+      return;
+    }
+    $('accounts').innerHTML = list.map(acc => {
+      const full = acc.charts_used >= acc.max_charts;
+      const who = acc.email || acc.clerk_user_id || acc.internal_user_id;
+      return `<section class="account">
+        <div class="acc-head">
+          <div class="acc-who">
+            <div class="acc-email">${esc(who)}${acc.is_admin ? '<span class="badge gold">Admin</span>' : ''}</div>
+            <div class="acc-meta">${acc.name ? esc(acc.name) + ' · ' : ''}Signed up ${day(acc.created_at)} · Last sign-in ${day(acc.last_sign_in_at)}</div>
+          </div>
+          ${acc.is_tester
+            ? `<span class="badge gold">Tester · ${acc.tester_charts_today} of ${acc.tester_daily_cap} new charts today · ${acc.tester_runs} saved run${acc.tester_runs === 1 ? '' : 's'}</span>`
+            : `<span class="badge ${full ? 'full' : 'ok'}">${acc.charts_used} of ${acc.max_charts} charts used</span>`}
+          <div class="acc-actions">
+            ${acc.is_tester ? `<button class="btn small" type="button" data-remove-tester="${esc(acc.internal_user_id)}">Remove tester</button>` : ''}
+            <button class="btn small" type="button" data-reset="${esc(acc.internal_user_id)}">Reset allowance</button>
+            <button class="btn small danger" type="button" data-del-all="${esc(acc.internal_user_id)}">Delete all data</button>
+          </div>
+        </div>
+        ${chartRows(acc)}
+      </section>`;
+    }).join('');
+  }
+
+  // ── Confirm box ──────────────────────────────────────────────────────
+  function ask({ title, text, items, askText, expected, danger, okLabel, run }) {
+    $('c-title').textContent = title;
+    $('c-text').textContent = text;
+    $('c-list').innerHTML = (items || []).map(i => `<li>${esc(i)}</li>`).join('');
+    $('c-ask').textContent = askText;
+    const input = $('c-input'), ok = $('c-ok');
+    input.value = '';
+    input.style.display = expected ? '' : 'none';
+    ok.className = 'btn solid' + (danger ? ' danger' : '');
+    ok.textContent = okLabel || (danger ? 'Delete' : 'Reset');
+    ok.disabled = Boolean(expected);
+    input.oninput = () => { ok.disabled = input.value.trim().toLowerCase() !== String(expected).toLowerCase(); };
+    ok.onclick = async () => { ok.disabled = true; await run(input.value.trim()); close(); };
+    $('confirm').hidden = false;
+    (expected ? input : ok).focus();
+  }
+  function close() { $('confirm').hidden = true; }
+  $('c-cancel').onclick = close;
+  $('confirm').addEventListener('click', e => { if (e.target.id === 'confirm') close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('confirm').hidden) close(); });
+
+  async function act(url, confirmValue, label) {
+    let res, data;
+    try {
+      res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                               body: JSON.stringify({ confirm: confirmValue }) });
+      data = await res.json().catch(() => ({}));
+    } catch (e) {
+      return notice(esc(label) + ': could not reach the server.');
+    }
+    if (!res.ok && !data.report) return notice(esc(label) + ' failed: ' + esc(data.error || res.status));
+    const r = data.report || { removed: [], kept: [], failed: [] };
+    notice(`<b>${esc(label)}</b>${data.success ? ' — done.' : ' — finished with problems.'}
+      <div class="report">
+        ${r.removed.map(x => `<div class="r-ok">✓ ${esc(x)}</div>`).join('')}
+        ${r.kept.map(x => `<div class="r-kept">• kept: ${esc(x)}</div>`).join('')}
+        ${r.failed.map(x => `<div class="r-fail">✗ ${esc(x)}</div>`).join('')}
+      </div>`);
+    const keep = $('notice').innerHTML;
+    await load();
+    notice(keep);
+  }
+
+  $('accounts').addEventListener('click', async (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    const acc = state.accounts.find(a => a.internal_user_id === (b.dataset.uid || b.dataset.reset || b.dataset.delAll || b.dataset.removeTester));
+    const who = acc ? (acc.email || acc.clerk_user_id || acc.internal_user_id) : '';
+    if (b.dataset.open) {
+      try {
+        const res = await fetch('/patient-data/' + encodeURIComponent(b.dataset.open));
+        const payload = await res.json();
+        if (!res.ok || !payload.success) throw new Error(payload.error || res.status);
+        sessionStorage.setItem('chartData', JSON.stringify({ patient_id: b.dataset.open, ...payload.data }));
+        window.location.href = '/results';
+      } catch (err) { notice('Could not open chart ' + esc(b.dataset.open) + ': ' + esc(err.message)); }
+    } else if (b.dataset.delChart) {
+      const pid = b.dataset.delChart;
+      ask({ title: 'Delete chart ' + pid, danger: true, expected: pid,
+            text: `Deletes this chart of ${who} and everything linked to it. The user can create a new chart. This can't be undone.`,
+            items: ['the chart and its saved birth chart', 'its chats and the RAG / RL reports', 'the RL chat logs (training data)', 'the files on the server'],
+            askText: `Type ${pid} to confirm.`,
+            run: (typed) => act(`/admin/api/accounts/${encodeURIComponent(b.dataset.uid)}/charts/${encodeURIComponent(pid)}/delete`, typed, 'Delete chart ' + pid) });
+    } else if (b.dataset.removeTester) {
+      ask({ title: 'Remove tester', danger: false, okLabel: 'Remove', expected: null,
+            text: `${who} goes back to the normal chart limit (${acc.max_charts} charts). Their saved test charts, chats and feedback are kept until you delete them.`,
+            items: [], askText: '',
+            run: () => act(`/admin/api/accounts/${encodeURIComponent(b.dataset.removeTester)}/remove-tester`, 'remove', 'Remove tester ' + who) });
+    } else if (b.dataset.reset) {
+      ask({ title: 'Reset allowance', danger: false, expected: null,
+            text: `Keeps all charts of ${who}. Lets the user create a new chart again (0 of ${acc.max_charts} used).`,
+            items: [], askText: '',
+            run: () => act(`/admin/api/accounts/${encodeURIComponent(b.dataset.reset)}/reset-allowance`, 'reset', 'Reset allowance for ' + who) });
+    } else if (b.dataset.delAll) {
+      const expected = acc.email || acc.internal_user_id;
+      ask({ title: 'Delete all data', danger: true, expected,
+            text: `Deletes all ${acc.charts.length} chart(s) of ${who}, with their chats, reports and RL chat logs, and the account record. Their Clerk login stays, so they can sign in and start fresh. This can't be undone.`,
+            items: acc.charts.map(c => `chart ${c.patient_id}${c.name ? ' (' + c.name + ')' : ''}`),
+            askText: `Type ${expected} to confirm.`,
+            run: (typed) => act(`/admin/api/accounts/${encodeURIComponent(b.dataset.delAll)}/delete-all`, typed, 'Delete all data for ' + who) });
+    }
+  });
+
+  $('search').addEventListener('input', render);
+  $('filter').addEventListener('change', render);
+  $('refresh').addEventListener('click', load);
+
+  (window.astromedicaAuthReady || Promise.resolve()).then(load);
+</script>
+</body>
+</html>
