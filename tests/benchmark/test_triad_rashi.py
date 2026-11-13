@@ -110,6 +110,10 @@ def test_rashi_tracks_on_saved_chart_match_and_trace_weights(saved_twelve):
     record = execute_one("101", algorithms=("Rashi Correlation",))
     cells = record["cells"]["Rashi Correlation"]
     assert cells["A"]["verification"]["status"] == "passed"
+    top = cells["A"]["rankings"][0]
+    assert top["trail"]
+    line_sum = round(sum(float(step["weight"]) for step in top["trail"]), 2)
+    assert abs(line_sum - float(top["score"])) < 0.06
     assert cells["B"]["verification"]["status"] == "passed"
     assert record["differentials"]["Rashi Correlation"]["A_vs_B"]["status"] == "equivalent"
     assert cells["C"]["ok"] is True

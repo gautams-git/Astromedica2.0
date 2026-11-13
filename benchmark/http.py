@@ -166,3 +166,9 @@ def register_benchmark_routes(app) -> None:
             }),
             mimetype="application/json",
         )
+
+    app.add_url_rule("/rashi-check", "rashi_check_page", benchmark_dashboard)
+    app.add_url_rule("/rashi-check/api/catalog", "rashi_check_catalog", benchmark_catalog)
+    app.add_url_rule("/rashi-check/api/patient/<patient_id>", "rashi_check_patient", benchmark_patient)
+    app.add_url_rule("/rashi-check/api/summary", "rashi_check_summary", benchmark_summary)
+    app.add_url_rule("/rashi-check/api/reports", "rashi_check_reports", benchmark_reports)

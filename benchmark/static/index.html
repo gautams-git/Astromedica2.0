@@ -3,293 +3,186 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rashi forensic benchmark</title>
+  <title>Rashi score check</title>
   <style>
-    :root {
-      color-scheme: light;
-      --ink: #1c1915;
-      --muted: #5c564c;
-      --line: #e4ddd2;
-      --paper: #faf7f2;
-      --card: #fff;
-      --accent: #8c3a2f;
-      --ok: #1f6b45;
-      --warn: #8a5a12;
-    }
+    :root { color-scheme: light; --ink: #1c1915; --muted: #5c564c; --line: #e4ddd2; --paper: #faf7f2; --card: #fff; --accent: #8c3a2f; --ok: #1f6b45; }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font: 16px/1.5 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-      background: var(--paper);
-      color: var(--ink);
-    }
+    body { margin: 0; font: 16px/1.5 Georgia, "Iowan Old Style", serif; background: var(--paper); color: var(--ink); }
     header, main { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
     header { padding-bottom: 0; }
     h1 { font-size: 2rem; line-height: 1.15; margin: 0 0 8px; }
     h2 { font-size: 1.25rem; margin: 28px 0 8px; }
     a { color: var(--accent); }
-    .lede { color: var(--muted); max-width: 68ch; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .lede, .note { color: var(--muted); max-width: 72ch; }
     .card, table { background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
     .card { padding: 14px 16px; }
+    .scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .scores strong { display: block; font: 600 0.72rem/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    .scores .num { font-size: 1.7rem; line-height: 1.2; }
     table { width: 100%; border-collapse: collapse; overflow: hidden; }
     th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 0.92rem; }
-    th { font: 600 0.78rem/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
-    button, select {
-      font: 15px/1.2 ui-sans-serif, system-ui, sans-serif;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--line);
-      background: white;
-    }
+    th { font: 600 0.75rem/1.3 ui-sans-serif, system-ui, sans-serif; color: var(--muted); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    button, select { font: 15px/1.2 ui-sans-serif, system-ui, sans-serif; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: white; }
     button { background: var(--ink); color: white; cursor: pointer; }
     .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; background: #f3eee6; font: 12px/1.6 ui-sans-serif, system-ui, sans-serif; }
+    .changed { background: #fff6e8; }
     .ok { color: var(--ok); }
-    .bad { color: var(--accent); }
-    .warn { color: var(--warn); }
-    pre {
-      white-space: pre-wrap;
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 14px;
-      font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    }
-    .trace { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
-    .trace div { flex: 1 1 140px; background: white; border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
-    .trace strong { display: block; font: 600 0.72rem/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
   </style>
 </head>
 <body>
   <header>
-    <p class="pill">TRIAD-5 · Rashi Correlation only for LLM weights</p>
-    <h1>Forensic benchmark</h1>
-    <p class="lede">This page is the check of the Rashi score. It is not the health report. The health report is the home page. Nothing here is a clinical accuracy claim.</p>
-    <ol class="lede">
-      <li>Open the <a href="/">home page</a>. The saved patient folders should be listed there.</li>
-      <li>Return here and choose a patient in the dropdown. One chart is scored at a time.</li>
-      <li>Read the row. A is the original engine. B is the agent with the normal weights. C is the same engine after a checked weight change.</li>
-    </ol>
+    <h1>How the Rashi score is built</h1>
+    <p class="lede">One saved chart is scored three times. The group score is the sum of the evidence lines below. Each line is already a product: source priority × layer × anchor × how close the terms match.</p>
+    <p class="note">These weights are the three tables written in the Rashi engine. They are not learned by the reinforcement-learning chat trainer. That trainer keeps its own files and does not set these numbers. Prokerala is not called again.</p>
     <p><a href="/">Back to the patient index</a></p>
   </header>
   <main>
-    <section class="grid" id="facts"></section>
-    <h2>Patients on this run</h2>
-    <div style="overflow-x:auto"><table id="patients"><thead><tr>
-      <th>Patient</th><th>Case</th><th>Split</th><th>A</th><th>B</th><th>C</th><th>Check</th><th>A vs B</th><th>A vs C</th>
-    </tr></thead><tbody></tbody></table></div>
-
-    <h2>Deviation explorer</h2>
     <div class="controls">
       <label>Patient <select id="patient"></select></label>
       <label>Group <select id="group"></select></label>
-      <button id="reload" type="button">Reload from backend</button>
+      <button id="reload" type="button">Score this chart</button>
     </div>
-    <div id="explorer" class="card" style="margin-top:12px">Looking for saved charts in the patients folder. Prokerala is not called.</div>
+    <p id="status" class="note">Choose a saved patient. The first selection scores that chart only.</p>
 
-    <h2>Critic, without using an LLM as the judge</h2>
-    <div id="critic" class="card">The critic numbers appear after you choose a patient. An LLM is not the judge.</div>
+    <h2>The three scores for the selected group</h2>
+    <section class="scores" id="scores"></section>
+    <p id="meaning" class="note"></p>
 
-    <h2>Executive report</h2>
-    <pre id="executive">Loading…</pre>
+    <h2>Weights in force</h2>
+    <p class="note">Run 1 and run 2 use today’s tables. Run 3 may raise an existing number, then puts the original number back. A raised cell is highlighted. No new key is allowed, and a number outside 50% to 150% of today’s value is not used.</p>
+    <div style="overflow-x:auto"><table id="weights"><thead><tr>
+      <th>Table</th><th>Name</th><th>Today</th><th>Run 3</th>
+    </tr></thead><tbody></tbody></table></div>
+
+    <h2>Lines that add up to the original score</h2>
+    <p class="note" id="sum-note"></p>
+    <div style="overflow-x:auto"><table id="lines"><thead><tr>
+      <th>Source</th><th>Planet</th><th>Layer</th><th>Anchor</th><th>Match</th><th class="num">Amount</th>
+    </tr></thead><tbody></tbody></table></div>
+
+    <h2>The same group after the weight change</h2>
+    <div style="overflow-x:auto"><table id="lines-c"><thead><tr>
+      <th>Source</th><th>Planet</th><th>Layer</th><th>Anchor</th><th>Match</th><th class="num">Amount</th>
+    </tr></thead><tbody></tbody></table></div>
   </main>
   <script>
-    const state = { summary: null };
+    const state = { patients: [] };
+    const api = location.pathname.indexOf("/rashi-check") === 0 ? "/rashi-check/api" : "/benchmark/api";
 
     function esc(value) {
-      return String(value ?? "").replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+      return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[ch]));
     }
 
-    function topText(track) {
-      if (!track) return "—";
-      if (track.ok === null || track.ok === undefined) return "not run";
-      if (!track.ok) return "failed";
-      const top = (track.top || [])[0];
-      if (!top) return "empty";
-      return `${top.label} · ${top.score}`;
+    function rowFor(cell, label) {
+      const rows = (cell && cell.rankings) || [];
+      return rows.find((item) => item && item.label === label) || null;
     }
 
-    function showEmpty(message) {
-      document.querySelector("#patients tbody").innerHTML = "";
-      document.getElementById("patient").innerHTML = "";
-      document.getElementById("group").innerHTML = "";
-      document.getElementById("explorer").textContent = message;
-      document.getElementById("executive").textContent = message;
+    function scoreText(cell, label) {
+      const row = rowFor(cell, label);
+      if (!row || row.score === undefined || row.score === null) return "no score for this group";
+      return row.score;
     }
 
-    function render(summary) {
-      state.summary = summary;
-      if (!summary.patients || !summary.patients.length) {
-        showEmpty(summary.executive || "No saved charts were found. Put the patient folders next to server.py, inside patients, each with raw_chart.json and raw_dasha.json. Then restart the server and reload this page. Prokerala is not called.");
+    function lineRows(row) {
+      const steps = (row && row.trail) || [];
+      if (!steps.length) {
+        return `<tr><td colspan="6">This run did not return the evidence lines for that group.</td></tr>`;
+      }
+      const body = steps.map((step) => `<tr>
+        <td>${esc(step.priority)} ${esc(step.source_label)}</td>
+        <td>${esc(step.planet)}</td>
+        <td>${esc(step.layer)}</td>
+        <td>${esc(step.anchor_priority)} ${esc(step.anchor_label)}</td>
+        <td>${esc(step.evidence_term)} matched ${esc(step.anchor_term)} (${esc(step.match_type)})</td>
+        <td class="num">${esc(step.weight)}</td>
+      </tr>`).join("");
+      const sum = steps.reduce((total, step) => total + Number(step.weight || 0), 0);
+      return body + `<tr><td colspan="5"><strong>Sum of the lines</strong></td><td class="num"><strong>${sum.toFixed(2)}</strong></td></tr>
+        <tr><td colspan="5"><strong>Score the engine reported</strong></td><td class="num"><strong>${esc(row.score)}</strong></td></tr>`;
+    }
+
+    function weightRows(base, changed) {
+      const tables = ["PRIORITY_WEIGHTS", "LAYER_WEIGHTS", "ANCHOR_WEIGHTS"];
+      const names = { PRIORITY_WEIGHTS: "Source priority", LAYER_WEIGHTS: "Evidence layer", ANCHOR_WEIGHTS: "Anchor" };
+      let html = "";
+      tables.forEach((table) => {
+        const left = (base && base[table]) || {};
+        const right = (changed && changed[table]) || left;
+        Object.keys(left).forEach((key) => {
+          const moved = Number(left[key]) !== Number(right[key]);
+          html += `<tr class="${moved ? "changed" : ""}"><td>${esc(names[table])}</td><td>${esc(key)}</td><td>${esc(left[key])}</td><td>${esc(right[key])}</td></tr>`;
+        });
+      });
+      return html || `<tr><td colspan="4">Weight tables were not returned.</td></tr>`;
+    }
+
+    async function loadPatients() {
+      const response = await fetch(api + "/catalog");
+      const catalog = await response.json();
+      const select = document.getElementById("patient");
+      state.patients = catalog.patients || [];
+      if (!state.patients.length) {
+        document.getElementById("status").textContent = "No saved charts were found next to the server. Each patient folder needs raw_chart.json and raw_dasha.json. Prokerala was not called.";
         return;
       }
-      const facts = document.getElementById("facts");
-      facts.innerHTML = [
-        ["Algorithms", "5 existing engines, unchanged"],
-        ["Tracks", "A original · B agent default · C Rashi weights only"],
-        ["Patients", `${summary.patients.length} saved charts`],
-        ["LLM critic", "Not used as proof of correctness"],
-      ].map(([title, body]) => `<article class="card"><strong>${esc(title)}</strong><div>${esc(body)}</div></article>`).join("");
-
-      const body = document.querySelector("#patients tbody");
-      body.innerHTML = tableRows(summary.patients);
-
-      const select = document.getElementById("patient");
-      select.innerHTML = summary.patients.map((patient) => `<option value="${esc(patient.patient_id)}">${esc(patient.patient_id)} · ${esc(patient.case)}</option>`).join("");
-      fillGroups();
-      explore();
-
-      const critic = summary.critic || {};
-      const counts = critic.counts || {};
-      document.getElementById("critic").innerHTML =
-        `<div>Rule-based critic on labelled scenarios: true positive ${counts.tp || 0}, false positive ${counts.fp || 0}, true negative ${counts.tn || 0}, false negative ${counts.fn || 0}.</div>` +
-        `<div class="lede">${esc(critic.authority || "")}</div>`;
-      document.getElementById("executive").textContent = summary.executive || "";
+      select.innerHTML = state.patients.map((patient) => `<option value="${esc(patient.patient_id)}">${esc(patient.patient_id)}</option>`).join("");
+      score();
     }
 
-    function fillGroups() {
-      const patient = state.summary.patients.find((item) => item.patient_id === document.getElementById("patient").value);
-      const labels = new Set();
-      ["A", "B", "C"].forEach((track) => (patient.rashi[track].top || []).forEach((item) => labels.add(item.label)));
-      const group = document.getElementById("group");
-      const values = [...labels];
-      group.innerHTML = values.length
-        ? values.map((label) => `<option value="${esc(label)}">${esc(label)}</option>`).join("")
-        : `<option value="">No ranked group</option>`;
-    }
-
-    function tableRows(patients) {
-      return patients.map((patient) => {
-        const diff = patient.differentials || {};
-        const verify = patient.rashi.A.verification || "—";
-        return `<tr>
-          <td><a href="/results?patient_id=${encodeURIComponent(patient.patient_id)}">${esc(patient.patient_id)}</a></td>
-          <td>${esc(patient.case)}</td>
-          <td>${esc(patient.split)}</td>
-          <td>${esc(topText(patient.rashi.A))}</td>
-          <td>${esc(topText(patient.rashi.B))}</td>
-          <td>${esc(topText(patient.rashi.C))}</td>
-          <td class="${verify === "passed" ? "ok" : verify === "mismatch" ? "bad" : "warn"}">${esc(verify)}</td>
-          <td>${esc((diff.A_vs_B || {}).status || "")}</td>
-          <td>${esc((diff.A_vs_C || {}).status || "")}</td>
-        </tr>`;
-      }).join("");
-    }
-
-    function listScores(cell) {
-      const rows = (cell && (cell.rankings || cell.top)) || [];
-      if (!rows.length) return "no groups";
-      return rows.slice(0, 5).map((item) => `${item.label} ${item.score}`).join(" · ");
-    }
-
-    function scoreOf(track, label) {
-      const rows = (track && (track.rankings || track.top)) || [];
-      const row = rows.find((item) => item && item.label === label);
-      return row && row.score !== undefined && row.score !== null ? row.score : "not in this track";
-    }
-
-    async function explore() {
+    async function score() {
       const patientId = document.getElementById("patient").value;
-      const label = document.getElementById("group").value;
-      const box = document.getElementById("explorer");
+      const status = document.getElementById("status");
       if (!patientId) return;
-      box.textContent = "Scoring " + patientId + " from the saved chart. The original engine, the default agent, and the checked weight change run on that same file. Prokerala is not called.";
-      const response = await fetch("/benchmark/api/patient/" + encodeURIComponent(patientId));
+      status.textContent = "Scoring " + patientId + " from the saved chart. Three runs, one file. Prokerala is not called.";
+      const response = await fetch(api + "/patient/" + encodeURIComponent(patientId));
       const payload = await response.json();
       if (!payload.success) {
-        box.textContent = payload.error || "This patient could not be scored.";
+        status.textContent = payload.error || "This patient could not be scored.";
         return;
       }
-      const run = payload.run;
-      const rashi = run.cells["Rashi Correlation"];
-      const row = state.summary.patients.find((item) => item.patient_id === patientId);
-      if (row) {
-        row.differentials = run.differentials["Rashi Correlation"] || {};
-        ["A", "B", "C"].forEach((track) => {
-          const cell = rashi[track] || {};
-          row.rashi[track] = {
-            ok: cell.ok,
-            top: (cell.rankings || []).slice(0, 3),
-            verification: (cell.verification || {}).status || "limited",
-            error: cell.error,
-          };
-        });
-        document.querySelector("#patients tbody").innerHTML = tableRows(state.summary.patients);
-      }
-      const audit = (rashi.C.weight_audit || {});
-      const changed = ((audit.validation || {}).changed || []).map((item) => `${item.table}.${item.key}: ${item.baseline} → ${item.proposed}`).join("; ") || "none applied";
-      const ablations = audit.ablation || [];
-      const ablationText = ablations.length
-        ? ablations.map((item) => `Only ${item.table}.${item.key} (${item.from} → ${item.to}) moved the top score by ${item.top_score_delta}. Label changed: ${item.top_label_changed}.`).join(" ")
-        : "No single-weight check was recorded.";
-      const agentB = (rashi.B && rashi.B.agent) || {};
-      const agentC = (rashi.C && rashi.C.agent) || {};
-      const verification = (rashi.A.verification || {}).status;
-      const differential = (run.differentials["Rashi Correlation"] || {}).A_vs_C || {};
-      let chosen = label || ((rashi.A.rankings || [])[0] || {}).label || "";
-      const group = document.getElementById("group");
+      const rashi = payload.run.cells["Rashi Correlation"];
       const labels = [];
       ["A", "B", "C"].forEach((track) => ((rashi[track] || {}).rankings || []).forEach((item) => {
         if (item.label && !labels.includes(item.label)) labels.push(item.label);
       }));
-      if (labels.length) {
-        group.innerHTML = labels.map((item) => `<option value="${esc(item)}">${esc(item)}</option>`).join("");
-        if (!labels.includes(chosen)) chosen = labels[0];
-        group.value = chosen;
-      }
-      box.innerHTML = `
-        <div class="trace">
-          <div><strong>A · original engine</strong>${esc(listScores(rashi.A))}</div>
-          <div><strong>B · agent, same weights</strong>${esc(listScores(rashi.B))}</div>
-          <div><strong>C · same engine, new weights</strong>${esc(listScores(rashi.C))}</div>
-        </div>
-        <p><strong>${esc(chosen || "Top group")}</strong> — A ${esc(scoreOf(rashi.A, chosen))}, B ${esc(scoreOf(rashi.B, chosen))}, C ${esc(scoreOf(rashi.C, chosen))}.</p>
-        <p>Weights applied on C, then removed: ${esc(changed)}. The formula was not edited. Each contribution is still priority × layer × anchor × match strength.</p>
-        <p>${esc(ablationText)}</p>
-        <p>Math check on A: ${esc(verification)}. A versus B: ${esc((run.differentials["Rashi Correlation"].A_vs_B || {}).status)}. A versus C: ${esc(differential.status)} — ${esc(differential.explanation || "")}</p>
-        <p>B profile ${esc(agentB.profile_used || "clinical")}, confidence ${esc(agentB.confidence)}. C profile ${esc((agentC.agent_under_proposed_weights || agentC).profile_used || "clinical")}. Model ${esc(audit.model_identifier || "none")}, live ${esc(audit.live_model)}. Input hash <code>${esc(run.input.input_hash)}</code>. Prokerala was not called.</p>`;
+      const group = document.getElementById("group");
+      const previous = group.value;
+      group.innerHTML = labels.map((item) => `<option value="${esc(item)}">${esc(item)}</option>`).join("");
+      const chosen = labels.includes(previous) ? previous : (labels[0] || "");
+      group.value = chosen;
+      const a = scoreText(rashi.A, chosen);
+      const b = scoreText(rashi.B, chosen);
+      const c = scoreText(rashi.C, chosen);
+      document.getElementById("scores").innerHTML = `
+        <div class="card"><strong>1 · Original engine</strong><div class="num">${esc(a)}</div><div>${esc(chosen)}</div></div>
+        <div class="card"><strong>2 · Agent, same weights</strong><div class="num">${esc(b)}</div><div>Same tables. The agent adds a review. It does not change the product.</div></div>
+        <div class="card"><strong>3 · Checked weight change</strong><div class="num">${esc(c)}</div><div>Same formula. Only allowed table numbers may change.</div></div>`;
+      const audit = (rashi.C && rashi.C.weight_audit) || {};
+      const changed = ((audit.validation || {}).changed || []).map((item) => `${item.key} ${item.baseline} → ${item.proposed}`).join("; ") || "no number changed";
+      const diff = ((payload.run.differentials || {})["Rashi Correlation"] || {}).A_vs_C || {};
+      const live = audit.live_model ? "Vertex proposed the run 3 numbers." : "Run 3 used the scripted 20% rise because Vertex login was not available.";
+      document.getElementById("meaning").textContent = chosen + " is " + a + " on the original engine and " + c + " after the weight change (" + changed + "). " + (diff.explanation || "") + " " + live + " The reinforcement-learning trainer was not used.";
+      document.getElementById("weights").querySelector("tbody").innerHTML = weightRows((rashi.A || {}).weights, (rashi.C || {}).weights);
+      const original = rowFor(rashi.A, chosen);
+      const weighted = rowFor(rashi.C, chosen);
+      document.getElementById("lines").querySelector("tbody").innerHTML = lineRows(original);
+      document.getElementById("lines-c").querySelector("tbody").innerHTML = lineRows(weighted);
+      const steps = (original && original.trail) || [];
+      const sum = steps.reduce((total, step) => total + Number(step.weight || 0), 0);
+      document.getElementById("sum-note").textContent = steps.length
+        ? "Add the Amount column. That sum is the group score (" + sum.toFixed(2) + " against the reported " + original.score + "). A highlighted weight above is the only reason a line can grow in the next table."
+        : "The evidence lines were not on this response.";
+      status.textContent = "Patient " + patientId + ". Saved chart. Prokerala was not called.";
     }
 
-    document.getElementById("patient").addEventListener("change", () => { fillGroups(); explore(); });
-    document.getElementById("group").addEventListener("change", explore);
-    document.getElementById("reload").addEventListener("click", load);
-
-    function catalogSummary(catalog) {
-      const patients = (catalog.patients || []).map((patient) => ({
-        patient_id: patient.patient_id,
-        case: patient.case || "saved chart",
-        split: patient.split || "",
-        rashi: {
-          A: { ok: null, top: [], verification: "not run" },
-          B: { ok: null, top: [], verification: "not run" },
-          C: { ok: null, top: [], verification: "not run" },
-        },
-        differentials: {},
-      }));
-      return {
-        patients: patients,
-        critic: {},
-        executive: patients.length
-          ? "Saved charts found. Choose one patient. The first choice runs that chart only. Prokerala is not called."
-          : "No saved charts were found. Put the folders in patients, next to server.py. Each folder needs raw_chart.json and raw_dasha.json.",
-      };
-    }
-
-    async function load() {
-      document.getElementById("explorer").textContent = "Reading the patients folder. This does not score anyone yet, and it does not call Prokerala.";
-      const response = await fetch("/benchmark/api/catalog");
-      const catalog = await response.json();
-      if (!catalog.success) {
-        showEmpty(catalog.error || "The patient list did not load.");
-        return;
-      }
-      render(catalogSummary(catalog));
-    }
-
-    load().catch((error) => {
-      showEmpty(String(error));
-    });
+    document.getElementById("patient").addEventListener("change", score);
+    document.getElementById("group").addEventListener("change", score);
+    document.getElementById("reload").addEventListener("click", score);
+    loadPatients();
   </script>
 </body>
 </html>

@@ -104,7 +104,7 @@ def execute_patient(patient: dict, algorithms: Iterable[str] | None = None, trac
         "differentials": differentials,
         "limitations": [
             "Track C LLM weight selection is implemented only for Rashi Correlation.",
-            "No clinical accuracy claim is made. These patients are synthetic fixtures.",
+            "No clinical accuracy claim is made. The inputs are saved charts.",
             "Verification is limited wherever an engine does not expose contribution trails.",
         ],
     }

@@ -31,6 +31,29 @@ def _score(item: dict) -> float | None:
         return None
 
 
+def _public_trail(trail) -> list[dict[str, Any]]:
+    """Keep the lines that already add up to a group score. Drop anything that is not JSON."""
+    if not isinstance(trail, list):
+        return []
+    rows = []
+    for step in trail:
+        if not isinstance(step, dict):
+            continue
+        rows.append({
+            "priority": step.get("priority") or "",
+            "source_label": step.get("source_label") or "",
+            "planet": step.get("planet") or "",
+            "layer": step.get("layer") or "",
+            "evidence_term": step.get("evidence_term") or "",
+            "anchor_priority": step.get("anchor_priority") or "",
+            "anchor_label": step.get("anchor_label") or "",
+            "anchor_term": step.get("anchor_term") or "",
+            "match_type": step.get("match_type") or "",
+            "weight": step.get("weight"),
+        })
+    return rows
+
+
 def rankings_from_engine(engine: dict | None) -> list[dict[str, Any]]:
     if not isinstance(engine, dict):
         return []
@@ -61,6 +84,7 @@ def rankings_from_engine(engine: dict | None) -> list[dict[str, Any]]:
             "score": _score(item),
             "organs": list(organs) if isinstance(organs, list) else [],
             "diseases": list(diseases) if isinstance(diseases, list) else [],
+            "trail": _public_trail(item.get("trail")),
         })
     return output
 
