@@ -177,10 +177,16 @@
       }).join("");
     }
 
+    function listScores(cell) {
+      const rows = (cell && (cell.rankings || cell.top)) || [];
+      if (!rows.length) return "no groups";
+      return rows.slice(0, 5).map((item) => `${item.label} ${item.score}`).join(" · ");
+    }
+
     function scoreOf(track, label) {
-      const rows = (track && (track.top || track.rankings)) || [];
-      const row = rows.find((item) => item.label === label);
-      return row ? row.score : "absent";
+      const rows = (track && (track.rankings || track.top)) || [];
+      const row = rows.find((item) => item && item.label === label);
+      return row && row.score !== undefined && row.score !== null ? row.score : "not in this track";
     }
 
     async function explore() {
@@ -213,29 +219,36 @@
       }
       const audit = (rashi.C.weight_audit || {});
       const changed = ((audit.validation || {}).changed || []).map((item) => `${item.table}.${item.key}: ${item.baseline} → ${item.proposed}`).join("; ") || "none applied";
-      const ablation = (audit.ablation || []).find((item) => true);
+      const ablations = audit.ablation || [];
+      const ablationText = ablations.length
+        ? ablations.map((item) => `Only ${item.table}.${item.key} (${item.from} → ${item.to}) moved the top score by ${item.top_score_delta}. Label changed: ${item.top_label_changed}.`).join(" ")
+        : "No single-weight check was recorded.";
+      const agentB = (rashi.B && rashi.B.agent) || {};
+      const agentC = (rashi.C && rashi.C.agent) || {};
       const verification = (rashi.A.verification || {}).status;
       const differential = (run.differentials["Rashi Correlation"] || {}).A_vs_C || {};
-      const chosen = label || ((rashi.A.rankings || [])[0] || {}).label || "";
-      if (!label && chosen) {
-        const group = document.getElementById("group");
-        const labels = new Set();
-        ["A", "B", "C"].forEach((track) => ((rashi[track] || {}).rankings || []).forEach((item) => labels.add(item.label)));
-        group.innerHTML = [...labels].map((item) => `<option value="${esc(item)}">${esc(item)}</option>`).join("");
+      let chosen = label || ((rashi.A.rankings || [])[0] || {}).label || "";
+      const group = document.getElementById("group");
+      const labels = [];
+      ["A", "B", "C"].forEach((track) => ((rashi[track] || {}).rankings || []).forEach((item) => {
+        if (item.label && !labels.includes(item.label)) labels.push(item.label);
+      }));
+      if (labels.length) {
+        group.innerHTML = labels.map((item) => `<option value="${esc(item)}">${esc(item)}</option>`).join("");
+        if (!labels.includes(chosen)) chosen = labels[0];
         group.value = chosen;
       }
       box.innerHTML = `
         <div class="trace">
-          <div><strong>A · original score</strong>${esc(scoreOf(rashi.A, chosen))}</div>
-          <div><strong>B · default agent</strong>${esc(scoreOf(rashi.B, chosen))}</div>
-          <div><strong>C · checked weights</strong>${esc(scoreOf(rashi.C, chosen))}</div>
-          <div><strong>Weight that changed</strong>${esc(changed)}</div>
-          <div><strong>Math check</strong>${esc(verification)}</div>
-          <div><strong>What it means</strong>${esc(differential.status || "")}: ${esc(differential.explanation || "")}</div>
+          <div><strong>A · original engine</strong>${esc(listScores(rashi.A))}</div>
+          <div><strong>B · agent, same weights</strong>${esc(listScores(rashi.B))}</div>
+          <div><strong>C · same engine, new weights</strong>${esc(listScores(rashi.C))}</div>
         </div>
-        <p>Same saved chart for all three. Model: ${esc(audit.model_identifier || "none")}. Live model: ${esc(audit.live_model)}. Prokerala was not called.</p>
-        <p>Input hash <code>${esc(run.input.input_hash)}</code></p>
-        <p>${ablation ? `Changing only ${esc(ablation.table)}.${esc(ablation.key)} moved the top score by ${esc(ablation.top_score_delta)}.` : "No single-weight check was recorded."}</p>`;
+        <p><strong>${esc(chosen || "Top group")}</strong> — A ${esc(scoreOf(rashi.A, chosen))}, B ${esc(scoreOf(rashi.B, chosen))}, C ${esc(scoreOf(rashi.C, chosen))}.</p>
+        <p>Weights applied on C, then removed: ${esc(changed)}. The formula was not edited. Each contribution is still priority × layer × anchor × match strength.</p>
+        <p>${esc(ablationText)}</p>
+        <p>Math check on A: ${esc(verification)}. A versus B: ${esc((run.differentials["Rashi Correlation"].A_vs_B || {}).status)}. A versus C: ${esc(differential.status)} — ${esc(differential.explanation || "")}</p>
+        <p>B profile ${esc(agentB.profile_used || "clinical")}, confidence ${esc(agentB.confidence)}. C profile ${esc((agentC.agent_under_proposed_weights || agentC).profile_used || "clinical")}. Model ${esc(audit.model_identifier || "none")}, live ${esc(audit.live_model)}. Input hash <code>${esc(run.input.input_hash)}</code>. Prokerala was not called.</p>`;
     }
 
     document.getElementById("patient").addEventListener("change", () => { fillGroups(); explore(); });
