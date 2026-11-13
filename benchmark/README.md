@@ -23,7 +23,7 @@ There are no adjudicated clinical labels. Metrics exist and are tested on hand-w
 From the repository root, with the project virtualenv:
 
 ```bash
-pytest tests/test_agentic_rashi_correlation.py tests/benchmark -q
+python -m pytest tests/test_agentic_rashi_correlation.py tests/benchmark -q
 python -m benchmark
 ```
 
