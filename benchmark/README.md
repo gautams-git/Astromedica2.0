@@ -51,6 +51,6 @@ Then open:
 
 The server log for an open should say the algorithms were re-run on the saved chart and that Prokerala was not called. A missing folder is skipped. It is not fetched.
 
-`BENCHMARK_RASHI_WEIGHT_MODE` may be `mock` (default when `GEMINI_API_KEY` is unset), `live`, or `off`. Mock is a scripted 20% increase on the nakshatra layer and the P6 anchor. It is not a live model. Live proposals that fail the 50%–150% range check are not executed.
+`BENCHMARK_RASHI_WEIGHT_MODE` may be `live`, `mock`, or `off`. When it is unset, a working Vertex AI login (`gcloud auth application-default login`, the same login as Firestore) selects `live`. No `GEMINI_API_KEY` is required. The call uses `gemini_client.py` and `GEMINI_MODEL`. If that login is missing, the mode is `mock`: a scripted 20% increase on the nakshatra layer and the P6 anchor. Live proposals that fail the 50%–150% range check are not executed.
 
 The pilot search does not write production weights.

@@ -44,7 +44,7 @@ def _tracks_from_record(record: dict) -> dict:
         "model_identifier": audit.get("model_identifier"),
         "prompt_version": audit.get("prompt_version"),
         "note": (
-            "Saved Prokerala chart. Track C uses a scripted weight selector when no live model key is set. "
+            "Saved Prokerala chart. Track C used the scripted weight selector because Vertex AI login was not available. "
             "Prokerala was not called."
             if audit.get("model_identifier") == "benchmark-mock-rashi-weights-v1"
             else "Saved Prokerala chart. Prokerala was not called."

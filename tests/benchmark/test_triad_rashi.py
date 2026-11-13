@@ -21,7 +21,7 @@ from benchmark.controller import execute_one
 from benchmark.metrics import hit_rate_at_k, mean_reciprocal_rank, precision_at_k, rank_correlation, recall_at_k
 from benchmark.optimize import run_pilot
 from benchmark.patients import all_patients, get_patient, saved_patient_ids, splits
-from benchmark.rashi_weights import mock_proposal, validate_proposal
+from benchmark.rashi_weights import mock_proposal, propose_weights, resolve_mode, validate_proposal
 from benchmark.reports import executive_report
 
 
@@ -137,6 +137,33 @@ def test_other_algorithms_do_not_get_a_fabricated_track_c(saved_twelve):
     assert record["cells"]["HitList"]["C"]["ok"] is False
     assert "not implemented" in record["cells"]["HitList"]["C"]["error"]
     assert record["cells"]["Rashi Correlation"]["C"]["ok"] is True
+
+
+def test_vertex_login_selects_live_without_an_api_key(monkeypatch):
+    monkeypatch.delenv("BENCHMARK_RASHI_WEIGHT_MODE", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.setattr("benchmark.rashi_weights._vertex_ready", lambda: True)
+    assert resolve_mode() == "live"
+    monkeypatch.setattr(
+        "benchmark.rashi_weights._call_vertex",
+        lambda _prompt: (
+            '{"layer_weights": {"nakshatra": 1.5}, "anchor_weights": {"P6": 3.6}, "justification": "vertex"}',
+            "vertex:gemini-2.5-flash",
+            0.0,
+        ),
+    )
+    record = propose_weights({"gender": "Male"})
+    assert record["live_model"] is True
+    assert record["transport"] == "vertex_adc"
+    assert record["validation"]["valid"] is True
+    assert record["validation"]["changed"]
+
+
+def test_missing_vertex_login_stays_on_the_scripted_selector(monkeypatch):
+    monkeypatch.delenv("BENCHMARK_RASHI_WEIGHT_MODE", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.setattr("benchmark.rashi_weights._vertex_ready", lambda: False)
+    assert resolve_mode() == "mock"
 
 
 def test_invalid_weights_rejected():

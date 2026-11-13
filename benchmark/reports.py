@@ -30,7 +30,7 @@ def executive_report(bundle: dict) -> str:
         "- Track B runs the existing agent with engine-default weights and with the LLM switched off.",
         "- Track C, for Rashi Correlation only, may apply a validated weight proposal. The other four algorithms have no Track C. That gap is reported rather than filled in.",
         "",
-        "When no live model key is configured, the Rashi weight proposal is a scripted selector. It is labelled as such and is not a live model result.",
+        "When Vertex AI login is available, Track C asks Gemini on Vertex for the weight proposal. No API key is used. When that login is missing, the proposal is a scripted selector and is labelled as such.",
         "",
         "## Matrix",
         "",
@@ -70,7 +70,7 @@ def executive_report(bundle: dict) -> str:
         "",
         "- The inputs are saved charts already on disk. A numerical match is not a clinical diagnosis.",
         "- Independent verification can only be strict where the arithmetic is reconstructable. Other algorithms are marked limited when their internals are not exposed.",
-        "- A scripted weight selector is repeatable. A live model call would be statistically repeatable only, and only when a key is configured.",
+        "- A scripted weight selector is repeatable. A Vertex AI proposal is statistically repeatable: temperature is 0, and any value outside 50%–150% is rejected.",
         "- Learned weights from the pilot search are not written into the engines.",
         "",
     ])
