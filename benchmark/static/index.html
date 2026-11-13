@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rashi score check</title>
+  <style>
+    :root { color-scheme: light; --ink: #1c1915; --muted: #5c564c; --line: #e4ddd2; --paper: #faf7f2; --card: #fff; --accent: #8c3a2f; --ok: #1f6b45; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.5 Georgia, "Iowan Old Style", serif; background: var(--paper); color: var(--ink); }
+    header, main { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
+    header { padding-bottom: 0; }
+    h1 { font-size: 2rem; line-height: 1.15; margin: 0 0 8px; }
+    h2 { font-size: 1.25rem; margin: 28px 0 8px; }
+    a { color: var(--accent); }
+    .lede, .note { color: var(--muted); max-width: 72ch; }
+    .card, table { background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+    .card { padding: 14px 16px; }
+    .scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .scores strong { display: block; font: 600 0.72rem/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    .scores .num { font-size: 1.7rem; line-height: 1.2; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 0.92rem; }
+    th { font: 600 0.75rem/1.3 ui-sans-serif, system-ui, sans-serif; color: var(--muted); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    button, select { font: 15px/1.2 ui-sans-serif, system-ui, sans-serif; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: white; }
+    button { background: var(--ink); color: white; cursor: pointer; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .changed { background: #fff6e8; }
+    .ok { color: var(--ok); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>How the Rashi score is built</h1>
+    <p class="lede">One saved chart is scored three times. The group score is the sum of the evidence lines below. Each line is already a product: source priority × layer × anchor × how close the terms match.</p>
+    <p class="note">These weights are the three tables written in the Rashi engine. They are not learned by the reinforcement-learning chat trainer. That trainer keeps its own files and does not set these numbers. Prokerala is not called again.</p>
+    <p><a href="/">Back to the patient index</a></p>
+  </header>
+  <main>
+    <div class="controls">
+      <label>Patient <select id="patient"></select></label>
+      <label>Group <select id="group"></select></label>
+      <button id="reload" type="button">Score this chart</button>
+    </div>
+    <p id="status" class="note">Choose a saved patient. The first selection scores that chart only.</p>
+
+    <h2>The three scores for the selected group</h2>
+    <section class="scores" id="scores"></section>
+    <p id="meaning" class="note"></p>
+
+    <h2>Weights in force</h2>
+    <p class="note">Run 1 and run 2 use today’s tables. Run 3 may raise an existing number, then puts the original number back. A raised cell is highlighted. No new key is allowed, and a number outside 50% to 150% of today’s value is not used.</p>
+    <div style="overflow-x:auto"><table id="weights"><thead><tr>
+      <th>Table</th><th>Name</th><th>Today</th><th>Run 3</th>
+    </tr></thead><tbody></tbody></table></div>
+
+    <h2>Lines that add up to the original score</h2>
+    <p class="note" id="sum-note"></p>
+    <div style="overflow-x:auto"><table id="lines"><thead><tr>
+      <th>Source</th><th>Planet</th><th>Layer</th><th>Anchor</th><th>Match</th><th class="num">Amount</th>
+    </tr></thead><tbody></tbody></table></div>
+
+    <h2>The same group after the weight change</h2>
+    <div style="overflow-x:auto"><table id="lines-c"><thead><tr>
+      <th>Source</th><th>Planet</th><th>Layer</th><th>Anchor</th><th>Match</th><th class="num">Amount</th>
+    </tr></thead><tbody></tbody></table></div>
+  </main>
+  <script>
+    const state = { patients: [] };
+    const api = location.pathname.indexOf("/rashi-check") === 0 ? "/rashi-check/api" : "/benchmark/api";
+
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[ch]));
+    }
+
+    function rowFor(cell, label) {
+      const rows = (cell && cell.rankings) || [];
+      return rows.find((item) => item && item.label === label) || null;
+    }
+
+    function scoreText(cell, label) {
+      const row = rowFor(cell, label);
+      if (!row || row.score === undefined || row.score === null) return "no score for this group";
+      return row.score;
+    }
+
+    function lineRows(row) {
+      const steps = (row && row.trail) || [];
+      if (!steps.length) {
+        return `<tr><td colspan="6">This run did not return the evidence lines for that group.</td></tr>`;
+      }
+      const body = steps.map((step) => `<tr>
+        <td>${esc(step.priority)} ${esc(step.source_label)}</td>
+        <td>${esc(step.planet)}</td>
+        <td>${esc(step.layer)}</td>
+        <td>${esc(step.anchor_priority)} ${esc(step.anchor_label)}</td>
+        <td>${esc(step.evidence_term)} matched ${esc(step.anchor_term)} (${esc(step.match_type)})</td>
+        <td class="num">${esc(step.weight)}</td>
+      </tr>`).join("");
+      const sum = steps.reduce((total, step) => total + Number(step.weight || 0), 0);
+      return body + `<tr><td colspan="5"><strong>Sum of the lines</strong></td><td class="num"><strong>${sum.toFixed(2)}</strong></td></tr>
+        <tr><td colspan="5"><strong>Score the engine reported</strong></td><td class="num"><strong>${esc(row.score)}</strong></td></tr>`;
+    }
+
+    function weightRows(base, changed) {
+      const tables = ["PRIORITY_WEIGHTS", "LAYER_WEIGHTS", "ANCHOR_WEIGHTS"];
+      const names = { PRIORITY_WEIGHTS: "Source priority", LAYER_WEIGHTS: "Evidence layer", ANCHOR_WEIGHTS: "Anchor" };
+      let html = "";
+      tables.forEach((table) => {
+        const left = (base && base[table]) || {};
+        const right = (changed && changed[table]) || left;
+        Object.keys(left).forEach((key) => {
+          const moved = Number(left[key]) !== Number(right[key]);
+          html += `<tr class="${moved ? "changed" : ""}"><td>${esc(names[table])}</td><td>${esc(key)}</td><td>${esc(left[key])}</td><td>${esc(right[key])}</td></tr>`;
+        });
+      });
+      return html || `<tr><td colspan="4">Weight tables were not returned.</td></tr>`;
+    }
+
+    async function loadPatients() {
+      const response = await fetch(api + "/catalog");
+      const catalog = await response.json();
+      const select = document.getElementById("patient");
+      state.patients = catalog.patients || [];
+      if (!state.patients.length) {
+        document.getElementById("status").textContent = "No saved charts were found next to the server. Each patient folder needs raw_chart.json and raw_dasha.json. Prokerala was not called.";
+        return;
+      }
+      select.innerHTML = state.patients.map((patient) => `<option value="${esc(patient.patient_id)}">${esc(patient.patient_id)}</option>`).join("");
+      score();
+    }
+
+    async function score() {
+      const patientId = document.getElementById("patient").value;
+      const status = document.getElementById("status");
+      if (!patientId) return;
+      status.textContent = "Scoring " + patientId + " from the saved chart. Three runs, one file. Prokerala is not called.";
+      const response = await fetch(api + "/patient/" + encodeURIComponent(patientId));
+      const payload = await response.json();
+      if (!payload.success) {
+        status.textContent = payload.error || "This patient could not be scored.";
+        return;
+      }
+      const rashi = payload.run.cells["Rashi Correlation"];
+      const labels = [];
+      ["A", "B", "C"].forEach((track) => ((rashi[track] || {}).rankings || []).forEach((item) => {
+        if (item.label && !labels.includes(item.label)) labels.push(item.label);
+      }));
+      const group = document.getElementById("group");
+      const previous = group.value;
+      group.innerHTML = labels.map((item) => `<option value="${esc(item)}">${esc(item)}</option>`).join("");
+      const chosen = labels.includes(previous) ? previous : (labels[0] || "");
+      group.value = chosen;
+      const a = scoreText(rashi.A, chosen);
+      const b = scoreText(rashi.B, chosen);
+      const c = scoreText(rashi.C, chosen);
+      document.getElementById("scores").innerHTML = `
+        <div class="card"><strong>1 · Original engine</strong><div class="num">${esc(a)}</div><div>${esc(chosen)}</div></div>
+        <div class="card"><strong>2 · Agent, same weights</strong><div class="num">${esc(b)}</div><div>Same tables. The agent adds a review. It does not change the product.</div></div>
+        <div class="card"><strong>3 · Checked weight change</strong><div class="num">${esc(c)}</div><div>Same formula. Only allowed table numbers may change.</div></div>`;
+      const audit = (rashi.C && rashi.C.weight_audit) || {};
+      const changed = ((audit.validation || {}).changed || []).map((item) => `${item.key} ${item.baseline} → ${item.proposed}`).join("; ") || "no number changed";
+      const diff = ((payload.run.differentials || {})["Rashi Correlation"] || {}).A_vs_C || {};
+      const live = audit.live_model ? "Vertex proposed the run 3 numbers." : "Run 3 used the scripted 20% rise because Vertex login was not available.";
+      document.getElementById("meaning").textContent = chosen + " is " + a + " on the original engine and " + c + " after the weight change (" + changed + "). " + (diff.explanation || "") + " " + live + " The reinforcement-learning trainer was not used.";
+      document.getElementById("weights").querySelector("tbody").innerHTML = weightRows((rashi.A || {}).weights, (rashi.C || {}).weights);
+      const original = rowFor(rashi.A, chosen);
+      const weighted = rowFor(rashi.C, chosen);
+      document.getElementById("lines").querySelector("tbody").innerHTML = lineRows(original);
+      document.getElementById("lines-c").querySelector("tbody").innerHTML = lineRows(weighted);
+      const steps = (original && original.trail) || [];
+      const sum = steps.reduce((total, step) => total + Number(step.weight || 0), 0);
+      document.getElementById("sum-note").textContent = steps.length
+        ? "Add the Amount column. That sum is the group score (" + sum.toFixed(2) + " against the reported " + original.score + "). A highlighted weight above is the only reason a line can grow in the next table."
+        : "The evidence lines were not on this response.";
+      status.textContent = "Patient " + patientId + ". Saved chart. Prokerala was not called.";
+    }
+
+    document.getElementById("patient").addEventListener("change", score);
+    document.getElementById("group").addEventListener("change", score);
+    document.getElementById("reload").addEventListener("click", score);
+    loadPatients();
+  </script>
+</body>
+</html>

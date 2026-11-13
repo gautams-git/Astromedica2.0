@@ -3843,7 +3843,8 @@ function renderRashiCorrelation(d) {
   const container = getDiseaseLogicContainer('priority-logic-section');
   const rc = d.rashi_correlation || {};
   const top3 = rc.top3 || [];
-  if (!container || top3.length === 0) return;
+  if (!container) return;
+  if (top3.length === 0 && !(d.rashi_tracks && d.rashi_tracks.tracks)) return;
 
   const anchors = rc.anchors || {};
   const esc = (v) => String(v ?? '')
@@ -3960,6 +3961,39 @@ function renderRashiCorrelation(d) {
       </div>
     </div>
   `;
+  const tracks = d.rashi_tracks;
+  if (tracks && tracks.tracks) {
+    const trackCard = (key, title) => {
+      const track = tracks.tracks[key] || {};
+      const top = (track.top || []).slice(0, 3).map((item) => `${esc(item.label)} (${esc(item.score)})`).join(", ") || "—";
+      const verification = (track.verification || {}).status || "—";
+      return `<div class="hit-item" style="cursor:default;">
+        <div style="font-size:0.65rem; color:#93c5fd; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">${esc(title)}</div>
+        <div class="hit-system">${top}</div>
+        <div class="hit-reason">${track.ok ? "Verification: " + esc(verification) : "Failed: " + esc(track.error || "unknown")}</div>
+      </div>`;
+    };
+    const changed = (((tracks.tracks.C || {}).changed_weights) || []).map((item) =>
+      `${esc(item.table)}.${esc(item.key)} ${esc(item.baseline)} → ${esc(item.proposed)}`
+    ).join("; ") || "none applied";
+    const diff = (tracks.differentials || {}).A_vs_C || {};
+    html += `
+      <div class="hitlist-card" style="border-top-color:#8c3a2f; margin-top:16px;">
+        <div class="hitlist-header">
+          <div>
+            <div class="hitlist-title" style="color:#8c3a2f;">Rashi three-track audit</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">${esc(tracks.note || "")} Model: ${esc(tracks.model_identifier || "none")}. Input ${esc(tracks.input_hash || "")}.</div>
+          </div>
+        </div>
+        <div class="hitlist-grid">
+          ${trackCard("A", "A · Original engine")}
+          ${trackCard("B", "B · Agent, default weights")}
+          ${trackCard("C", "C · Validated weights")}
+        </div>
+        <div style="margin-top:12px; font-size:0.82rem; color:var(--text);">Weights changed: ${changed}</div>
+        <div style="margin-top:6px; font-size:0.82rem; color:var(--text-muted);">${esc(diff.status || "")}: ${esc(diff.explanation || "")}</div>
+      </div>`;
+  }
   container.innerHTML = html;
 }
 

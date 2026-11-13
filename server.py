@@ -726,7 +726,8 @@ def _resolve_patient_gender(chart_data=None, diagnosis=None, payload=None, proce
 
 
 def _build_latest_patient_payload(patient_id: str) -> dict:
-    folder = os.path.join("patients", str(patient_id))
+    from benchmark.patients import patients_root
+    folder = os.path.join(str(patients_root()), str(patient_id))
     chart_data = _read_json_if_exists(os.path.join(folder, "chart_data.json"))
     processed = _read_json_if_exists(os.path.join(folder, "processed_logic.json"))
     diagnosis = _read_json_if_exists(os.path.join(folder, "diagnosis.json"))
@@ -1330,7 +1331,8 @@ def _prepare_patient_chart(patient_id: str) -> None:
     """Refresh patients/<id>/ from the user's saved chart in Firestore, and re-run
     the algorithms on it when the saved results are from an older ALGO_VERSION.
     Never calls Prokerala."""
-    folder = os.path.join("patients", patient_id)
+    from benchmark.patients import patients_root
+    folder = os.path.join(str(patients_root()), patient_id)
     key = (g.user["internal_user_id"], patient_id)
     source = None
 
@@ -1435,29 +1437,37 @@ DEMO_LIST_HIDDEN_PATIENT_IDS = {"007"}
 @app.get("/patients-list")
 @login_required(rate_limit="read")
 def patients_list():
-    root = "patients"
+    root = str(__import__("benchmark.patients", fromlist=["patients_root"]).patients_root())
     out = []
     if os.path.isdir(root):
         for entry in sorted(os.listdir(root)):
-            if entry in DEMO_LIST_HIDDEN_PATIENT_IDS:
+            if entry in DEMO_LIST_HIDDEN_PATIENT_IDS and not (
+                os.path.isfile(os.path.join(folder, "raw_chart.json"))
+                and os.path.isfile(os.path.join(folder, "raw_dasha.json"))
+            ):
                 continue
             # With login on, only the signed-in user's own patients.
+            # Saved benchmark charts live in this folder and are listed for local
+            # inspection. Prokerala is not contacted to build this list.
             if not user_owns_patient(entry):
                 continue
             folder = os.path.join(root, entry)
             if not os.path.isdir(folder):
                 continue
             profile = _read_json_if_exists(os.path.join(folder, "profile.json"))
-            if not profile:
+            raw_chart = _read_json_if_exists(os.path.join(folder, "raw_chart.json"))
+            if not profile and not raw_chart:
                 continue
             out.append({
                 "patient_id": entry,
-                "name": profile.get("name", entry),
-                "dob": profile.get("dob", ""),
-                "birth_place": profile.get("birth_place", ""),
-                "gender": profile.get("gender", ""),
+                "name": (profile or {}).get("name") or (raw_chart or {}).get("name") or entry,
+                "dob": (profile or {}).get("dob") or (raw_chart or {}).get("dob", ""),
+                "birth_place": (profile or {}).get("birth_place") or (raw_chart or {}).get("place", ""),
+                "gender": (profile or {}).get("gender") or (raw_chart or {}).get("gender", ""),
+                "benchmark": bool(raw_chart and os.path.exists(os.path.join(folder, "raw_dasha.json"))),
+                "prokerala_called": False,
             })
-    return jsonify({"success": True, "patients": out})
+    return jsonify({"success": True, "patients": out, "prokerala_called": False})
 
 
 @app.get("/patient-data/<patient_id>")
@@ -1465,21 +1475,29 @@ def patients_list():
 def patient_data(patient_id):
     check_patient_access(patient_id)
     try:
-        # The account's saved chart from Firestore, re-run if the algorithms changed.
+        # Saved chart only. _prepare_patient_chart reloads Firestore or local
+        # raw_chart.json / raw_dasha.json and does not call Prokerala.
         _prepare_patient_chart(patient_id)
         payload = _build_latest_patient_payload(patient_id)
         if not payload:
-            return jsonify({"success": False, "error": "patient data not found"}), 404
+            return jsonify({"success": False, "error": "patient data not found", "prokerala_called": False}), 404
+
+        try:
+            from benchmark.http import attach_rashi_tracks
+            payload = attach_rashi_tracks(patient_id, payload)
+        except Exception as exc:
+            print(f"[Benchmark] Rashi tracks were not attached for {patient_id}: {exc}")
+            payload["rashi_tracks"] = {"prokerala_called": False, "error": str(exc)}
 
         # Patients opened from the list (not re-generated) never went through
         # /generate-chart, so make sure their RL file exists here. An existing
         # current file is left alone so its chat_log isn't wiped.
         try:
-            ensure_rl_report(os.path.join("patients", str(patient_id)))
+            ensure_rl_report(os.path.join(str(__import__("benchmark.patients", fromlist=["patients_root"]).patients_root()), str(patient_id)))
         except Exception as e:
             print(f"[RL] could not create For RL Report.json for {patient_id}: {e}")
 
-        return jsonify({"success": True, "patient_id": patient_id, "data": payload})
+        return jsonify({"success": True, "patient_id": patient_id, "data": payload, "prokerala_called": False})
     except AUTH_ERRORS:
         raise
     except Exception as e:
@@ -1897,6 +1915,10 @@ def dev_mode_unlock():
         return jsonify({"success": True})
     print("[Dev view] Wrong password")
     return jsonify({"success": False, "error": "Wrong password."}), 403
+
+
+from benchmark.http import register_benchmark_routes
+register_benchmark_routes(app)
 
 
 if __name__ == "__main__":

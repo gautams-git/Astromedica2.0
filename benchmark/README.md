@@ -1,0 +1,56 @@
+# TRIAD-5 benchmark
+
+The five scoring engines are not modified. LLM weight selection is wired only around Rashi Correlation, through the existing `weights_context` lock. The other four algorithms still run on Track A (original engine) and Track B (agent, default weights, no LLM). Their Track C cell is an explicit gap.
+
+## Twelve patients
+
+The benchmark reads up to twelve patient folders that already contain Prokerala results: `raw_chart.json` and `raw_dasha.json`. It rebuilds the chart locally. It does not call Prokerala, including when a folder is missing.
+
+Default directory: `patients/`. Override with `BENCHMARK_PATIENTS_DIR`.
+
+Those folders are gitignored because they hold birth details. On a machine that already has them, they appear on `GET /patients-list` and open from `GET /patient-data/<id>` with the Rashi three-track panel attached. Opening them reuses the saved chart.
+
+| Split | Patients | Used for |
+|---|---|---|
+| train | first 6 saved ids | pilot search only |
+| validation | next 2 saved ids | held out of the pilot search |
+| holdout | the rest, up to 12 | held out of the pilot search |
+
+There are no adjudicated clinical labels. Metrics exist and are tested on hand-written vectors. They are not reported as clinical accuracy.
+
+## Run
+
+From the repository root, with the project virtualenv:
+
+```bash
+python -m pytest tests/test_agentic_rashi_correlation.py tests/benchmark -q
+python -m benchmark
+```
+
+The second command writes:
+
+- `benchmark/reports/executive.md`
+- `benchmark/reports/technical.md`
+- `benchmark/reports/evidence.json`
+- `benchmark/reports/critic.json`
+- `benchmark/reports/pilot.json`
+
+## Local server
+
+The chart folders are not in git. Copy the twelve folders you already have, each with `raw_chart.json` and `raw_dasha.json`, into `patients/` at the repository root. Folder names such as `001` … `012` are the patient ids. Do not put Prokerala keys in `.env` for this demo. With `AUTH_ENABLED=false` the home page lists those folders without Clerk.
+
+```bash
+python server.py
+```
+
+Then open:
+
+- `http://localhost:5000/` — saved patients on the index
+- `http://localhost:5000/results?patient_id=001` — Rashi tracks on that saved chart
+- `http://localhost:5000/benchmark` — deviation explorer
+
+The server log for an open should say the algorithms were re-run on the saved chart and that Prokerala was not called. A missing folder is skipped. It is not fetched.
+
+`BENCHMARK_RASHI_WEIGHT_MODE` may be `live`, `mock`, or `off`. When it is unset, a working Vertex AI login (`gcloud auth application-default login`, the same login as Firestore) selects `live`. No `GEMINI_API_KEY` is required. The call uses `gemini_client.py` and `GEMINI_MODEL`. If that login is missing, the mode is `mock`: a scripted 20% increase on the nakshatra layer and the P6 anchor. Live proposals that fail the 50%–150% range check are not executed.
+
+The pilot search does not write production weights.
