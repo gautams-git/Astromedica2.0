@@ -65,7 +65,12 @@
   <header>
     <p class="pill">TRIAD-5 · Rashi Correlation only for LLM weights</p>
     <h1>Forensic benchmark</h1>
-    <p class="lede">Twelve synthetic patients, five existing algorithms, three tracks. Track C changes weights only for Rashi Correlation, and only after a range check. Nothing here is a clinical accuracy claim.</p>
+    <p class="lede">This page is the check of the Rashi score. It is not the health report. The health report is the home page. Nothing here is a clinical accuracy claim.</p>
+    <ol class="lede">
+      <li>Open the <a href="/">home page</a>. The saved patient folders should be listed there.</li>
+      <li>Return here and choose a patient in the dropdown. One chart is scored at a time.</li>
+      <li>Read the row. A is the original engine. B is the agent with the normal weights. C is the same engine after a checked weight change.</li>
+    </ol>
     <p><a href="/">Back to the patient index</a></p>
   </header>
   <main>
@@ -81,10 +86,10 @@
       <label>Group <select id="group"></select></label>
       <button id="reload" type="button">Reload from backend</button>
     </div>
-    <div id="explorer" class="card" style="margin-top:12px">Choose a patient. The first load asks the backend to run the frozen inputs.</div>
+    <div id="explorer" class="card" style="margin-top:12px">Looking for saved charts in the patients folder. Prokerala is not called.</div>
 
     <h2>Critic, without using an LLM as the judge</h2>
-    <div id="critic" class="card">Loading…</div>
+    <div id="critic" class="card">The critic numbers appear after you choose a patient. An LLM is not the judge.</div>
 
     <h2>Executive report</h2>
     <pre id="executive">Loading…</pre>
@@ -98,43 +103,37 @@
 
     function topText(track) {
       if (!track) return "—";
+      if (track.ok === null || track.ok === undefined) return "not run";
       if (!track.ok) return "failed";
       const top = (track.top || [])[0];
       if (!top) return "empty";
       return `${top.label} · ${top.score}`;
     }
 
+    function showEmpty(message) {
+      document.querySelector("#patients tbody").innerHTML = "";
+      document.getElementById("patient").innerHTML = "";
+      document.getElementById("group").innerHTML = "";
+      document.getElementById("explorer").textContent = message;
+      document.getElementById("executive").textContent = message;
+    }
+
     function render(summary) {
       state.summary = summary;
       if (!summary.patients || !summary.patients.length) {
-        document.getElementById("executive").textContent = summary.executive || "No saved Prokerala charts were found. Prokerala was not called.";
-        document.querySelector("#patients tbody").innerHTML = "";
+        showEmpty(summary.executive || "No saved charts were found. Put the patient folders next to server.py, inside patients, each with raw_chart.json and raw_dasha.json. Then restart the server and reload this page. Prokerala is not called.");
         return;
       }
       const facts = document.getElementById("facts");
       facts.innerHTML = [
         ["Algorithms", "5 existing engines, unchanged"],
         ["Tracks", "A original · B agent default · C Rashi weights only"],
-        ["Patients", `${summary.patients.length} synthetic fixtures`],
+        ["Patients", `${summary.patients.length} saved charts`],
         ["LLM critic", "Not used as proof of correctness"],
       ].map(([title, body]) => `<article class="card"><strong>${esc(title)}</strong><div>${esc(body)}</div></article>`).join("");
 
       const body = document.querySelector("#patients tbody");
-      body.innerHTML = summary.patients.map((patient) => {
-        const diff = patient.differentials || {};
-        const verify = patient.rashi.A.verification || "—";
-        return `<tr>
-          <td><a href="/results?patient_id=${encodeURIComponent(patient.patient_id)}">${esc(patient.patient_id)}</a></td>
-          <td>${esc(patient.case)}</td>
-          <td>${esc(patient.split)}</td>
-          <td>${esc(topText(patient.rashi.A))}</td>
-          <td>${esc(topText(patient.rashi.B))}</td>
-          <td>${esc(topText(patient.rashi.C))}</td>
-          <td class="${verify === "passed" ? "ok" : verify === "mismatch" ? "bad" : "warn"}">${esc(verify)}</td>
-          <td>${esc((diff.A_vs_B || {}).status || "")}</td>
-          <td>${esc((diff.A_vs_C || {}).status || "")}</td>
-        </tr>`;
-      }).join("");
+      body.innerHTML = tableRows(summary.patients);
 
       const select = document.getElementById("patient");
       select.innerHTML = summary.patients.map((patient) => `<option value="${esc(patient.patient_id)}">${esc(patient.patient_id)} · ${esc(patient.case)}</option>`).join("");
@@ -160,8 +159,27 @@
         : `<option value="">No ranked group</option>`;
     }
 
+    function tableRows(patients) {
+      return patients.map((patient) => {
+        const diff = patient.differentials || {};
+        const verify = patient.rashi.A.verification || "—";
+        return `<tr>
+          <td><a href="/results?patient_id=${encodeURIComponent(patient.patient_id)}">${esc(patient.patient_id)}</a></td>
+          <td>${esc(patient.case)}</td>
+          <td>${esc(patient.split)}</td>
+          <td>${esc(topText(patient.rashi.A))}</td>
+          <td>${esc(topText(patient.rashi.B))}</td>
+          <td>${esc(topText(patient.rashi.C))}</td>
+          <td class="${verify === "passed" ? "ok" : verify === "mismatch" ? "bad" : "warn"}">${esc(verify)}</td>
+          <td>${esc((diff.A_vs_B || {}).status || "")}</td>
+          <td>${esc((diff.A_vs_C || {}).status || "")}</td>
+        </tr>`;
+      }).join("");
+    }
+
     function scoreOf(track, label) {
-      const row = (track.top || []).find((item) => item.label === label);
+      const rows = (track && (track.top || track.rankings)) || [];
+      const row = rows.find((item) => item.label === label);
       return row ? row.score : "absent";
     }
 
@@ -170,48 +188,94 @@
       const label = document.getElementById("group").value;
       const box = document.getElementById("explorer");
       if (!patientId) return;
-      box.textContent = "Loading the execution record…";
+      box.textContent = "Scoring " + patientId + " from the saved chart. The original engine, the default agent, and the checked weight change run on that same file. Prokerala is not called.";
       const response = await fetch("/benchmark/api/patient/" + encodeURIComponent(patientId));
       const payload = await response.json();
+      if (!payload.success) {
+        box.textContent = payload.error || "This patient could not be scored.";
+        return;
+      }
       const run = payload.run;
       const rashi = run.cells["Rashi Correlation"];
+      const row = state.summary.patients.find((item) => item.patient_id === patientId);
+      if (row) {
+        row.differentials = run.differentials["Rashi Correlation"] || {};
+        ["A", "B", "C"].forEach((track) => {
+          const cell = rashi[track] || {};
+          row.rashi[track] = {
+            ok: cell.ok,
+            top: (cell.rankings || []).slice(0, 3),
+            verification: (cell.verification || {}).status || "limited",
+            error: cell.error,
+          };
+        });
+        document.querySelector("#patients tbody").innerHTML = tableRows(state.summary.patients);
+      }
       const audit = (rashi.C.weight_audit || {});
       const changed = ((audit.validation || {}).changed || []).map((item) => `${item.table}.${item.key}: ${item.baseline} → ${item.proposed}`).join("; ") || "none applied";
       const ablation = (audit.ablation || []).find((item) => true);
       const verification = (rashi.A.verification || {}).status;
       const differential = (run.differentials["Rashi Correlation"] || {}).A_vs_C || {};
+      const chosen = label || ((rashi.A.rankings || [])[0] || {}).label || "";
+      if (!label && chosen) {
+        const group = document.getElementById("group");
+        const labels = new Set();
+        ["A", "B", "C"].forEach((track) => ((rashi[track] || {}).rankings || []).forEach((item) => labels.add(item.label)));
+        group.innerHTML = [...labels].map((item) => `<option value="${esc(item)}">${esc(item)}</option>`).join("");
+        group.value = chosen;
+      }
       box.innerHTML = `
         <div class="trace">
-          <div><strong>Original score</strong>${esc(scoreOf(rashi.A, label))}</div>
-          <div><strong>Default agent</strong>${esc(scoreOf(rashi.B, label))}</div>
-          <div><strong>Weighted agent</strong>${esc(scoreOf(rashi.C, label))}</div>
-          <div><strong>Weight responsible</strong>${esc(changed)}</div>
+          <div><strong>A · original score</strong>${esc(scoreOf(rashi.A, chosen))}</div>
+          <div><strong>B · default agent</strong>${esc(scoreOf(rashi.B, chosen))}</div>
+          <div><strong>C · checked weights</strong>${esc(scoreOf(rashi.C, chosen))}</div>
+          <div><strong>Weight that changed</strong>${esc(changed)}</div>
           <div><strong>Math check</strong>${esc(verification)}</div>
-          <div><strong>Evaluation</strong>${esc(differential.status || "")}: ${esc(differential.explanation || "")}</div>
+          <div><strong>What it means</strong>${esc(differential.status || "")}: ${esc(differential.explanation || "")}</div>
         </div>
-        <p>Model: ${esc(audit.model_identifier || "none")} · live model: ${esc(audit.live_model)} · prompt ${esc(audit.prompt_version || "")}</p>
+        <p>Same saved chart for all three. Model: ${esc(audit.model_identifier || "none")}. Live model: ${esc(audit.live_model)}. Prokerala was not called.</p>
         <p>Input hash <code>${esc(run.input.input_hash)}</code></p>
-        <p>${ablation ? `Single-key ablation ${esc(ablation.table)}.${esc(ablation.key)} moved the top score by ${esc(ablation.top_score_delta)}.` : "No ablation was recorded for this execution."}</p>
-        <p class="lede">${esc(run.limitations && run.limitations[0])}</p>`;
+        <p>${ablation ? `Changing only ${esc(ablation.table)}.${esc(ablation.key)} moved the top score by ${esc(ablation.top_score_delta)}.` : "No single-weight check was recorded."}</p>`;
     }
 
     document.getElementById("patient").addEventListener("change", () => { fillGroups(); explore(); });
     document.getElementById("group").addEventListener("change", explore);
     document.getElementById("reload").addEventListener("click", load);
 
+    function catalogSummary(catalog) {
+      const patients = (catalog.patients || []).map((patient) => ({
+        patient_id: patient.patient_id,
+        case: patient.case || "saved chart",
+        split: patient.split || "",
+        rashi: {
+          A: { ok: null, top: [], verification: "not run" },
+          B: { ok: null, top: [], verification: "not run" },
+          C: { ok: null, top: [], verification: "not run" },
+        },
+        differentials: {},
+      }));
+      return {
+        patients: patients,
+        critic: {},
+        executive: patients.length
+          ? "Saved charts found. Choose one patient. The first choice runs that chart only. Prokerala is not called."
+          : "No saved charts were found. Put the folders in patients, next to server.py. Each folder needs raw_chart.json and raw_dasha.json.",
+      };
+    }
+
     async function load() {
-      document.getElementById("executive").textContent = "Running the twelve patients on the backend. This can take a minute the first time.";
-      const response = await fetch("/benchmark/api/summary");
-      const summary = await response.json();
-      if (!summary.success) {
-        document.getElementById("executive").textContent = summary.error || "The benchmark did not return a summary.";
+      document.getElementById("explorer").textContent = "Reading the patients folder. This does not score anyone yet, and it does not call Prokerala.";
+      const response = await fetch("/benchmark/api/catalog");
+      const catalog = await response.json();
+      if (!catalog.success) {
+        showEmpty(catalog.error || "The patient list did not load.");
         return;
       }
-      render(summary);
+      render(catalogSummary(catalog));
     }
 
     load().catch((error) => {
-      document.getElementById("executive").textContent = String(error);
+      showEmpty(String(error));
     });
   </script>
 </body>
