@@ -270,6 +270,9 @@ class RashiCorrelationAgent:
             "llm_used": state.llm_used,
             "llm_error": state.llm_error,
             "engine_result": engine_result,
+            # Clinical-profile ranking, exposed for the existing regression test.
+            # It does not alter scores.
+            "baseline_top3": (state.profile_results.get("clinical") or engine_result).get("top3") or [],
         }
         return state
 

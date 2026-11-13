@@ -791,6 +791,7 @@
   </ul>
   <div style="display: flex; align-items: center;">
     <a href="#cta" class="nav-cta">Request Access</a>
+    <a href="/benchmark" class="nav-cta" style="margin-left:14px;">Rashi benchmark</a>
     <a href="/admin" class="nav-cta" id="admin-link" hidden style="margin-left:14px;">Admin</a>
     <a href="/tester" class="nav-cta" id="tester-link" hidden style="margin-left:14px;">My test charts</a>
     <div id="account-slot"></div>
@@ -1460,7 +1461,7 @@
       card.innerHTML = `
         <div class="recent-card-name">${p.name}</div>
         <div class="recent-card-meta">${date}<br>${p.birth_place || '—'}</div>
-        <div class="recent-fill-badge">View report</div>
+        <div class="recent-fill-badge">${p.benchmark ? 'Benchmark case' : 'View report'}</div>
       `;
       card.addEventListener('click', () => {
         window.location.href = '/results?patient_id=' + encodeURIComponent(p.patient_id);

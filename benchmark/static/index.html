@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rashi forensic benchmark</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1c1915;
+      --muted: #5c564c;
+      --line: #e4ddd2;
+      --paper: #faf7f2;
+      --card: #fff;
+      --accent: #8c3a2f;
+      --ok: #1f6b45;
+      --warn: #8a5a12;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 16px/1.5 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    header, main { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
+    header { padding-bottom: 0; }
+    h1 { font-size: 2rem; line-height: 1.15; margin: 0 0 8px; }
+    h2 { font-size: 1.25rem; margin: 28px 0 8px; }
+    a { color: var(--accent); }
+    .lede { color: var(--muted); max-width: 68ch; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .card, table { background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+    .card { padding: 14px 16px; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 0.92rem; }
+    th { font: 600 0.78rem/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    button, select {
+      font: 15px/1.2 ui-sans-serif, system-ui, sans-serif;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: white;
+    }
+    button { background: var(--ink); color: white; cursor: pointer; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; background: #f3eee6; font: 12px/1.6 ui-sans-serif, system-ui, sans-serif; }
+    .ok { color: var(--ok); }
+    .bad { color: var(--accent); }
+    .warn { color: var(--warn); }
+    pre {
+      white-space: pre-wrap;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .trace { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+    .trace div { flex: 1 1 140px; background: white; border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+    .trace strong { display: block; font: 600 0.72rem/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="pill">TRIAD-5 · Rashi Correlation only for LLM weights</p>
+    <h1>Forensic benchmark</h1>
+    <p class="lede">Twelve synthetic patients, five existing algorithms, three tracks. Track C changes weights only for Rashi Correlation, and only after a range check. Nothing here is a clinical accuracy claim.</p>
+    <p><a href="/">Back to the patient index</a></p>
+  </header>
+  <main>
+    <section class="grid" id="facts"></section>
+    <h2>Patients on this run</h2>
+    <div style="overflow-x:auto"><table id="patients"><thead><tr>
+      <th>Patient</th><th>Case</th><th>Split</th><th>A</th><th>B</th><th>C</th><th>Check</th><th>A vs B</th><th>A vs C</th>
+    </tr></thead><tbody></tbody></table></div>
+
+    <h2>Deviation explorer</h2>
+    <div class="controls">
+      <label>Patient <select id="patient"></select></label>
+      <label>Group <select id="group"></select></label>
+      <button id="reload" type="button">Reload from backend</button>
+    </div>
+    <div id="explorer" class="card" style="margin-top:12px">Choose a patient. The first load asks the backend to run the frozen inputs.</div>
+
+    <h2>Critic, without using an LLM as the judge</h2>
+    <div id="critic" class="card">Loading…</div>
+
+    <h2>Executive report</h2>
+    <pre id="executive">Loading…</pre>
+  </main>
+  <script>
+    const state = { summary: null };
+
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+    }
+
+    function topText(track) {
+      if (!track) return "—";
+      if (!track.ok) return "failed";
+      const top = (track.top || [])[0];
+      if (!top) return "empty";
+      return `${top.label} · ${top.score}`;
+    }
+
+    function render(summary) {
+      state.summary = summary;
+      if (!summary.patients || !summary.patients.length) {
+        document.getElementById("executive").textContent = summary.executive || "No saved Prokerala charts were found. Prokerala was not called.";
+        document.querySelector("#patients tbody").innerHTML = "";
+        return;
+      }
+      const facts = document.getElementById("facts");
+      facts.innerHTML = [
+        ["Algorithms", "5 existing engines, unchanged"],
+        ["Tracks", "A original · B agent default · C Rashi weights only"],
+        ["Patients", `${summary.patients.length} synthetic fixtures`],
+        ["LLM critic", "Not used as proof of correctness"],
+      ].map(([title, body]) => `<article class="card"><strong>${esc(title)}</strong><div>${esc(body)}</div></article>`).join("");
+
+      const body = document.querySelector("#patients tbody");
+      body.innerHTML = summary.patients.map((patient) => {
+        const diff = patient.differentials || {};
+        const verify = patient.rashi.A.verification || "—";
+        return `<tr>
+          <td><a href="/results?patient_id=${encodeURIComponent(patient.patient_id)}">${esc(patient.patient_id)}</a></td>
+          <td>${esc(patient.case)}</td>
+          <td>${esc(patient.split)}</td>
+          <td>${esc(topText(patient.rashi.A))}</td>
+          <td>${esc(topText(patient.rashi.B))}</td>
+          <td>${esc(topText(patient.rashi.C))}</td>
+          <td class="${verify === "passed" ? "ok" : verify === "mismatch" ? "bad" : "warn"}">${esc(verify)}</td>
+          <td>${esc((diff.A_vs_B || {}).status || "")}</td>
+          <td>${esc((diff.A_vs_C || {}).status || "")}</td>
+        </tr>`;
+      }).join("");
+
+      const select = document.getElementById("patient");
+      select.innerHTML = summary.patients.map((patient) => `<option value="${esc(patient.patient_id)}">${esc(patient.patient_id)} · ${esc(patient.case)}</option>`).join("");
+      fillGroups();
+      explore();
+
+      const critic = summary.critic || {};
+      const counts = critic.counts || {};
+      document.getElementById("critic").innerHTML =
+        `<div>Rule-based critic on labelled scenarios: true positive ${counts.tp || 0}, false positive ${counts.fp || 0}, true negative ${counts.tn || 0}, false negative ${counts.fn || 0}.</div>` +
+        `<div class="lede">${esc(critic.authority || "")}</div>`;
+      document.getElementById("executive").textContent = summary.executive || "";
+    }
+
+    function fillGroups() {
+      const patient = state.summary.patients.find((item) => item.patient_id === document.getElementById("patient").value);
+      const labels = new Set();
+      ["A", "B", "C"].forEach((track) => (patient.rashi[track].top || []).forEach((item) => labels.add(item.label)));
+      const group = document.getElementById("group");
+      const values = [...labels];
+      group.innerHTML = values.length
+        ? values.map((label) => `<option value="${esc(label)}">${esc(label)}</option>`).join("")
+        : `<option value="">No ranked group</option>`;
+    }
+
+    function scoreOf(track, label) {
+      const row = (track.top || []).find((item) => item.label === label);
+      return row ? row.score : "absent";
+    }
+
+    async function explore() {
+      const patientId = document.getElementById("patient").value;
+      const label = document.getElementById("group").value;
+      const box = document.getElementById("explorer");
+      if (!patientId) return;
+      box.textContent = "Loading the execution record…";
+      const response = await fetch("/benchmark/api/patient/" + encodeURIComponent(patientId));
+      const payload = await response.json();
+      const run = payload.run;
+      const rashi = run.cells["Rashi Correlation"];
+      const audit = (rashi.C.weight_audit || {});
+      const changed = ((audit.validation || {}).changed || []).map((item) => `${item.table}.${item.key}: ${item.baseline} → ${item.proposed}`).join("; ") || "none applied";
+      const ablation = (audit.ablation || []).find((item) => true);
+      const verification = (rashi.A.verification || {}).status;
+      const differential = (run.differentials["Rashi Correlation"] || {}).A_vs_C || {};
+      box.innerHTML = `
+        <div class="trace">
+          <div><strong>Original score</strong>${esc(scoreOf(rashi.A, label))}</div>
+          <div><strong>Default agent</strong>${esc(scoreOf(rashi.B, label))}</div>
+          <div><strong>Weighted agent</strong>${esc(scoreOf(rashi.C, label))}</div>
+          <div><strong>Weight responsible</strong>${esc(changed)}</div>
+          <div><strong>Math check</strong>${esc(verification)}</div>
+          <div><strong>Evaluation</strong>${esc(differential.status || "")}: ${esc(differential.explanation || "")}</div>
+        </div>
+        <p>Model: ${esc(audit.model_identifier || "none")} · live model: ${esc(audit.live_model)} · prompt ${esc(audit.prompt_version || "")}</p>
+        <p>Input hash <code>${esc(run.input.input_hash)}</code></p>
+        <p>${ablation ? `Single-key ablation ${esc(ablation.table)}.${esc(ablation.key)} moved the top score by ${esc(ablation.top_score_delta)}.` : "No ablation was recorded for this execution."}</p>
+        <p class="lede">${esc(run.limitations && run.limitations[0])}</p>`;
+    }
+
+    document.getElementById("patient").addEventListener("change", () => { fillGroups(); explore(); });
+    document.getElementById("group").addEventListener("change", explore);
+    document.getElementById("reload").addEventListener("click", load);
+
+    async function load() {
+      document.getElementById("executive").textContent = "Running the twelve patients on the backend. This can take a minute the first time.";
+      const response = await fetch("/benchmark/api/summary");
+      const summary = await response.json();
+      if (!summary.success) {
+        document.getElementById("executive").textContent = summary.error || "The benchmark did not return a summary.";
+        return;
+      }
+      render(summary);
+    }
+
+    load().catch((error) => {
+      document.getElementById("executive").textContent = String(error);
+    });
+  </script>
+</body>
+</html>
