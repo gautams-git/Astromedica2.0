@@ -1192,6 +1192,72 @@ def start_chat(
         "debug_context": debug_context
     }
 
+def build_final_text(session: dict) -> str:
+    """Deterministic final message from cluster_scores.
+
+    Used by the agentic path when the chat reaches its final turn. Reads
+    the same data the results page uses; the model is not involved.
+
+    Returns a plain string, no markdown, no disclaimer (the agent appends
+    the disclaimer separately).
+    """
+    scores = session.get("cluster_scores") or {}
+    if not scores:
+        return "Thank you. Your consultation is complete."
+
+    clusters = []
+    for rank_key, score in scores.items():
+        cluster = cluster_by_rank(session, int(rank_key))
+        organ = (cluster or {}).get("organ", "") or f"Cluster {rank_key}"
+        labels = []
+        for branch_id, state in (score.get("branches") or {}).items():
+            label = state.get("label")
+            if not label:
+                branch = branch_by_id(cluster, branch_id) or {}
+                label = branch.get("label", "")
+            if not label:
+                continue
+            weight = state.get("support", 0) - state.get("refute", 0)
+            labels.append((label, weight))
+
+        # Best-supported branches first.
+        labels.sort(key=lambda x: x[1], reverse=True)
+        kept = [label for label, weight in labels if weight > 0][:3]
+        clusters.append({
+            "organ": organ,
+            "score": score.get("total", 0),
+            "confirmed": kept,
+        })
+
+    clusters.sort(key=lambda c: c["score"], reverse=True)
+
+    parts = ["Thank you. Based on our conversation, here is what stands out:"]
+
+    for c in clusters[:3]:
+        if not c["confirmed"]:
+            continue
+        joined = ", ".join(c["confirmed"])
+        parts.append(f"- {c['organ']}: {joined}")
+
+    if len(parts) == 1:
+        parts.append(
+            "No symptoms reached a confident threshold in this chat. "
+            "Please consult a healthcare professional for any persistent concern."
+        )
+    else:
+        parts.append(
+            "These are astrological correlations, not a medical diagnosis. "
+            "Please share them with a qualified healthcare professional."
+        )
+
+    return "\n".join(parts)
+
+def _build_retriever():
+    try:
+        from orchestrator import get_retriever
+        return get_retriever()
+    except Exception:
+        return None
 
 # ── Function 5: Handle one user message ──────────────────────────
 def send_message(
@@ -1205,6 +1271,23 @@ def send_message(
     saves both to chat_log.json, detects if final assessment.
     Returns: { response, turn, is_final, patient_id }
     """
+    # ── Agentic hook ─────────────────────────────────────
+    import os
+    if os.getenv("CHAT_MODE", "classic").lower() == "agentic":
+        try:
+            import asyncio
+            from agentic_chat.turn import run_turn
+            from agentic_chat.llm_provider import get_provider
+
+            session = conversation_store[session_id]
+            retriever = session.get("retriever") or _build_retriever()
+            return asyncio.run(run_turn(
+                session, session_id, user_message,
+                get_provider(), retriever=retriever,
+            ))
+        except Exception as exc:
+            print(f"[AgenticChat] failed ({type(exc).__name__}: {exc})")
+
     session    = conversation_store[session_id]
     patient_id = session["patient_id"]
     answer_label = classify_answer(user_message)

@@ -1899,6 +1899,64 @@ def dev_mode_unlock():
     return jsonify({"success": False, "error": "Wrong password."}), 403
 
 
+# ══════════════════════════════════════════════════════════════
+# Agentic chat — administrative routes only.
+# The chat route (/send-message) is unchanged. The agent is
+# reached via orchestrator.handle_chat_message → chat_module.send_message.
+# ══════════════════════════════════════════════════════════════
+
+from agentic_chat.config import (
+    CHAT_MODE, CHAT_LLM, CHAT_UNDERSTAND, CHAT_PHRASE_LLM,
+    RAG_MODE, RL_HINT, RL_HINT_SHADOW,
+    LLM_TIMEOUT, RAG_TIMEOUT, RL_HINT_WAIT,
+)
+
+@app.get("/healthz")
+def healthz():
+    """Switches and budgets, for rollout and rollback verification."""
+    return jsonify({
+        "ok": True,
+        "chat": {
+            "mode":           CHAT_MODE,
+            "llm":            CHAT_LLM,
+            "understand":     CHAT_UNDERSTAND,
+            "phrase_llm":     CHAT_PHRASE_LLM,
+            "rag_mode":       RAG_MODE,
+            "rl_hint":        RL_HINT,
+            "rl_hint_shadow": RL_HINT_SHADOW,
+        },
+        "budgets_seconds": {
+            "llm":     LLM_TIMEOUT,
+            "rag":     RAG_TIMEOUT,
+            "rl_hint": RL_HINT_WAIT,
+        },
+        "classic_fallback_available": True,
+    })
+
+
+@app.post("/feedback")
+@login_required(rate_limit="read")
+def chat_feedback():
+    data = request.get_json(silent=True) or {}
+    required = ("user_id", "session_id", "turn_index", "signal")
+    missing = [k for k in required if k not in data]
+    if missing:
+        return jsonify({"ok": False, "error": f"missing: {missing}"}), 400
+    try:
+        from agentic_chat.feedback import record_feedback
+        record_feedback(
+            user_id=data["user_id"],
+            session_id=data["session_id"],
+            turn_index=int(data["turn_index"]),
+            signal=data["signal"],
+            comment=data.get("comment", ""),
+        )
+    except Exception as exc:
+        app.logger.warning(f"[feedback] failed: {type(exc).__name__}")
+        return jsonify({"ok": False, "reason": type(exc).__name__}), 200
+    return jsonify({"ok": True})
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print(f"[OK] AstroMedica server starting on port {port}")
