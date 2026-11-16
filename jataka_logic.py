@@ -53,6 +53,16 @@ def _run_disease_compare(chart: dict, rule1_result: dict, gender_code) -> dict:
     return run_disease_compare_logic(chart, rule1_result, gender=gender_code)
 
 
+def _run_organ_truth(chart: dict, rule1_result: dict, gender_code) -> dict:
+    from organ_truth_correlation_engine import run_organ_truth_correlation_analysis
+    if _agentic_disease_logic_on():          # the same switch as Disease First / Compare
+        try:
+            from agentic_organ import run_agentic_organ_analysis
+            return _unwrap_agentic(run_agentic_organ_analysis(chart, rule1_result, gender=gender_code))
+        except Exception as exc:           # never lose a chart because of the agent
+            print(f"[Agentic] Organ Truth agent unavailable ({type(exc).__name__}: {exc}) - plain engine used")
+    return run_organ_truth_correlation_analysis(chart, rule1_result, gender=gender_code)
+
 def build_chart_dict(raw_chart: dict, raw_dasha: dict) -> dict:
     data = raw_chart.get("planet_position", {}).get("data", {})
     
@@ -215,13 +225,7 @@ def run_logic(patient_id: str) -> dict:
     from rashi_correlation_engine import run_rashi_correlation_analysis
     rashi_correlation_result = run_rashi_correlation_analysis(
         chart, rule1_result, gender=gender_code)
-    '''
-    from organ_truth_correlation_engine import run_organ_truth_correlation_analysis
-    organ_truth_correlation_result = run_organ_truth_correlation_analysis(
-        chart, rule1_result, gender=gender_code)
-    '''
-    from agentic_organ import run_agentic_organ_analysis
-    organ_truth_correlation_result = _unwrap_agentic(run_agentic_organ_analysis(chart, rule1_result, gender=gender_code))
+    organ_truth_correlation_result = _run_organ_truth(chart, rule1_result, gender_code)
     from disease_first_logic import build_current_dasha_priority_sources
     disease_first_logic_result = _run_disease_first(chart, rule1_result, gender_code)
     current_dasha_priority_sources = build_current_dasha_priority_sources(

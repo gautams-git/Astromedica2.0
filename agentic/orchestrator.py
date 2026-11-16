@@ -264,5 +264,4 @@ class HitlistAgent:
 def run_agentic_analysis(chart_data, rule1_result, gender=None,
                         user_id=None, config=None) -> Dict[str, Any]:
     agent = HitlistAgent(config)
-    print("Config is",agent.cfg)
     return agent.invoke(chart_data, rule1_result, gender, user_id)

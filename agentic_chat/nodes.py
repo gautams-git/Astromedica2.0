@@ -5,7 +5,7 @@ from typing import Any, Dict
 from agentic_chat import config as cfg
 from agentic_chat import inputs
 from agentic_chat.rag_reader import fetch as rag_fetch, examples_from_hits
-from agentic_chat.rl_hint import start_prewarm, take_hint
+from agentic_chat.rl_hint import drop_hint, hint_key, start_prewarm, take_hint
 from agentic_chat.state import TurnState
 
 
@@ -37,6 +37,8 @@ async def understand(st: TurnState, session: Dict[str, Any],
     question = last.get("question_text", "")
 
     rag_examples = ""
+    if cfg.RAG_MODE != "off" and retriever is None:
+        st.trace["rag_error"] = "no_retriever"      # RAG is switched on but nothing can be searched
     if (
         cfg.RAG_MODE != "off"
         and retriever is not None
@@ -69,7 +71,8 @@ async def understand(st: TurnState, session: Dict[str, Any],
 def score(st: TurnState, session: Dict[str, Any]) -> None:
     inputs.apply_score(st, session)
     if st.extracted.get("red_flag"):
-        session["red_flag_seen"] = True
+        session["red_flag_seen"] = True     # ask ONE red-flag question next (plan() clears it)
+        session["red_flag_ever"] = True     # the final message tells the patient to see a doctor
 
 
 # ── 3. plan ─────────────────────────────────────────────
@@ -80,9 +83,12 @@ def plan(st: TurnState, session: Dict[str, Any]) -> None:
 
     meta = inputs.planner_meta(st.turn, session)
 
-    if session.get("red_flag_seen") and meta.get("cluster_rank"):
-        st.meta = {**meta, "question_type": "red_flag"}
-        return
+    # pop: the red-flag question is asked once, not on every later turn
+    if session.pop("red_flag_seen", False) and meta.get("cluster_rank"):
+        red = {**meta, "question_type": "red_flag"}
+        if inputs.bank_question(session, red):          # only if a red-flag question is left to ask
+            st.meta = red
+            return
 
     hint = take_hint(st.session_id)
     if hint:
@@ -109,7 +115,7 @@ def _apply_hint(session, meta, hint, trace) -> Dict[str, Any]:
         return meta
 
     def answered(b):
-        h = hint.get(b.get("label", ""), {})
+        h = hint.get(hint_key(b.get("label")), {})
         return h.get("endorsed", 0) + h.get("denied", 0)
 
     pick = (
@@ -133,7 +139,13 @@ async def word(st: TurnState, session: Dict[str, Any],
                provider) -> None:
     if st.meta.get("question_type") == "final":
         return
-    bank = inputs.bank_question(session, st.meta)
+    # The planner's choice if the bank has a question for it; otherwise the next unasked one.
+    # st.meta becomes the meta the question really belongs to (or "final" if nothing is left).
+    bank, st.meta = inputs.next_question(session, st.meta)
+    st.bank = bank
+    if st.meta.get("question_type") == "final":
+        st.trace["no_question_left"] = True
+        return
     text = bank
     if cfg.CHAT_PHRASE_LLM and bank:
         try:
@@ -154,11 +166,15 @@ async def word(st: TurnState, session: Dict[str, Any],
 def guard(st: TurnState, session: Dict[str, Any]) -> None:
     if st.meta.get("question_type") == "final":
         return
-    bank = inputs.bank_question(session, st.meta)
+    # A reworded question that fails the checks is replaced by the bank text it was based on.
     reason = inputs.question_is_bad(st.reply, session)
-    if reason:
+    if reason and st.bank and st.reply != st.bank:
         st.trace["guard"] = reason
-        st.reply = bank or st.reply
+        st.reply = st.bank
+    # Never send a blank message: with nothing to ask, end the chat properly.
+    if not st.reply.strip():
+        st.trace["empty_reply"] = True
+        st.meta = {"cluster_rank": 0, "question_type": "final"}
 
 
 # ── 6. persist ──────────────────────────────────────────
@@ -167,6 +183,7 @@ def persist(st: TurnState, session: Dict[str, Any]) -> Dict[str, Any]:
         st.reply = inputs.final_text(session) or "Thank you. Your consultation is complete."
         st.reply += cfg.DISCLAIMER
         st.is_final = True
+        drop_hint(st.session_id)                # the chat is over: forget any hint still being prepared
     return inputs.persist_turn(st, session)
 
 

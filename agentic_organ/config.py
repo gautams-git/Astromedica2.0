@@ -10,7 +10,7 @@ class LLMConfig:
     model: str = os.getenv("LLM_MODEL", "gemini-2.0-flash")
     temperature: float = 0.0
     max_tokens: int = 1500
-    api_key: Optional[str] = os.getenv("GOOGLE_API_KEY")
+    api_key: Optional[str] = field(default=os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"), repr=False)  # same name as the other agents; the old name still works; never printed
     # The Gemini client defaults to no timeout and 6 retries, so a blocked key looks like a hang.
     timeout: float = float(os.getenv("LLM_TIMEOUT", "20"))
     max_retries: int = int(os.getenv("LLM_MAX_RETRIES", "1"))

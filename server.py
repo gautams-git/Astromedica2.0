@@ -1905,55 +1905,77 @@ def dev_mode_unlock():
 # reached via orchestrator.handle_chat_message → chat_module.send_message.
 # ══════════════════════════════════════════════════════════════
 
-from agentic_chat.config import (
-    CHAT_MODE, CHAT_LLM, CHAT_UNDERSTAND, CHAT_PHRASE_LLM,
-    RAG_MODE, RL_HINT, RL_HINT_SHADOW,
-    LLM_TIMEOUT, RAG_TIMEOUT, RL_HINT_WAIT,
-)
-
-@app.get("/healthz")
-def healthz():
-    """Switches and budgets, for rollout and rollback verification."""
+@app.get("/chat/healthz")
+def chat_healthz():
+    """Switches and budgets of the chat agent, for rollout and rollback checks.
+    (/healthz is the RL page's own health route.) The import is inside the route on purpose:
+    if the agent package has a problem the server still starts, and the chat falls back to
+    the classic path."""
+    try:
+        from agentic_chat import config as ac
+    except Exception as exc:
+        return jsonify({
+            "ok": False,
+            "chat": {"error": f"{type(exc).__name__}: {exc}"},
+            "classic_fallback_available": True,
+        }), 503
     return jsonify({
         "ok": True,
         "chat": {
-            "mode":           CHAT_MODE,
-            "llm":            CHAT_LLM,
-            "understand":     CHAT_UNDERSTAND,
-            "phrase_llm":     CHAT_PHRASE_LLM,
-            "rag_mode":       RAG_MODE,
-            "rl_hint":        RL_HINT,
-            "rl_hint_shadow": RL_HINT_SHADOW,
+            "mode":           ac.CHAT_MODE,
+            "llm":            ac.CHAT_LLM,
+            "understand":     ac.CHAT_UNDERSTAND,
+            "phrase_llm":     ac.CHAT_PHRASE_LLM,
+            "rag_mode":       ac.RAG_MODE,
+            "rl_hint":        ac.RL_HINT,
+            "rl_hint_shadow": ac.RL_HINT_SHADOW,
         },
         "budgets_seconds": {
-            "llm":     LLM_TIMEOUT,
-            "rag":     RAG_TIMEOUT,
-            "rl_hint": RL_HINT_WAIT,
+            "llm":     ac.LLM_TIMEOUT,
+            "rag":     ac.RAG_TIMEOUT,
+            "rl_hint": ac.RL_HINT_WAIT,
         },
         "classic_fallback_available": True,
     })
 
 
 @app.post("/feedback")
-@login_required(rate_limit="read")
+@login_required(rate_limit="chat")
 def chat_feedback():
-    data = request.get_json(silent=True) or {}
-    required = ("user_id", "session_id", "turn_index", "signal")
-    missing = [k for k in required if k not in data]
+    """A rating of one chat turn. The user is the logged-in user: a user_id sent in the
+    request is ignored, so nobody can rate as someone else."""
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"ok": False, "error": "send a JSON object"}), 400
+    missing = [k for k in ("session_id", "turn_index", "signal") if k not in data]
     if missing:
         return jsonify({"ok": False, "error": f"missing: {missing}"}), 400
     try:
-        from agentic_chat.feedback import record_feedback
-        record_feedback(
-            user_id=data["user_id"],
-            session_id=data["session_id"],
-            turn_index=int(data["turn_index"]),
+        from agentic_chat import feedback as fb
+    except Exception as exc:
+        app.logger.warning(f"[feedback] unavailable: {type(exc).__name__}")
+        return jsonify({"ok": False, "error": "feedback is not available"}), 503
+    try:
+        session_id = str(data.get("session_id") or "")
+        # A chat still in memory belongs to someone: only that user may rate it.
+        if orchestrator.session_exists(session_id):
+            check_patient_access(orchestrator.get_session(session_id)["patient_id"])
+        fb.record_feedback(
+            user_id=(g.user or {}).get("internal_user_id"),
+            session_id=session_id,
+            turn_index=data["turn_index"],
             signal=data["signal"],
             comment=data.get("comment", ""),
         )
+    except AUTH_ERRORS:
+        raise
+    except fb.FeedbackInvalid as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except fb.FeedbackFull:
+        return jsonify({"ok": False, "error": "the feedback store is full"}), 503
     except Exception as exc:
         app.logger.warning(f"[feedback] failed: {type(exc).__name__}")
-        return jsonify({"ok": False, "reason": type(exc).__name__}), 200
+        return jsonify({"ok": False, "error": "could not save the feedback"}), 500
     return jsonify({"ok": True})
 
 
