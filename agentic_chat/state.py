@@ -16,6 +16,7 @@ class TurnState:
     extracted: Dict[str, Any] = field(default_factory=dict)
     hint: Dict[str, Any] = field(default_factory=dict)
     meta: Dict[str, Any] = field(default_factory=dict)
+    bank: str = ""          # the question-bank text this turn's reply is based on
     reply: str = ""
     is_final: bool = False
 

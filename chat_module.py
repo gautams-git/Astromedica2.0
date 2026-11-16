@@ -1195,69 +1195,64 @@ def start_chat(
 def build_final_text(session: dict) -> str:
     """Deterministic final message from cluster_scores.
 
-    Used by the agentic path when the chat reaches its final turn. Reads
-    the same data the results page uses; the model is not involved.
+    Used by the agentic path on the final turn. It reads the same data the results page uses
+    (each cluster's confirmed and possible diseases); the model is not involved.
 
-    Returns a plain string, no markdown, no disclaimer (the agent appends
-    the disclaimer separately).
+    Returns plain text, no markdown, no disclaimer (the agent adds the disclaimer once).
     """
     scores = session.get("cluster_scores") or {}
     if not scores:
         return "Thank you. Your consultation is complete."
 
-    clusters = []
-    for rank_key, score in scores.items():
-        cluster = cluster_by_rank(session, int(rank_key))
-        organ = (cluster or {}).get("organ", "") or f"Cluster {rank_key}"
-        labels = []
-        for branch_id, state in (score.get("branches") or {}).items():
-            label = state.get("label")
-            if not label:
-                branch = branch_by_id(cluster, branch_id) or {}
-                label = branch.get("label", "")
-            if not label:
-                continue
-            weight = state.get("support", 0) - state.get("refute", 0)
-            labels.append((label, weight))
-
-        # Best-supported branches first.
-        labels.sort(key=lambda x: x[1], reverse=True)
-        kept = [label for label, weight in labels if weight > 0][:3]
-        clusters.append({
-            "organ": organ,
-            "score": score.get("total", 0),
-            "confirmed": kept,
-        })
-
-    clusters.sort(key=lambda c: c["score"], reverse=True)
-
-    parts = ["Thank you. Based on our conversation, here is what stands out:"]
-
-    for c in clusters[:3]:
-        if not c["confirmed"]:
+    confirmed, possible = [], []
+    for score in scores.values():
+        area = score.get("system") or "this area"
+        diseases = _dedupe_preserve(score.get("confirmed_diseases") or [])[:3]
+        if diseases:
+            confirmed.append((score.get("score", 0), area, diseases))
             continue
-        joined = ", ".join(c["confirmed"])
-        parts.append(f"- {c['organ']}: {joined}")
+        maybe = _dedupe_preserve(score.get("possible_diseases") or [])[:3]
+        if maybe and score.get("status") in ("suspected", "drilldown"):
+            possible.append((score.get("score", 0), area, maybe))
 
-    if len(parts) == 1:
-        parts.append(
-            "No symptoms reached a confident threshold in this chat. "
-            "Please consult a healthcare professional for any persistent concern."
-        )
+    confirmed.sort(key=lambda item: item[0], reverse=True)
+    possible.sort(key=lambda item: item[0], reverse=True)
+
+    parts = []
+    if confirmed:
+        parts.append("Thank you. Based on our conversation today, your answers confirmed these areas:")
+        parts += [f"- {area}: {', '.join(diseases)}" for _, area, diseases in confirmed[:3]]
+        if possible:
+            parts.append("These also came up in your answers, but were not confirmed:")
+            parts += [f"- {area}: {', '.join(diseases)}" for _, area, diseases in possible[:2]]
+    elif possible:
+        parts.append("Thank you. Based on our conversation today, nothing was confirmed, "
+                     "but these came up in your answers:")
+        parts += [f"- {area}: {', '.join(diseases)}" for _, area, diseases in possible[:3]]
     else:
-        parts.append(
-            "These are astrological correlations, not a medical diagnosis. "
-            "Please share them with a qualified healthcare professional."
-        )
+        parts.append("Thank you. Based on our conversation today, no symptoms reached a confident "
+                     "threshold. Please consult a healthcare professional for any persistent concern.")
 
+    if session.get("red_flag_ever"):
+        parts.append("You mentioned symptoms that can be serious. Please see a doctor soon.")
+    if confirmed or possible:
+        parts.append("Please share this with a qualified healthcare professional.")
     return "\n".join(parts)
 
+
+_RAG_WARNED = False
+
+
 def _build_retriever():
-    try:
-        from orchestrator import get_retriever
-        return get_retriever()
-    except Exception:
-        return None
+    """The agentic chat's optional RAG reader needs an object with an async
+    search(query, k, filters). The app has no such retriever yet (orchestrator.get_retriever
+    does not exist), so this returns None. With RAG_MODE=off (the default) nothing changes;
+    with it on, RAG is skipped and the chat says so once in the log."""
+    global _RAG_WARNED
+    if os.getenv("RAG_MODE", "off").strip().lower() != "off" and not _RAG_WARNED:
+        _RAG_WARNED = True
+        print("[AgenticChat] RAG_MODE is on but the app has no retriever yet - RAG is skipped")
+    return None
 
 # ── Function 5: Handle one user message ──────────────────────────
 def send_message(
