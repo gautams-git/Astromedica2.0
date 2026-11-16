@@ -41,6 +41,17 @@ def _run_disease_first(chart: dict, rule1_result: dict, gender_code) -> dict:
             print(f"[Agentic] Disease First agent unavailable ({type(exc).__name__}: {exc}) - plain engine used")
     return run_disease_first_logic(chart, rule1_result, gender=gender_code)
 
+def _run_rashi_correlation(chart: dict, rule1_result: dict, gender_code) -> dict:
+    from rashi_correlation_engine import run_rashi_correlation_analysis
+    if _agentic_disease_logic_on():
+        try:
+            from agentic_rashi_correlation import run_agentic_rashi_correlation
+            return _unwrap_agentic(run_agentic_rashi_correlation(chart, rule1_result, gender=gender_code))
+        except Exception as exc:           # never lose a chart because of the agent
+            print(f"[Agentic] Rashi agent unavailable ({type(exc).__name__}: {exc}) - plain engine used")
+    return run_rashi_correlation_analysis(chart, rule1_result, gender=gender_code)    
+
+
 
 def _run_disease_compare(chart: dict, rule1_result: dict, gender_code) -> dict:
     from disease_compare_logic import run_disease_compare_logic
@@ -222,9 +233,7 @@ def run_logic(patient_id: str) -> dict:
     else:
         hitlist_result = agentic_result
 
-    from rashi_correlation_engine import run_rashi_correlation_analysis
-    rashi_correlation_result = run_rashi_correlation_analysis(
-        chart, rule1_result, gender=gender_code)
+    rashi_correlation_result = _run_rashi_correlation(chart, rule1_result, gender_code)
     organ_truth_correlation_result = _run_organ_truth(chart, rule1_result, gender_code)
     from disease_first_logic import build_current_dasha_priority_sources
     disease_first_logic_result = _run_disease_first(chart, rule1_result, gender_code)
