@@ -1,0 +1,166 @@
+{
+  "project": "astrohealth-509609",
+  "audit_type": "READ_ONLY_METADATA",
+  "collections": [
+    {
+      "path": "branch_hints",
+      "document_reference_count": 44,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "chat_logs",
+      "document_reference_count": 20,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "chat_maps",
+      "document_reference_count": 2,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "clerk_index",
+      "document_reference_count": 16,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "organ_aliases",
+      "document_reference_count": 25,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "organ_branch_families",
+      "document_reference_count": 9,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "stop_words",
+      "document_reference_count": 106,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "symptom_library",
+      "document_reference_count": 45,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "test_collection",
+      "document_reference_count": 1,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "users",
+      "document_reference_count": 28,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": [
+        "account",
+        "algorithm_results",
+        "audit_events",
+        "chart_inputs",
+        "chart_sources",
+        "combined_results",
+        "identity_vault",
+        "inputs",
+        "patients",
+        "prokerala_results",
+        "tester_charts"
+      ]
+    },
+    {
+      "path": "users/{document}/account",
+      "document_reference_count": 2,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "document_reference_count": 19,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "document_reference_count": 1,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "document_reference_count": 1,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "document_reference_count": 1,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "document_reference_count": 1,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "users/{document}/inputs",
+      "document_reference_count": 1,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "users/{document}/patients",
+      "document_reference_count": 1,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "document_reference_count": 1,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "users/{document}/tester_charts",
+      "document_reference_count": 1,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    },
+    {
+      "path": "users/{document}/audit_events",
+      "document_reference_count": 4,
+      "scan_limit": 300,
+      "truncated": false,
+      "subcollections": []
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,3460 @@
+{
+  "project": "Astromedica2.0-main",
+  "python_files": [
+    {
+      "file": "admin_routes.py",
+      "functions": [
+        "_account",
+        "_admin_ids",
+        "_audit",
+        "_chart_row",
+        "_clerk_profiles",
+        "_confirm_matches",
+        "_delete_rl_logs",
+        "_email_of",
+        "_find_user",
+        "_forget_on_disk",
+        "_now",
+        "_other_owners",
+        "_read_json",
+        "_repo",
+        "_require_admin",
+        "admin_accounts",
+        "admin_delete_all",
+        "admin_delete_chart",
+        "admin_page",
+        "admin_remove_tester",
+        "admin_reset_allowance",
+        "admin_tester_accuracy",
+        "delete_chart",
+        "fix_allowance",
+        "step"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "app_auth",
+        "app_core.errors",
+        "app_core.runtime",
+        "app_core.validation",
+        "chart_access",
+        "clerk_backend_api",
+        "datetime",
+        "flask",
+        "json",
+        "os",
+        "rl_enhancer",
+        "shutil",
+        "tester_access",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "algorithm_comparison.py",
+      "functions": [
+        "_agentic_combined_on",
+        "_algorithm_sections",
+        "_can_be_main_organ",
+        "_canonical_organ",
+        "_combined_summary",
+        "_display_organ",
+        "_normalize",
+        "_rank_score",
+        "_split_label",
+        "add_diseases",
+        "add_evidence",
+        "add_related",
+        "build_combined_algo_summary",
+        "ensure_organ",
+        "write_algorithm_comparison"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_combined",
+        "datetime",
+        "json",
+        "math",
+        "os"
+      ]
+    },
+    {
+      "file": "algorithm_comparison_v2.py",
+      "functions": [
+        "_can_be_main_organ",
+        "_canonical_organ",
+        "_display_organ",
+        "_normalize",
+        "_normalized_score",
+        "_split_label",
+        "add_diseases",
+        "add_evidence",
+        "add_related",
+        "build_combined_algo_summary_v2",
+        "ensure_organ"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "disease_compare_logic_v2",
+        "disease_first_logic_v2",
+        "hitlist_engine_v2",
+        "organ_truth_correlation_engine_v2",
+        "rashi_correlation_engine_v2"
+      ]
+    },
+    {
+      "file": "app_auth.py",
+      "functions": [
+        "_announce_user",
+        "_auth_error",
+        "_db_unavailable",
+        "_hidden_from_user",
+        "_invalid",
+        "_limited",
+        "_not_yours",
+        "_unavailable",
+        "check_patient_access",
+        "db_error_hint",
+        "decorator",
+        "describe_main_db",
+        "is_admin",
+        "login_required",
+        "main_db_label",
+        "print_startup_status",
+        "register_auth_errors",
+        "user_owns_patient",
+        "wrapper"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "app_core.errors",
+        "app_core.http",
+        "app_core.repository",
+        "app_core.runtime",
+        "app_core.validation",
+        "flask",
+        "functools",
+        "google.api_core.exceptions",
+        "google.auth.exceptions",
+        "os"
+      ]
+    },
+    {
+      "file": "architecture_audit.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "ast",
+        "json",
+        "pathlib",
+        "re"
+      ]
+    },
+    {
+      "file": "auth.py",
+      "functions": [
+        "authenticate",
+        "register_user"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "db_layer",
+        "werkzeug.security"
+      ]
+    },
+    {
+      "file": "chart_access.py",
+      "functions": [
+        "_repo",
+        "_short_uid",
+        "_uid",
+        "chart_status",
+        "check_can_generate",
+        "exists",
+        "get_allowance",
+        "is_limited",
+        "load_chart_source",
+        "mark_source_version",
+        "record_new_chart",
+        "reset_allowance",
+        "save_chart_source"
+      ],
+      "classes": [
+        "ChartLimitError"
+      ],
+      "imports": [
+        "__future__",
+        "app_auth",
+        "app_core.runtime",
+        "datetime",
+        "flask",
+        "json",
+        "tester_access"
+      ]
+    },
+    {
+      "file": "chart_specific_overrides.py",
+      "functions": [
+        "_ensure_item_at_rank",
+        "_leprosy_disease_first_item",
+        "_move_matching_to_rank",
+        "_skin_combined_item",
+        "apply_bhadravathi_overrides",
+        "apply_person2_overrides",
+        "is_bhadravathi_chart",
+        "is_person2_chart"
+      ],
+      "classes": [],
+      "imports": [
+        "copy"
+      ]
+    },
+    {
+      "file": "chat_ai_context_builder.py",
+      "functions": [
+        "_build_consensus",
+        "_ensure_list",
+        "_extract_terms_from_trail",
+        "_read_json_if_exists",
+        "_summarize_algorithm_comparison",
+        "_summarize_disease_list_block",
+        "_summarize_hitlist",
+        "_trim_list",
+        "build_chat_ai_context"
+      ],
+      "classes": [],
+      "imports": [
+        "datetime",
+        "json",
+        "os"
+      ]
+    },
+    {
+      "file": "chat_module.py",
+      "functions": [
+        "_build_retriever",
+        "_dedupe_preserve",
+        "ask_gemini",
+        "branch_by_id",
+        "build_backend_reasoning",
+        "build_debug_context",
+        "build_final_text",
+        "build_hitlist_cluster_text",
+        "build_hitlist_system_prompt",
+        "build_runtime_state",
+        "build_safe_json_response",
+        "build_system_prompt",
+        "choose_branch_for_cluster",
+        "cluster_by_rank",
+        "dedupe_keep_order",
+        "fallback_question_meta",
+        "initial_cluster_scores",
+        "load_patient_context",
+        "log_unreadable_reply",
+        "parse_model_json",
+        "queue_rl",
+        "save_chat_turn",
+        "send_message",
+        "should_finish_early",
+        "sort_key",
+        "start_chat",
+        "strongest_cluster_rank",
+        "summarize_cluster",
+        "sync_rl_report",
+        "unasked_branch",
+        "update_cluster_support"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_chat.llm_provider",
+        "agentic_chat.turn",
+        "asyncio",
+        "combine_output",
+        "combined_algo_clusters",
+        "datetime",
+        "json",
+        "os",
+        "question_generator",
+        "rl_integration",
+        "rules",
+        "symptom_mapper"
+      ]
+    },
+    {
+      "file": "check_dasha.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "json"
+      ]
+    },
+    {
+      "file": "combined_algo_clusters.py",
+      "functions": [
+        "combined_algo_as_hitlist",
+        "compute_combined_algo_summary",
+        "load_combined_algo_hitlist"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "algorithm_comparison",
+        "json"
+      ]
+    },
+    {
+      "file": "combine_output.py",
+      "functions": [
+        "_answered_questions",
+        "_chat_message_text",
+        "_current_session_log",
+        "_disease_branch_id",
+        "_group_by_organ",
+        "_is_body_part_term",
+        "_latest_session_turns",
+        "_norm_term",
+        "_save_rl_report",
+        "_score_disease",
+        "_split_yes_no",
+        "build_confirmed_findings",
+        "build_hitlist_confirmation_summary",
+        "build_rl_conditions",
+        "calculate_care_period",
+        "calculate_disease_probability",
+        "ensure_rl_report",
+        "get_doctor_recommendation",
+        "get_food_recommendations",
+        "get_lifestyle_recommendations",
+        "get_risk_grade",
+        "get_wellness_suggestions",
+        "pick",
+        "refresh_rl_report_chat",
+        "run_combine",
+        "write_rl_report"
+      ],
+      "classes": [],
+      "imports": [
+        "argparse",
+        "chat_ai_context_builder",
+        "combined_algo_clusters",
+        "datetime",
+        "json",
+        "knowledge_base",
+        "os",
+        "question_generator",
+        "rashi_truth_review",
+        "re",
+        "symptom_mapper",
+        "sys"
+      ]
+    },
+    {
+      "file": "common_findings_engine.py",
+      "functions": [
+        "_extract_hitlist_diseases",
+        "_extract_hitlist_organs",
+        "_normalize",
+        "build_common_findings"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "typing"
+      ]
+    },
+    {
+      "file": "config.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "dotenv",
+        "os"
+      ]
+    },
+    {
+      "file": "dasha_chat_priority.py",
+      "functions": [
+        "_dedupe",
+        "_norm",
+        "_planet_name_from_source",
+        "build_dasha_chat_priority"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "knowledge_base"
+      ]
+    },
+    {
+      "file": "dasha_weighted_disease_priority.py",
+      "functions": [
+        "_disease_organs",
+        "compute_dasha_marks",
+        "run_dasha_weighted_disease_priority"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "knowledge_base",
+        "priority_cascade",
+        "rashi_truth_review"
+      ]
+    },
+    {
+      "file": "db_layer.py",
+      "functions": [
+        "_current_user_id",
+        "_ensure_stub_dir",
+        "_read_json",
+        "_repository",
+        "_write_json",
+        "create_user",
+        "get_identity_vault",
+        "get_user_by_email",
+        "insert_kb_chunk",
+        "query_similar_chunks",
+        "save_chart_generation",
+        "save_identity_vault"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "app_core.runtime",
+        "flask",
+        "json",
+        "os",
+        "uuid"
+      ]
+    },
+    {
+      "file": "deidentification.py",
+      "functions": [
+        "deidentify",
+        "generate_token",
+        "reidentify"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "config",
+        "db_layer",
+        "hashlib",
+        "hmac"
+      ]
+    },
+    {
+      "file": "dict_dump.py",
+      "functions": [],
+      "classes": [],
+      "imports": []
+    },
+    {
+      "file": "disease_compare_logic.py",
+      "functions": [
+        "_candidate_match",
+        "_disease_organs",
+        "_is_very_close_disease",
+        "_meaningful_tokens",
+        "_norm_text",
+        "run_disease_compare_logic"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "difflib",
+        "disease_first_logic",
+        "eleventh_lord_confirmation",
+        "knowledge_base",
+        "rashi_truth_review"
+      ]
+    },
+    {
+      "file": "disease_compare_logic_v2.py",
+      "functions": [
+        "_disease_organs",
+        "_is_very_close_disease",
+        "_meaningful_tokens",
+        "_norm_text",
+        "_term_allowed",
+        "run_disease_compare_logic_v2"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "difflib",
+        "knowledge_base",
+        "priority_cascade",
+        "rashi_truth_review"
+      ]
+    },
+    {
+      "file": "disease_diagnose.py",
+      "functions": [
+        "run_diagnose"
+      ],
+      "classes": [],
+      "imports": [
+        "argparse",
+        "datetime",
+        "json",
+        "os"
+      ]
+    },
+    {
+      "file": "disease_first_logic.py",
+      "functions": [
+        "_add_organ_support",
+        "_build_source",
+        "_dedupe",
+        "_nakshatra_terms",
+        "_new_disease_entry",
+        "_norm",
+        "_planet_data",
+        "_planet_mapped_organs",
+        "_planet_terms",
+        "_rashi_terms",
+        "_term_allowed",
+        "build_current_dasha_priority_sources",
+        "run_disease_first_logic"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "eleventh_lord_confirmation",
+        "knowledge_base",
+        "rashi_truth_review"
+      ]
+    },
+    {
+      "file": "disease_first_logic_v2.py",
+      "functions": [
+        "_add_organ_support",
+        "_canonical_organ",
+        "_new_disease_entry",
+        "_term_allowed",
+        "run_disease_first_logic_v2"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "knowledge_base",
+        "priority_cascade",
+        "rashi_truth_review"
+      ]
+    },
+    {
+      "file": "disease_priority_cascade_logic.py",
+      "functions": [
+        "_canonical_organs",
+        "_dedupe",
+        "_disease_organs",
+        "_disease_sort_key",
+        "_drishti_confirmations_for",
+        "_norm",
+        "_organ_tiebreak_rank",
+        "_tier_planet_organs",
+        "_tier_rashi_organs",
+        "run_disease_priority_cascade_logic"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "knowledge_base",
+        "priority_cascade",
+        "rashi_truth_review"
+      ]
+    },
+    {
+      "file": "disease_priority_cascade_logic_v2.py",
+      "functions": [
+        "_best_match_strength",
+        "_compute_generic_organs",
+        "_dedupe",
+        "_disease_organs",
+        "_drishti_confirmations_for",
+        "_is_real_match",
+        "_norm",
+        "_terms_of",
+        "_tier_disease_sources",
+        "_tier_diseases",
+        "_tier_planet_organs",
+        "_tier_rashi_organs",
+        "build_organ_priority_view",
+        "organs_of",
+        "run_disease_priority_cascade_logic_v2"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "disease_priority_cascade_logic",
+        "knowledge_base",
+        "priority_cascade",
+        "rashi_truth_review"
+      ]
+    },
+    {
+      "file": "eleventh_lord_confirmation.py",
+      "functions": [
+        "_allowed",
+        "_nakshatra_diseases",
+        "_normalize",
+        "confirmation_boost",
+        "confirmation_systems",
+        "find_disease_confirmation",
+        "get_eleventh_lord_confirmation_source",
+        "match_disease"
+      ],
+      "classes": [],
+      "imports": [
+        "difflib",
+        "knowledge_base",
+        "rashi_truth_review",
+        "term_to_systems"
+      ]
+    },
+    {
+      "file": "firestore_audit.py",
+      "functions": [
+        "inspect_collection"
+      ],
+      "classes": [],
+      "imports": [
+        "google.cloud",
+        "json",
+        "traceback"
+      ]
+    },
+    {
+      "file": "firestore_schema_audit.py",
+      "functions": [
+        "inspect_collection"
+      ],
+      "classes": [],
+      "imports": [
+        "google.cloud",
+        "json"
+      ]
+    },
+    {
+      "file": "gemini_client.py",
+      "functions": [
+        "_credentials",
+        "_fresh_token",
+        "_model_url",
+        "auth_failure_message",
+        "auth_headers",
+        "embed_url",
+        "generate_url",
+        "location",
+        "print_startup_status",
+        "project"
+      ],
+      "classes": [
+        "GeminiAuthError"
+      ],
+      "imports": [
+        "__future__",
+        "asyncio",
+        "google.auth",
+        "google.auth.exceptions",
+        "google.auth.transport.requests",
+        "os",
+        "threading"
+      ]
+    },
+    {
+      "file": "gunicorn.conf.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "os"
+      ]
+    },
+    {
+      "file": "hitlist_engine.py",
+      "functions": [
+        "_with_hl2_fallback",
+        "build_hitlists",
+        "get_nakshatra_terms",
+        "get_planet_terms",
+        "get_rashi_terms",
+        "is_term_allowed",
+        "run_hitlist_analysis",
+        "score_terms"
+      ],
+      "classes": [],
+      "imports": [
+        "eleventh_lord_confirmation",
+        "knowledge_base",
+        "term_to_systems"
+      ]
+    },
+    {
+      "file": "hitlist_engine_v2.py",
+      "functions": [
+        "_score_layer",
+        "_term_allowed",
+        "run_hitlist_analysis_v2"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "knowledge_base",
+        "priority_cascade",
+        "term_to_systems"
+      ]
+    },
+    {
+      "file": "imp_rashi_distance.py",
+      "functions": [
+        "_active_dasha",
+        "_active_levels_for_planet",
+        "_classify_distance",
+        "_role_entries",
+        "build_birth_current_distance_analysis",
+        "build_imp_rashi_distance_analysis"
+      ],
+      "classes": [],
+      "imports": []
+    },
+    {
+      "file": "jataka_fetch.py",
+      "functions": [
+        "_api_failure",
+        "_find_existing_patient",
+        "_load_patient_index",
+        "_read_json",
+        "_write_json",
+        "fetch_and_save",
+        "get_cached_data",
+        "get_next_patient_id",
+        "get_or_create_patient",
+        "get_patient_folder",
+        "get_request_key",
+        "get_token",
+        "get_tz_offset",
+        "save_to_master_cache",
+        "update_patient_records"
+      ],
+      "classes": [
+        "ChartServiceError"
+      ],
+      "imports": [
+        "argparse",
+        "asyncio",
+        "config",
+        "datetime",
+        "geopy.geocoders",
+        "hashlib",
+        "httpx",
+        "jataka_logic",
+        "json",
+        "os",
+        "pytz",
+        "time",
+        "timezonefinder"
+      ]
+    },
+    {
+      "file": "jataka_logic.py",
+      "functions": [
+        "_agentic_disease_logic_on",
+        "_run_disease_compare",
+        "_run_disease_first",
+        "_run_organ_truth",
+        "_run_rashi_correlation",
+        "_unwrap_agentic",
+        "build_chart_dict",
+        "calc_nakshatra",
+        "run_logic"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic",
+        "agentic_disease_compare",
+        "agentic_disease_first",
+        "agentic_organ",
+        "agentic_rashi_correlation",
+        "algorithm_comparison",
+        "argparse",
+        "chart_specific_overrides",
+        "chat_ai_context_builder",
+        "common_findings_engine",
+        "dasha_chat_priority",
+        "datetime",
+        "disease_compare_logic",
+        "disease_first_logic",
+        "json",
+        "knowledge_base",
+        "organ_truth_correlation_engine",
+        "os",
+        "rashi_correlation_engine",
+        "related_house_severity_engine",
+        "rules"
+      ]
+    },
+    {
+      "file": "knowledge_base.py",
+      "functions": [
+        "filter_nakshatra_diseases_by_gender",
+        "filter_planet_diseases_by_gender",
+        "filter_rashi_organs_by_gender",
+        "filter_terms_by_gender",
+        "get_nakshatra_diseases",
+        "is_term_allowed_for_gender",
+        "normalize_gender"
+      ],
+      "classes": [],
+      "imports": []
+    },
+    {
+      "file": "llm1_search.py",
+      "functions": [
+        "_parse_search_results",
+        "_safe_json_parse",
+        "_web_search",
+        "search_symptoms"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "config",
+        "gemini_client",
+        "httpx",
+        "json",
+        "re"
+      ]
+    },
+    {
+      "file": "orchestrator.py",
+      "functions": [
+        "__init__",
+        "_get_or_create_session",
+        "_load_chart_from_disk",
+        "build_rag_context",
+        "get_session",
+        "handle_chart_generation",
+        "handle_chat_message",
+        "remove_session",
+        "session_exists",
+        "start_chat_session"
+      ],
+      "classes": [
+        "Orchestrator"
+      ],
+      "imports": [
+        "__future__",
+        "asyncio",
+        "chat_module",
+        "combined_algo_clusters",
+        "deidentification",
+        "json",
+        "llm1_search",
+        "rag_pipeline",
+        "rules"
+      ]
+    },
+    {
+      "file": "organ_truth_correlation_engine.py",
+      "functions": [
+        "_add_disease_to_organ",
+        "_build_anchor",
+        "_build_source",
+        "_dedupe",
+        "_nakshatra_mapped_organs",
+        "_nakshatra_terms",
+        "_new_organ_entry",
+        "_norm",
+        "_planet_data",
+        "_planet_mapped_organs",
+        "_planet_terms",
+        "_rashi_terms",
+        "_should_keep_ranked_organ",
+        "_term_allowed",
+        "run_organ_truth_correlation_analysis"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "eleventh_lord_confirmation",
+        "knowledge_base",
+        "rashi_truth_review"
+      ]
+    },
+    {
+      "file": "organ_truth_correlation_engine_v2.py",
+      "functions": [
+        "_anchor_organs",
+        "_canonical_organ",
+        "_new_organ_entry",
+        "_term_allowed",
+        "credit",
+        "run_organ_truth_correlation_analysis_v2"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "knowledge_base",
+        "priority_cascade",
+        "rashi_truth_review"
+      ]
+    },
+    {
+      "file": "parhora_table.py",
+      "functions": [],
+      "classes": [],
+      "imports": []
+    },
+    {
+      "file": "parse_excel.py",
+      "functions": [
+        "parse_diseases"
+      ],
+      "classes": [],
+      "imports": [
+        "json",
+        "os",
+        "pandas",
+        "re"
+      ]
+    },
+    {
+      "file": "priority_cascade.py",
+      "functions": [
+        "_all_tier_candidates",
+        "_ascendant_lord_relation_role",
+        "_dedupe",
+        "_disease_organ_breakdown",
+        "_is_ascendant_lord_related",
+        "_norm",
+        "_planet_data",
+        "_planet_snapshot",
+        "_tier_evidence_terms",
+        "build_ascendant_reference",
+        "build_cascade_tiers",
+        "build_drishti_catalysts",
+        "build_full_cascade_view",
+        "build_house_occupant_reference",
+        "catalyst_multiplier",
+        "nakshatra_terms",
+        "planet_terms",
+        "rashi_terms",
+        "term_allowed"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "knowledge_base",
+        "rashi_truth_review"
+      ]
+    },
+    {
+      "file": "question_generator.py",
+      "functions": [
+        "_apply",
+        "_ask_gemini",
+        "_bad_question",
+        "_banned_names",
+        "_cache_key",
+        "_clean_list",
+        "_count_questions",
+        "_norm",
+        "_plan_input",
+        "_validate",
+        "collect",
+        "generated_branch_id",
+        "improve_chat_plan"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "asyncio",
+        "config",
+        "copy",
+        "datetime",
+        "gemini_client",
+        "hashlib",
+        "httpx",
+        "json",
+        "os",
+        "re"
+      ]
+    },
+    {
+      "file": "rag_pipeline.py",
+      "functions": [
+        "_estimate_tokens",
+        "build_augmented_prompt",
+        "build_query",
+        "embed_query",
+        "retrieve_chunks"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "config",
+        "db_layer",
+        "gemini_client",
+        "httpx"
+      ]
+    },
+    {
+      "file": "rashi_correlation_engine.py",
+      "functions": [
+        "_build_evidence_sources",
+        "_dedupe",
+        "_group_lookup",
+        "_is_generic_only_match",
+        "_is_support_only_match",
+        "_nakshatra_terms",
+        "_norm",
+        "_planet_terms",
+        "_rashi_terms",
+        "_systems_for_terms",
+        "_term_allowed",
+        "add_source",
+        "run_rashi_correlation_analysis"
+      ],
+      "classes": [],
+      "imports": [
+        "eleventh_lord_confirmation",
+        "knowledge_base",
+        "term_to_systems"
+      ]
+    },
+    {
+      "file": "rashi_correlation_engine_v2.py",
+      "functions": [
+        "_anchors",
+        "_group_lookup",
+        "_norm",
+        "_term_allowed",
+        "run_rashi_correlation_analysis_v2"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "knowledge_base",
+        "priority_cascade",
+        "term_to_systems"
+      ]
+    },
+    {
+      "file": "rashi_truth_normalization.py",
+      "functions": [
+        "_canonicalize",
+        "_split_csv",
+        "build_nakshatra_truth_map",
+        "build_planet_truth_map",
+        "build_rashi_truth_map",
+        "map_disease_to_rashi_organs",
+        "map_planet_term_to_rashi_organs",
+        "validate_truth_maps"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "collections",
+        "knowledge_base"
+      ]
+    },
+    {
+      "file": "rashi_truth_review.py",
+      "functions": [
+        "_split_csv"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "knowledge_base",
+        "rashi_truth_normalization"
+      ]
+    },
+    {
+      "file": "related_house_severity_engine.py",
+      "functions": [
+        "_active_dasha_levels",
+        "_planet_details_by_name",
+        "build_related_house_severity"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "typing"
+      ]
+    },
+    {
+      "file": "rl_integration.py",
+      "functions": [
+        "_bg",
+        "_chat_key",
+        "_chat_training_data",
+        "_compare_with_llm",
+        "_detail",
+        "_inline_chat_logs",
+        "_iso_now",
+        "_log_db_contents",
+        "_log_db_save",
+        "_model_name",
+        "_norm",
+        "_read_input",
+        "_read_json",
+        "_record_cycle",
+        "_run_job",
+        "_run_one_training_cycle",
+        "_save_patient_output",
+        "_scheduler_loop",
+        "_show_his_logs",
+        "_start_scheduler",
+        "_training",
+        "_wait_for_job",
+        "_watch_training_job",
+        "_worker_loop",
+        "init_rl",
+        "patient_rl_report",
+        "progress_cb",
+        "queue_patient_rl",
+        "rl_cancel_job",
+        "rl_config_reload",
+        "rl_config_status",
+        "rl_delete_chat_log",
+        "rl_healthz",
+        "rl_index",
+        "rl_job_download",
+        "rl_job_result",
+        "rl_job_status",
+        "rl_list_chat_logs",
+        "rl_list_jobs",
+        "rl_scheduler_config",
+        "rl_scheduler_run_now",
+        "rl_scheduler_status",
+        "rl_start_training",
+        "rl_static",
+        "rl_store_chat_log",
+        "rl_store_chat_logs",
+        "rl_symptom_library",
+        "rl_training_status",
+        "rl_upload",
+        "start_training"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "datetime",
+        "flask",
+        "json",
+        "logging",
+        "os",
+        "pathlib",
+        "rl_enhancer",
+        "rl_enhancer.chat_log_parser",
+        "rl_enhancer.enhancer",
+        "rl_enhancer.jobs",
+        "rl_enhancer.parser",
+        "threading",
+        "time"
+      ]
+    },
+    {
+      "file": "rules.py",
+      "functions": [
+        "_antardashas",
+        "_build_conditional_moon",
+        "_build_house_occupant_relations",
+        "_period_end",
+        "_period_start",
+        "_planet_name",
+        "analyse_dasha",
+        "analyse_drishti",
+        "apply_disease_filter",
+        "apply_rule_1",
+        "build_organ_disease_map",
+        "complete_risk_analysis",
+        "downgrade",
+        "find_dominant_theme",
+        "generate_1_year_health_forecast",
+        "generate_chat_questions",
+        "get_aspect_type",
+        "get_aspected_houses",
+        "get_category",
+        "get_semantic_groups",
+        "get_top_diseases",
+        "perform_tiered_diagnostic_analysis",
+        "process_and_add_to_map",
+        "process_hit",
+        "score_health_risks"
+      ],
+      "classes": [],
+      "imports": [
+        "collections",
+        "datetime",
+        "json",
+        "knowledge_base",
+        "re"
+      ]
+    },
+    {
+      "file": "second_ascendant.py",
+      "functions": [
+        "_absolute_degree_to_house",
+        "_absolute_degree_to_nakshatra",
+        "_absolute_degree_to_rashi",
+        "_compute_local_sunrise",
+        "_normalize_degrees",
+        "_planet_absolute_degree",
+        "_timezone_name",
+        "calculate_second_ascendant"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "datetime",
+        "math",
+        "pytz",
+        "timezonefinder"
+      ]
+    },
+    {
+      "file": "seed_users.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "auth"
+      ]
+    },
+    {
+      "file": "server.py",
+      "functions": [
+        "_build_latest_patient_payload",
+        "_json_fallback_message",
+        "_legacy_build_imp_rashi_distance_analysis_unused",
+        "_nk_lord",
+        "_nk_name",
+        "_prepare_patient_chart",
+        "_read_json_if_exists",
+        "_resolve_patient_gender",
+        "_rl_report_visible",
+        "_run_chart_pipeline",
+        "_save_chart_source",
+        "_save_chart_to_main_db",
+        "add_role_rows",
+        "build_planet_position_snapshot",
+        "calc_nakshatra",
+        "call_gemini",
+        "chat_feedback",
+        "chat_healthz",
+        "cleanup",
+        "combine_output",
+        "dev_mode_unlock",
+        "favicon",
+        "fetch_chart",
+        "fetch_current_planetary_positions",
+        "generate_chart",
+        "get_timezone_name",
+        "get_timezone_offset",
+        "get_token",
+        "health",
+        "index",
+        "landing_html",
+        "my_chart",
+        "my_records",
+        "patient_data",
+        "patients_list",
+        "print_report_html",
+        "print_report_js",
+        "priority6_data",
+        "priority6_page",
+        "public_config",
+        "results_html",
+        "results_page",
+        "rl_report",
+        "send_message",
+        "start_consultation"
+      ],
+      "classes": [],
+      "imports": [
+        "admin_routes",
+        "agentic_chat",
+        "algorithm_comparison_v2",
+        "app_auth",
+        "app_core.runtime",
+        "asyncio",
+        "chart_access",
+        "chart_specific_overrides",
+        "combine_output",
+        "combined_algo_clusters",
+        "common_findings_engine",
+        "config",
+        "dasha_weighted_disease_priority",
+        "datetime",
+        "db_layer",
+        "disease_compare_logic",
+        "disease_diagnose",
+        "disease_first_logic",
+        "disease_priority_cascade_logic",
+        "disease_priority_cascade_logic_v2",
+        "dotenv",
+        "flask",
+        "flask_cors",
+        "gemini_client",
+        "hmac",
+        "httpx",
+        "imp_rashi_distance",
+        "jataka_fetch",
+        "jataka_logic",
+        "json",
+        "knowledge_base",
+        "orchestrator",
+        "organ_truth_correlation_engine",
+        "os",
+        "priority_cascade",
+        "pytz",
+        "re",
+        "related_house_severity_engine",
+        "rl_integration",
+        "rules",
+        "second_ascendant",
+        "shadbala_weighted_disease_priority",
+        "sys",
+        "tester_access",
+        "tester_routes",
+        "threading",
+        "time",
+        "timezonefinder",
+        "traceback",
+        "zone_engine"
+      ]
+    },
+    {
+      "file": "shadbala_weighted_disease_priority.py",
+      "functions": [
+        "_disease_organs",
+        "_shadbala_marks_for_rank",
+        "compute_shadbala_marks",
+        "run_shadbala_weighted_disease_priority",
+        "strength"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "knowledge_base",
+        "priority_cascade",
+        "rashi_truth_review"
+      ]
+    },
+    {
+      "file": "symptom_mapper.py",
+      "functions": [
+        "_dedupe",
+        "_has",
+        "_norm",
+        "_rule_id",
+        "build_hitlist_chat_plan",
+        "classify_answer",
+        "ensure_branch",
+        "extract_cluster_terms",
+        "map_term",
+        "score_answer"
+      ],
+      "classes": [],
+      "imports": [
+        "re"
+      ]
+    },
+    {
+      "file": "temp_kb_output.py",
+      "functions": [],
+      "classes": [],
+      "imports": []
+    },
+    {
+      "file": "term_to_systems.py",
+      "functions": [],
+      "classes": [],
+      "imports": []
+    },
+    {
+      "file": "tester_access.py",
+      "functions": [
+        "_algo_diseases",
+        "_algo_organs",
+        "_compact_algorithms",
+        "_count_new_chart",
+        "_read_json",
+        "_repo",
+        "_uid",
+        "_would_call_prokerala",
+        "accuracy_summary",
+        "add",
+        "answer",
+        "cap_applies",
+        "charts_today",
+        "check_daily_cap",
+        "clean_feedback",
+        "daily_cap",
+        "disease_key",
+        "has_role",
+        "is_tester",
+        "latest_run",
+        "list_runs",
+        "make_tester",
+        "password",
+        "password_matches",
+        "rating_of",
+        "record_run",
+        "remove_tester",
+        "run_summary",
+        "save_feedback",
+        "sync_chat",
+        "today"
+      ],
+      "classes": [
+        "TesterCapError"
+      ],
+      "imports": [
+        "__future__",
+        "algorithm_comparison",
+        "app_auth",
+        "app_core.runtime",
+        "combine_output",
+        "datetime",
+        "flask",
+        "hmac",
+        "jataka_fetch",
+        "json",
+        "os"
+      ]
+    },
+    {
+      "file": "tester_routes.py",
+      "functions": [
+        "_require_tester",
+        "_status",
+        "tester_charts",
+        "tester_feedback_get",
+        "tester_feedback_save",
+        "tester_page",
+        "tester_status",
+        "tester_unlock"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "app_auth",
+        "app_core.errors",
+        "app_core.validation",
+        "flask",
+        "tester_access"
+      ]
+    },
+    {
+      "file": "test_algorithm_comparison.py",
+      "functions": [
+        "sample_processed",
+        "test_rerun_overwrites_same_file",
+        "test_writes_named_algorithms_and_combined_output"
+      ],
+      "classes": [
+        "AlgorithmComparisonTests"
+      ],
+      "imports": [
+        "algorithm_comparison",
+        "json",
+        "os",
+        "tempfile",
+        "unittest"
+      ]
+    },
+    {
+      "file": "verify_fix.py",
+      "functions": [
+        "verify"
+      ],
+      "classes": [],
+      "imports": [
+        "json",
+        "knowledge_base"
+      ]
+    },
+    {
+      "file": "workspace_audit.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "json",
+        "os",
+        "pathlib"
+      ]
+    },
+    {
+      "file": "zone_engine.py",
+      "functions": [
+        "get_8th_house_sign",
+        "get_planet_house",
+        "get_score",
+        "run_zone_analysis",
+        "zones_match"
+      ],
+      "classes": [],
+      "imports": []
+    },
+    {
+      "file": "agentic\\config.py",
+      "functions": [
+        "get_llm"
+      ],
+      "classes": [
+        "AgentConfig",
+        "LLMConfig"
+      ],
+      "imports": [
+        "dataclasses",
+        "langchain_community.chat_models",
+        "langchain_core.language_models.fake_chat_models",
+        "langchain_google_genai",
+        "os",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic\\critic.py",
+      "functions": [
+        "_extract_json",
+        "critique"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic.schemas",
+        "json",
+        "langchain_core.messages",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic\\guardrails.py",
+      "functions": [
+        "_collect_all_engine_terms",
+        "add_disclaimer",
+        "validate_output"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic.schemas",
+        "hitlist_engine",
+        "term_to_systems",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic\\memory.py",
+      "functions": [
+        "__init__",
+        "_flush",
+        "chart_key",
+        "recall",
+        "remember",
+        "trend"
+      ],
+      "classes": [
+        "MemoryStore"
+      ],
+      "imports": [
+        "collections",
+        "hashlib",
+        "json",
+        "os",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic\\orchestrator.py",
+      "functions": [
+        "__init__",
+        "_build_graph",
+        "_extract_json",
+        "_node_critique",
+        "_node_finalize",
+        "_node_guardrail",
+        "_node_score",
+        "_node_summarize",
+        "_node_validate",
+        "_pick_stable_profile",
+        "_route_after_critique",
+        "invoke",
+        "run_agentic_analysis"
+      ],
+      "classes": [
+        "HitlistAgent"
+      ],
+      "imports": [
+        "agentic.config",
+        "agentic.critic",
+        "agentic.guardrails",
+        "agentic.memory",
+        "agentic.profiles",
+        "agentic.schemas",
+        "agentic.tools",
+        "json",
+        "langchain_core.messages",
+        "langgraph.graph",
+        "term_to_systems",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic\\profiles.py",
+      "functions": [
+        "profile_context",
+        "top_terms"
+      ],
+      "classes": [],
+      "imports": [
+        "contextlib",
+        "hitlist_engine",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic\\schemas.py",
+      "functions": [],
+      "classes": [
+        "AgentState",
+        "ChartInput",
+        "CriticOutput",
+        "GenderCheckInput",
+        "GuardrailReport",
+        "NakshatraTermsInput",
+        "PlanetTermsInput",
+        "RashiTermsInput"
+      ],
+      "imports": [
+        "pydantic",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic\\tools.py",
+      "functions": [
+        "__init__",
+        "_gender_filter_tool",
+        "_get_nakshatra_terms_tool",
+        "_get_planet_terms_tool",
+        "_get_rashi_terms_tool",
+        "_lookup_systems_tool",
+        "_run_hitlist_analysis_tool",
+        "build_tool_registry",
+        "call",
+        "describe",
+        "names",
+        "register"
+      ],
+      "classes": [
+        "ToolRegistry"
+      ],
+      "imports": [
+        "agentic.schemas",
+        "hitlist_engine",
+        "term_to_systems",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic\\__init__.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "orchestrator"
+      ]
+    },
+    {
+      "file": "agentic_chat\\config.py",
+      "functions": [
+        "_flag"
+      ],
+      "classes": [],
+      "imports": [
+        "os"
+      ]
+    },
+    {
+      "file": "agentic_chat\\feedback.py",
+      "functions": [
+        "_max_bytes",
+        "_path",
+        "record_feedback"
+      ],
+      "classes": [
+        "FeedbackFull",
+        "FeedbackInvalid"
+      ],
+      "imports": [
+        "json",
+        "os",
+        "re",
+        "threading",
+        "time"
+      ]
+    },
+    {
+      "file": "agentic_chat\\inputs.py",
+      "functions": [
+        "_asked",
+        "_finish_chat",
+        "_first_unasked",
+        "_term_patterns",
+        "_undo_user_turn",
+        "_update_debug_context",
+        "apply_score",
+        "bank_question",
+        "final_text",
+        "known_term",
+        "next_question",
+        "persist_turn",
+        "planner_meta",
+        "question_is_bad",
+        "rules_label",
+        "should_finish"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_chat",
+        "chat_module",
+        "datetime",
+        "json",
+        "question_generator",
+        "re",
+        "symptom_mapper",
+        "term_to_systems",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_chat\\llm_gemini.py",
+      "functions": [
+        "_call",
+        "_vertex_schema"
+      ],
+      "classes": [
+        "GeminiProvider"
+      ],
+      "imports": [
+        "agentic_chat",
+        "agentic_chat.llm_provider",
+        "config",
+        "gemini_client",
+        "httpx"
+      ]
+    },
+    {
+      "file": "agentic_chat\\llm_lfm.py",
+      "functions": [
+        "_call"
+      ],
+      "classes": [
+        "LFMProvider"
+      ],
+      "imports": [
+        "agentic_chat",
+        "agentic_chat.llm_provider",
+        "httpx",
+        "os"
+      ]
+    },
+    {
+      "file": "agentic_chat\\llm_provider.py",
+      "functions": [
+        "_call",
+        "extract",
+        "get_provider",
+        "phrase"
+      ],
+      "classes": [
+        "ChatLLM"
+      ],
+      "imports": [
+        "agentic_chat",
+        "agentic_chat.llm_gemini",
+        "agentic_chat.llm_lfm",
+        "agentic_chat.prompts",
+        "json",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_chat\\nodes.py",
+      "functions": [
+        "_apply_hint",
+        "_preview_hint",
+        "_valid_extract",
+        "answered",
+        "guard",
+        "persist",
+        "plan",
+        "prewarm",
+        "score",
+        "understand",
+        "word"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_chat",
+        "agentic_chat.rag_reader",
+        "agentic_chat.rl_hint",
+        "agentic_chat.state",
+        "asyncio",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_chat\\prompts.py",
+      "functions": [],
+      "classes": [],
+      "imports": []
+    },
+    {
+      "file": "agentic_chat\\rag_reader.py",
+      "functions": [
+        "examples_from_hits",
+        "fetch"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_chat",
+        "asyncio",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_chat\\rl_hint.py",
+      "functions": [
+        "_compute",
+        "_conditions_from_plan",
+        "_load_chat_log",
+        "drop_hint",
+        "hint_key",
+        "start_prewarm",
+        "take_hint"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_chat",
+        "combine_output",
+        "concurrent.futures",
+        "json",
+        "os",
+        "rl_enhancer.chat_log_parser",
+        "rl_enhancer.enhancer",
+        "threading",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_chat\\state.py",
+      "functions": [],
+      "classes": [
+        "TurnState"
+      ],
+      "imports": [
+        "dataclasses",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_chat\\turn.py",
+      "functions": [
+        "_restore",
+        "_snapshot",
+        "run_turn"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_chat",
+        "agentic_chat.llm_provider",
+        "agentic_chat.state",
+        "copy",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_chat\\__init__.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "agentic_chat.config",
+        "agentic_chat.state",
+        "agentic_chat.turn"
+      ]
+    },
+    {
+      "file": "agentic_combined\\config.py",
+      "functions": [
+        "get_llm",
+        "is_live"
+      ],
+      "classes": [
+        "AgentConfig",
+        "LLMConfig"
+      ],
+      "imports": [
+        "dataclasses",
+        "langchain_community.chat_models",
+        "langchain_core.language_models.fake_chat_models",
+        "langchain_google_genai",
+        "os",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_combined\\critic.py",
+      "functions": [
+        "_extract_json",
+        "_payload",
+        "critique",
+        "rule_based_audit"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_combined.schemas",
+        "json",
+        "langchain_core.messages",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_combined\\guardrails.py",
+      "functions": [
+        "_mentioned",
+        "add_disclaimer",
+        "validate_output"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_combined.schemas",
+        "knowledge_base",
+        "rashi_truth_review",
+        "re",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_combined\\memory.py",
+      "functions": [
+        "__init__",
+        "_flush",
+        "chart_key",
+        "recall",
+        "remember",
+        "shared",
+        "trend"
+      ],
+      "classes": [
+        "MemoryStore"
+      ],
+      "imports": [
+        "collections",
+        "hashlib",
+        "json",
+        "os",
+        "threading",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_combined\\orchestrator.py",
+      "functions": [
+        "__init__",
+        "_build_graph",
+        "_node_critique",
+        "_node_finalize",
+        "_node_guardrail",
+        "_node_score",
+        "_node_summarize",
+        "_node_validate",
+        "_payload",
+        "_text",
+        "deterministic_summary",
+        "invoke",
+        "run_agentic_combined"
+      ],
+      "classes": [
+        "CombinedAlgoAgent"
+      ],
+      "imports": [
+        "agentic_combined.config",
+        "agentic_combined.critic",
+        "agentic_combined.guardrails",
+        "agentic_combined.memory",
+        "agentic_combined.schemas",
+        "agentic_combined.tools",
+        "algorithm_comparison",
+        "json",
+        "langchain_core.messages",
+        "langgraph.graph",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_combined\\schemas.py",
+      "functions": [],
+      "classes": [
+        "AgentState",
+        "CriticOutput",
+        "GuardrailReport",
+        "ProcessedInput"
+      ],
+      "imports": [
+        "pydantic",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_combined\\tools.py",
+      "functions": [
+        "__init__",
+        "_combined_tool",
+        "algorithms_with_data",
+        "build_tool_registry",
+        "call",
+        "describe",
+        "names",
+        "register"
+      ],
+      "classes": [
+        "ToolRegistry"
+      ],
+      "imports": [
+        "agentic_combined.schemas",
+        "algorithm_comparison",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_combined\\__init__.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "orchestrator"
+      ]
+    },
+    {
+      "file": "agentic_disease_compare\\config.py",
+      "functions": [
+        "_flag",
+        "get_llm",
+        "is_live"
+      ],
+      "classes": [
+        "AgentConfig",
+        "LLMConfig"
+      ],
+      "imports": [
+        "dataclasses",
+        "langchain_community.chat_models",
+        "langchain_core.language_models.fake_chat_models",
+        "langchain_google_genai",
+        "os",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_compare\\critic.py",
+      "functions": [
+        "_extract_json",
+        "_payload",
+        "critique",
+        "rule_based_audit"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_disease_compare.schemas",
+        "json",
+        "langchain_core.messages",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_compare\\guardrails.py",
+      "functions": [
+        "_mentioned",
+        "add_disclaimer",
+        "validate_output"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_disease_compare.schemas",
+        "knowledge_base",
+        "rashi_truth_review",
+        "re",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_compare\\memory.py",
+      "functions": [
+        "__init__",
+        "_flush",
+        "chart_key",
+        "recall",
+        "remember",
+        "shared",
+        "trend"
+      ],
+      "classes": [
+        "MemoryStore"
+      ],
+      "imports": [
+        "collections",
+        "hashlib",
+        "json",
+        "os",
+        "threading",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_compare\\orchestrator.py",
+      "functions": [
+        "__init__",
+        "_build_graph",
+        "_node_critique",
+        "_node_finalize",
+        "_node_guardrail",
+        "_node_score",
+        "_node_summarize",
+        "_node_validate",
+        "_payload",
+        "_pick_stable_profile",
+        "_route_after_critique",
+        "_text",
+        "deterministic_summary",
+        "invoke",
+        "run_agentic_disease_compare"
+      ],
+      "classes": [
+        "DiseaseCompareAgent"
+      ],
+      "imports": [
+        "agentic_disease_compare.config",
+        "agentic_disease_compare.critic",
+        "agentic_disease_compare.guardrails",
+        "agentic_disease_compare.memory",
+        "agentic_disease_compare.profiles",
+        "agentic_disease_compare.schemas",
+        "agentic_disease_compare.tools",
+        "disease_compare_logic",
+        "json",
+        "langchain_core.messages",
+        "langgraph.graph",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_compare\\profiles.py",
+      "functions": [
+        "_scaled",
+        "profile_context",
+        "top_terms"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_disease_first.profiles",
+        "disease_compare_logic",
+        "disease_first_logic",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_compare\\schemas.py",
+      "functions": [],
+      "classes": [
+        "AgentState",
+        "ChartInput",
+        "CriticOutput",
+        "DiseaseOrgansInput",
+        "DiseasePairInput",
+        "GenderCheckInput",
+        "GuardrailReport",
+        "RashiTermsInput"
+      ],
+      "imports": [
+        "pydantic",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_compare\\tools.py",
+      "functions": [
+        "__init__",
+        "_compare_diseases_tool",
+        "_disease_organs_tool",
+        "_gender_filter_tool",
+        "_rashi_terms_tool",
+        "_run_disease_compare_tool",
+        "build_tool_registry",
+        "call",
+        "describe",
+        "names",
+        "register"
+      ],
+      "classes": [
+        "ToolRegistry"
+      ],
+      "imports": [
+        "agentic_disease_compare.schemas",
+        "disease_compare_logic",
+        "disease_first_logic",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_compare\\__init__.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "orchestrator"
+      ]
+    },
+    {
+      "file": "agentic_disease_first\\config.py",
+      "functions": [
+        "_flag",
+        "get_llm",
+        "is_live"
+      ],
+      "classes": [
+        "AgentConfig",
+        "LLMConfig"
+      ],
+      "imports": [
+        "dataclasses",
+        "langchain_community.chat_models",
+        "langchain_core.language_models.fake_chat_models",
+        "langchain_google_genai",
+        "os",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_first\\critic.py",
+      "functions": [
+        "_extract_json",
+        "_payload",
+        "critique",
+        "rule_based_audit"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_disease_first.schemas",
+        "json",
+        "langchain_core.messages",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_first\\guardrails.py",
+      "functions": [
+        "_mentioned",
+        "add_disclaimer",
+        "validate_output"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_disease_first.schemas",
+        "knowledge_base",
+        "rashi_truth_review",
+        "re",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_first\\memory.py",
+      "functions": [
+        "__init__",
+        "_flush",
+        "chart_key",
+        "recall",
+        "remember",
+        "shared",
+        "trend"
+      ],
+      "classes": [
+        "MemoryStore"
+      ],
+      "imports": [
+        "collections",
+        "hashlib",
+        "json",
+        "os",
+        "threading",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_first\\orchestrator.py",
+      "functions": [
+        "__init__",
+        "_build_graph",
+        "_node_critique",
+        "_node_finalize",
+        "_node_guardrail",
+        "_node_score",
+        "_node_summarize",
+        "_node_validate",
+        "_payload",
+        "_pick_stable_profile",
+        "_route_after_critique",
+        "_text",
+        "deterministic_summary",
+        "invoke",
+        "run_agentic_disease_first"
+      ],
+      "classes": [
+        "DiseaseFirstAgent"
+      ],
+      "imports": [
+        "agentic_disease_first.config",
+        "agentic_disease_first.critic",
+        "agentic_disease_first.guardrails",
+        "agentic_disease_first.memory",
+        "agentic_disease_first.profiles",
+        "agentic_disease_first.schemas",
+        "agentic_disease_first.tools",
+        "disease_first_logic",
+        "json",
+        "langchain_core.messages",
+        "langgraph.graph",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_first\\profiles.py",
+      "functions": [
+        "_scaled",
+        "_snapshot",
+        "profile_context",
+        "top_terms",
+        "weights_context"
+      ],
+      "classes": [],
+      "imports": [
+        "contextlib",
+        "disease_first_logic",
+        "threading",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_first\\schemas.py",
+      "functions": [],
+      "classes": [
+        "AgentState",
+        "ChartInput",
+        "CriticOutput",
+        "DiseaseOrgansInput",
+        "GenderCheckInput",
+        "GuardrailReport",
+        "NakshatraTermsInput",
+        "PlanetTermsInput",
+        "RashiTermsInput"
+      ],
+      "imports": [
+        "pydantic",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_first\\tools.py",
+      "functions": [
+        "__init__",
+        "_disease_organs_tool",
+        "_gender_filter_tool",
+        "_nakshatra_terms_tool",
+        "_planet_terms_tool",
+        "_rashi_terms_tool",
+        "_run_disease_first_tool",
+        "build_tool_registry",
+        "call",
+        "describe",
+        "names",
+        "register"
+      ],
+      "classes": [
+        "ToolRegistry"
+      ],
+      "imports": [
+        "agentic_disease_first.schemas",
+        "disease_first_logic",
+        "rashi_truth_review",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_disease_first\\__init__.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "orchestrator"
+      ]
+    },
+    {
+      "file": "agentic_organ\\config.py",
+      "functions": [
+        "get_llm"
+      ],
+      "classes": [
+        "AgentConfig",
+        "LLMConfig"
+      ],
+      "imports": [
+        "dataclasses",
+        "langchain_core.language_models.fake_chat_models",
+        "langchain_google_genai",
+        "os",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_organ\\critic.py",
+      "functions": [
+        "critique"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_organ.schemas",
+        "json",
+        "langchain_core.messages",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_organ\\guardrails.py",
+      "functions": [
+        "_collect_engine_terms",
+        "add_disclaimer",
+        "validate_output"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_organ.schemas",
+        "knowledge_base",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_organ\\memory.py",
+      "functions": [
+        "__init__",
+        "_flush",
+        "chart_key",
+        "recall",
+        "remember",
+        "trend"
+      ],
+      "classes": [
+        "MemoryStore"
+      ],
+      "imports": [
+        "collections",
+        "hashlib",
+        "json",
+        "os",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_organ\\orchestrator.py",
+      "functions": [
+        "__init__",
+        "_build_graph",
+        "_node_critique",
+        "_node_finalize",
+        "_node_guardrail",
+        "_node_score",
+        "_node_summarize",
+        "_node_validate",
+        "_route_after_critique",
+        "invoke",
+        "run_agentic_organ_analysis"
+      ],
+      "classes": [
+        "OrganTruthAgent"
+      ],
+      "imports": [
+        "agentic_organ.config",
+        "agentic_organ.critic",
+        "agentic_organ.guardrails",
+        "agentic_organ.memory",
+        "agentic_organ.schemas",
+        "agentic_organ.summarizer",
+        "agentic_organ.tools",
+        "langgraph.graph",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_organ\\schemas.py",
+      "functions": [],
+      "classes": [
+        "AgentState",
+        "ChartInput",
+        "CriticOutput",
+        "GuardrailReport"
+      ],
+      "imports": [
+        "pydantic",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_organ\\summarizer.py",
+      "functions": [
+        "summarize"
+      ],
+      "classes": [],
+      "imports": [
+        "json",
+        "langchain_core.messages",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_organ\\tools.py",
+      "functions": [
+        "__init__",
+        "_run_engine_tool",
+        "build_tool_registry",
+        "call",
+        "names",
+        "register"
+      ],
+      "classes": [
+        "ToolRegistry"
+      ],
+      "imports": [
+        "agentic_organ.schemas",
+        "organ_truth_correlation_engine",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_organ\\__init__.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "orchestrator"
+      ]
+    },
+    {
+      "file": "agentic_rashi_correlation\\config.py",
+      "functions": [
+        "_flag"
+      ],
+      "classes": [
+        "RashiAgentConfig"
+      ],
+      "imports": [
+        "agentic_disease_first.config",
+        "dataclasses",
+        "os"
+      ]
+    },
+    {
+      "file": "agentic_rashi_correlation\\critic.py",
+      "functions": [
+        "_extract_json",
+        "_payload",
+        "anchor_signs",
+        "critique",
+        "rule_based_audit",
+        "top_groups_payload"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_rashi_correlation.schemas",
+        "json",
+        "langchain_core.messages",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_rashi_correlation\\guardrails.py",
+      "functions": [
+        "_mentioned",
+        "validate_output"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_disease_first.guardrails",
+        "agentic_rashi_correlation.schemas",
+        "knowledge_base",
+        "re",
+        "term_to_systems",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_rashi_correlation\\memory.py",
+      "functions": [
+        "__init__",
+        "_rashi_path"
+      ],
+      "classes": [
+        "RashiMemoryStore"
+      ],
+      "imports": [
+        "agentic_disease_first.memory",
+        "os",
+        "threading",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_rashi_correlation\\orchestrator.py",
+      "functions": [
+        "__init__",
+        "_build_graph",
+        "_node_critique",
+        "_node_finalize",
+        "_node_guardrail",
+        "_node_score",
+        "_node_summarize",
+        "_node_validate",
+        "_payload",
+        "_pick_stable_profile",
+        "_route_after_critique",
+        "_text",
+        "deterministic_summary",
+        "invoke",
+        "run_agentic_rashi_correlation"
+      ],
+      "classes": [
+        "RashiCorrelationAgent"
+      ],
+      "imports": [
+        "agentic_rashi_correlation.config",
+        "agentic_rashi_correlation.critic",
+        "agentic_rashi_correlation.guardrails",
+        "agentic_rashi_correlation.memory",
+        "agentic_rashi_correlation.profiles",
+        "agentic_rashi_correlation.schemas",
+        "agentic_rashi_correlation.tools",
+        "json",
+        "langchain_core.messages",
+        "langgraph.graph",
+        "rashi_correlation_engine",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_rashi_correlation\\profiles.py",
+      "functions": [
+        "_freeze",
+        "_snapshot",
+        "profile_context",
+        "top_terms",
+        "weights_context"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_disease_first.profiles",
+        "contextlib",
+        "rashi_correlation_engine",
+        "threading",
+        "types",
+        "typing"
+      ]
+    },
+    {
+      "file": "agentic_rashi_correlation\\schemas.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "agentic_disease_first.schemas"
+      ]
+    },
+    {
+      "file": "agentic_rashi_correlation\\test_agentic_rashi_correlation.py",
+      "functions": [
+        "_live_agent",
+        "boom",
+        "engine_fixture",
+        "plain",
+        "tables",
+        "test_a_import",
+        "test_b_plain_engine_works_and_is_deterministic",
+        "test_c_agentic_run",
+        "test_critic_payload_field_names",
+        "test_critic_rule_based_audit",
+        "test_d_run_logic_uses_wrapper",
+        "test_e_bad_input_falls_back_to_plain_engine",
+        "test_e_fallback_when_agent_crashes",
+        "test_e_fallback_when_agent_import_fails",
+        "test_f_feature_flag",
+        "test_g_concurrent_agents_multi_profile",
+        "test_g_concurrent_requests_do_not_leak_weights",
+        "test_g_profiles_are_immutable_and_restore_tables",
+        "test_g_profiles_change_scores_but_clinical_matches_plain",
+        "test_g_tables_restored_after_engine_error",
+        "test_guardrail_blocks_invented_terms_and_gender",
+        "test_h_disease_agent_unaffected",
+        "test_i_output_contract_matches_plain_engine",
+        "test_live_llm_garbage_critic_falls_back_to_rule_based",
+        "test_live_llm_invented_term_falls_back_to_deterministic_summary",
+        "test_live_llm_summary_used_when_it_passes_guardrail",
+        "test_memory_files_never_collide",
+        "test_memory_trend_per_chart_and_algorithm",
+        "work"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_disease_first",
+        "agentic_disease_first.memory",
+        "agentic_rashi_correlation",
+        "agentic_rashi_correlation.critic",
+        "agentic_rashi_correlation.memory",
+        "agentic_rashi_correlation.orchestrator",
+        "concurrent.futures",
+        "copy",
+        "disease_first_logic",
+        "inspect",
+        "jataka_logic",
+        "json",
+        "langchain_core.language_models.fake_chat_models",
+        "pytest",
+        "rashi_correlation_engine",
+        "sys",
+        "threading",
+        "time",
+        "types"
+      ]
+    },
+    {
+      "file": "agentic_rashi_correlation\\tools.py",
+      "functions": [
+        "_gender_filter_tool",
+        "_nakshatra_terms_tool",
+        "_planet_terms_tool",
+        "_rashi_terms_tool",
+        "_run_rashi_tool",
+        "build_tool_registry"
+      ],
+      "classes": [],
+      "imports": [
+        "agentic_disease_first.tools",
+        "agentic_rashi_correlation.schemas",
+        "rashi_correlation_engine"
+      ]
+    },
+    {
+      "file": "agentic_rashi_correlation\\__init__.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "orchestrator"
+      ]
+    },
+    {
+      "file": "app_core\\auth.py",
+      "functions": [
+        "__init__",
+        "authenticate"
+      ],
+      "classes": [
+        "ClerkAuthenticator",
+        "Principal"
+      ],
+      "imports": [
+        "__future__",
+        "app_core.errors",
+        "app_core.settings",
+        "clerk_backend_api.security",
+        "dataclasses"
+      ]
+    },
+    {
+      "file": "app_core\\errors.py",
+      "functions": [
+        "__init__"
+      ],
+      "classes": [
+        "AuthError",
+        "AuthorizationError",
+        "RateLimitError",
+        "RequestValidationError",
+        "ServiceUnavailableError",
+        "UpstreamError"
+      ],
+      "imports": [
+        "__future__"
+      ]
+    },
+    {
+      "file": "app_core\\http.py",
+      "functions": [
+        "auth_error",
+        "bad_request",
+        "begin_request",
+        "client_ip",
+        "decorator",
+        "enforce_patient_access",
+        "finish_request",
+        "hidden",
+        "invalid",
+        "limited",
+        "register_http",
+        "require_auth",
+        "safe_failure",
+        "too_large",
+        "unavailable",
+        "unexpected",
+        "upstream",
+        "wrapper"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "app_core.errors",
+        "app_core.logging_config",
+        "app_core.runtime",
+        "app_core.validation",
+        "flask",
+        "functools",
+        "time",
+        "uuid",
+        "werkzeug.exceptions"
+      ]
+    },
+    {
+      "file": "app_core\\identifiers.py",
+      "functions": [
+        "algorithm_result_id",
+        "birth_key",
+        "input_id_for",
+        "new_internal_user_id"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "hashlib",
+        "uuid"
+      ]
+    },
+    {
+      "file": "app_core\\logging_config.py",
+      "functions": [
+        "configure_logging",
+        "format"
+      ],
+      "classes": [
+        "JsonFormatter"
+      ],
+      "imports": [
+        "__future__",
+        "datetime",
+        "json",
+        "logging",
+        "sys"
+      ]
+    },
+    {
+      "file": "app_core\\persistence.py",
+      "functions": [
+        "__init__",
+        "_fit",
+        "_sanitize_for_json",
+        "_shrink",
+        "algorithm_result_id",
+        "chart_input_id",
+        "delete_generation",
+        "get_algorithm_result",
+        "get_chart_input",
+        "get_planetary_positions",
+        "get_raw_response",
+        "list_patient_chart_inputs",
+        "save_generation",
+        "update_algorithm_result"
+      ],
+      "classes": [
+        "ChartPersistence"
+      ],
+      "imports": [
+        "datetime",
+        "logging",
+        "math",
+        "typing"
+      ]
+    },
+    {
+      "file": "app_core\\prokerala_token.py",
+      "functions": [
+        "__init__",
+        "clear",
+        "get_prokerala_token",
+        "get_token",
+        "prokerala_get"
+      ],
+      "classes": [
+        "ProkeralaTokenCache"
+      ],
+      "imports": [
+        "__future__",
+        "app_core.errors",
+        "asyncio",
+        "httpx",
+        "time"
+      ]
+    },
+    {
+      "file": "app_core\\ratelimit.py",
+      "functions": [
+        "__init__",
+        "check",
+        "reset"
+      ],
+      "classes": [
+        "RateLimiter"
+      ],
+      "imports": [
+        "__future__",
+        "app_core.errors",
+        "collections",
+        "threading",
+        "time"
+      ]
+    },
+    {
+      "file": "app_core\\repository.py",
+      "functions": [
+        "__init__",
+        "_now",
+        "_path",
+        "_strip_none",
+        "_user_collection",
+        "bind_patient",
+        "build_repository",
+        "delete",
+        "delete_user",
+        "get",
+        "get_or_create_user",
+        "list_docs",
+        "list_records",
+        "list_users",
+        "owns_patient",
+        "ping",
+        "save"
+      ],
+      "classes": [
+        "FirestoreRepository",
+        "MemoryRepository"
+      ],
+      "imports": [
+        "__future__",
+        "app_core.identifiers",
+        "app_core.settings",
+        "datetime",
+        "google.api_core.retry",
+        "google.auth.credentials",
+        "google.cloud",
+        "os",
+        "threading",
+        "typing"
+      ]
+    },
+    {
+      "file": "app_core\\runtime.py",
+      "functions": [
+        "__init__",
+        "get_services",
+        "ready",
+        "reset_services"
+      ],
+      "classes": [
+        "Services"
+      ],
+      "imports": [
+        "__future__",
+        "app_core.auth",
+        "app_core.persistence",
+        "app_core.ratelimit",
+        "app_core.repository",
+        "app_core.settings"
+      ]
+    },
+    {
+      "file": "app_core\\settings.py",
+      "functions": [
+        "_csv",
+        "auth_configured",
+        "is_production",
+        "is_test",
+        "issuer_from_publishable_key",
+        "load_settings",
+        "using_firestore_emulator"
+      ],
+      "classes": [
+        "Settings"
+      ],
+      "imports": [
+        "__future__",
+        "base64",
+        "dataclasses",
+        "os"
+      ]
+    },
+    {
+      "file": "app_core\\validation.py",
+      "functions": [
+        "parse_chart_input",
+        "parse_chat_message",
+        "require_patient_id",
+        "require_session_id"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "app_core.errors",
+        "datetime",
+        "re"
+      ]
+    },
+    {
+      "file": "app_core\\__init__.py",
+      "functions": [],
+      "classes": [],
+      "imports": []
+    },
+    {
+      "file": "rl_enhancer\\bootstrap_data.py",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        "__future__"
+      ]
+    },
+    {
+      "file": "rl_enhancer\\chat_log_parser.py",
+      "functions": [
+        "_assistant_question",
+        "_canonical_disease",
+        "_canonical_organ",
+        "_disease_map",
+        "_merge_summaries",
+        "_organ_map",
+        "_session_key",
+        "parse_chat_log",
+        "parse_chat_log_list",
+        "persist_and_merge_chat_logs",
+        "sort_key"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "json",
+        "logging",
+        "typing"
+      ]
+    },
+    {
+      "file": "rl_enhancer\\config_db.py",
+      "functions": [
+        "_chat_log_doc_id",
+        "_get_client",
+        "_is_empty",
+        "_patient_chat_docs",
+        "_slug",
+        "append_symptoms_to_library",
+        "chat_logs_distinct_patients",
+        "chat_logs_total",
+        "delete_chat_log",
+        "ensure_chat_log_indexes",
+        "get_db",
+        "load_all_chat_logs",
+        "load_branch_hints",
+        "load_chat_logs_for_patient",
+        "load_chat_maps",
+        "load_organ_aliases",
+        "load_organ_branch_families",
+        "load_stop_words",
+        "load_symptom_library",
+        "project_id",
+        "seed_if_empty",
+        "upsert_chat_log",
+        "write_symptom_library"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "bootstrap_data",
+        "datetime",
+        "google.api_core.retry",
+        "google.cloud",
+        "logging",
+        "os",
+        "re",
+        "threading",
+        "typing"
+      ]
+    },
+    {
+      "file": "rl_enhancer\\config_loader.py",
+      "functions": [
+        "_compile_bootstrap_disease_map",
+        "_loop",
+        "_status",
+        "get_chat_logs_for_patient",
+        "refresh_symptom_library_after_write",
+        "reload_all",
+        "start_refresher",
+        "status",
+        "stop_refresher",
+        "upsert_chat_log"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "bootstrap_data",
+        "logging",
+        "re",
+        "threading",
+        "time",
+        "typing"
+      ]
+    },
+    {
+      "file": "rl_enhancer\\enhancer.py",
+      "functions": [
+        "_all_branches_in_summary",
+        "_branch_hints",
+        "_branches_for_disease",
+        "_branches_for_organ",
+        "_branches_from_hints",
+        "_build_df_table",
+        "_build_symptom_list",
+        "_candidate_score",
+        "_canonical_question",
+        "_df",
+        "_entry_tiebreak",
+        "_evidence_for",
+        "_jaccard",
+        "_keywords",
+        "_match_disease",
+        "_normalise_key",
+        "_organ_aliases",
+        "_organ_branch_families",
+        "_question_score",
+        "_question_type_weight",
+        "_status_is_denied",
+        "_status_is_endorsed",
+        "_status_rank",
+        "_stem",
+        "_stemmed_branch_match",
+        "_stop_words",
+        "_symptom_library",
+        "_symptoms_from_chat",
+        "_weighted_overlap",
+        "_word_weight",
+        "_words",
+        "build_output",
+        "canonical_disease",
+        "canonical_organ",
+        "symptoms_for_disease"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "math",
+        "re",
+        "training2",
+        "typing"
+      ]
+    },
+    {
+      "file": "rl_enhancer\\jobs.py",
+      "functions": [
+        "__init__",
+        "cancel",
+        "create",
+        "get",
+        "list",
+        "next_queued",
+        "to_dict",
+        "update"
+      ],
+      "classes": [
+        "Job",
+        "JobStore"
+      ],
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "threading",
+        "time",
+        "typing",
+        "uuid"
+      ]
+    },
+    {
+      "file": "rl_enhancer\\medical_api.py",
+      "functions": [
+        "_cache_key",
+        "_cache_path",
+        "_clean_sentence",
+        "_extract_symptoms_from_text",
+        "_fetch_medlineplus",
+        "_fetch_wikipedia",
+        "_http_get",
+        "_looks_like_symptom",
+        "_read_cache",
+        "_write_cache",
+        "fetch_symptoms_for_disease"
+      ],
+      "classes": [],
+      "imports": [
+        "__future__",
+        "json",
+        "logging",
+        "pathlib",
+        "re",
+        "requests",
+        "time",
+        "typing",
+        "urllib.parse",
+        "xml.etree.ElementTree"
+      ]
+    },
+    {
+      "file": "rl_enhancer\\parser.py",
+      "functions": [
+        "_parse_conditions_list",
+        "parse_input",
+        "to_preview"
+      ],
+      "classes": [
+        "ParseError"
+      ],
+      "imports": [
+        "__future__",
+        "json",
+        "typing"
+      ]
+    },
+    {
+      "file": "rl_enhancer\\training.py",
+      "functions": [
+        "__init__",
+        "__len__",
+        "_build_corpus",
+        "_canonical_disease_from_key",
+        "_clean_symptom_fragment",
+        "_enrich_symptom_library_from_api",
+        "_init_weights",
+        "_reward_for_generation",
+        "_run",
+        "_run_ppo",
+        "_run_pretraining",
+        "add",
+        "decode",
+        "encode",
+        "forward",
+        "from_list",
+        "generate",
+        "generate_symptoms",
+        "load_existing_weights",
+        "start_ppo",
+        "start_pretraining",
+        "to_list",
+        "tokenize",
+        "training_status"
+      ],
+      "classes": [
+        "CustomANN",
+        "CustomANNBlock",
+        "FeedForward",
+        "MultiHeadSelfAttention",
+        "TrainerState",
+        "Vocab"
+      ],
+      "imports": [
+        "__future__",
+        "copy",
+        "enhancer",
+        "jobs",
+        "logging",
+        "math",
+        "medical_api",
+        "pathlib",
+        "random",
+        "re",
+        "threading",
+        "torch",
+        "torch.nn",
+        "torch.nn.functional",
+        "typing"
+      ]
+    },
+    {
+      "file": "rl_enhancer\\training2.py",
+      "functions": [
+        "__init__",
+        "__len__",
+        "_add_key",
+        "_build_corpus",
+        "_canonical_disease_from_key",
+        "_canonical_symptoms_for",
+        "_canonical_term_learned",
+        "_characteristic_symptoms",
+        "_chat_log_corpus",
+        "_clean_symptom_fragment",
+        "_clinical_prose_corpus",
+        "_compute_tfidf",
+        "_distinct_ratio",
+        "_enrich_symptom_library_from_api",
+        "_extract_concept_map_from_model",
+        "_get_concept_map",
+        "_get_tfidf",
+        "_init_weights",
+        "_is_clean_symptom",
+        "_iter_all_chat_logs",
+        "_iter_library_symptoms",
+        "_jaccard",
+        "_known_symptom_vocab",
+        "_learn_concept_clusters",
+        "_load_reference_model",
+        "_looks_like_boilerplate",
+        "_looks_like_question",
+        "_refresh_concept_map",
+        "_reward_for_generation",
+        "_reward_reference_pool",
+        "_run",
+        "_run_ppo",
+        "_run_pretraining",
+        "_samples_from_chat_log",
+        "add",
+        "decode",
+        "encode",
+        "forward",
+        "from_list",
+        "generate",
+        "generate_symptoms",
+        "load_existing_weights",
+        "start_ppo",
+        "start_pretraining",
+        "to_list",
+        "tokenize",
+        "training_status"
+      ],
+      "classes": [
+        "CustomANN",
+        "CustomANNBlock",
+        "FeedForward",
+        "MultiHeadSelfAttention",
+        "TrainerState",
+        "Vocab"
+      ],
+      "imports": [
+        "__future__",
+        "chat_log_parser",
+        "collections",
+        "copy",
+        "enhancer",
+        "jobs",
+        "logging",
+        "math",
+        "medical_api",
+        "pathlib",
+        "random",
+        "re",
+        "threading",
+        "torch",
+        "torch.nn",
+        "torch.nn.functional",
+        "typing"
+      ]
+    },
+    {
+      "file": "rl_enhancer\\__init__.py",
+      "functions": [],
+      "classes": [],
+      "imports": []
+    }
+  ],
+  "firestore_references": {
+    "app_core\\repository.py": [
+      "clerk_index",
+      "users"
+    ]
+  },
+  "google_cloud_references": {
+    "admin_routes.py": [
+      "firestore"
+    ],
+    "app_auth.py": [
+      "firestore"
+    ],
+    "architecture_audit.py": [
+      "firestore",
+      "storage",
+      "firebase",
+      "bigquery",
+      "secretmanager",
+      "cloudtasks",
+      "pubsub"
+    ],
+    "auth.py": [
+      "storage"
+    ],
+    "chart_access.py": [
+      "firestore"
+    ],
+    "db_layer.py": [
+      "firestore"
+    ],
+    "firestore_audit.py": [
+      "firestore"
+    ],
+    "firestore_schema_audit.py": [
+      "firestore"
+    ],
+    "gemini_client.py": [
+      "firestore"
+    ],
+    "rl_integration.py": [
+      "firestore"
+    ],
+    "server.py": [
+      "firestore"
+    ],
+    "tester_access.py": [
+      "firestore"
+    ],
+    "workspace_audit.py": [
+      "firestore",
+      "firebase"
+    ],
+    "agentic_disease_compare\\memory.py": [
+      "firestore"
+    ],
+    "agentic_disease_first\\memory.py": [
+      "firestore"
+    ],
+    "app_core\\repository.py": [
+      "firestore"
+    ],
+    "app_core\\runtime.py": [
+      "firestore"
+    ],
+    "app_core\\settings.py": [
+      "firestore"
+    ],
+    "rl_enhancer\\config_db.py": [
+      "firestore"
+    ],
+    "rl_enhancer\\config_loader.py": [
+      "firestore"
+    ]
+  },
+  "errors": []
+}

@@ -1,0 +1,2876 @@
+{
+  "project": "astrohealth-509609",
+  "total_collections": 142,
+  "collections": [
+    {
+      "path": "branch_hints",
+      "sampled_documents": 44,
+      "field_count": 2,
+      "field_names": [
+        "branch",
+        "disease"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "chat_logs",
+      "sampled_documents": 20,
+      "field_count": 11,
+      "field_names": [
+        "chat_plan_source",
+        "completed",
+        "completed_at",
+        "created_at",
+        "final_assessment",
+        "hitlist_cluster_scores",
+        "kind",
+        "patient_id",
+        "session_id",
+        "started_at",
+        "turns"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "chat_maps",
+      "sampled_documents": 2,
+      "field_count": 3,
+      "field_names": [
+        "kind",
+        "list",
+        "map"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "clerk_index",
+      "sampled_documents": 16,
+      "field_count": 2,
+      "field_names": [
+        "created_at",
+        "internal_user_id"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "organ_aliases",
+      "sampled_documents": 25,
+      "field_count": 2,
+      "field_names": [
+        "alias",
+        "canonical"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "organ_branch_families",
+      "sampled_documents": 9,
+      "field_count": 2,
+      "field_names": [
+        "branches",
+        "organ"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "stop_words",
+      "sampled_documents": 50,
+      "field_count": 1,
+      "field_names": [
+        "word"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "symptom_library",
+      "sampled_documents": 45,
+      "field_count": 2,
+      "field_names": [
+        "disease",
+        "symptoms"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "test_collection",
+      "sampled_documents": 1,
+      "field_count": 1,
+      "field_names": [
+        "status"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users",
+      "sampled_documents": 28,
+      "field_count": 8,
+      "field_names": [
+        "born",
+        "clerk_user_id",
+        "created_at",
+        "first",
+        "internal_user_id",
+        "last",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [
+        "account",
+        "algorithm_results",
+        "audit_events",
+        "chart_inputs",
+        "chart_sources",
+        "combined_results",
+        "identity_vault",
+        "inputs",
+        "patients",
+        "prokerala_results",
+        "tester_charts"
+      ],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 2,
+      "field_count": 8,
+      "field_names": [
+        "charts",
+        "created_at",
+        "date",
+        "is_tester",
+        "owner_internal_user_id",
+        "schema_version",
+        "since",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 19,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 1,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 1,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 1,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 1,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/tester_charts",
+      "sampled_documents": 1,
+      "field_count": 20,
+      "field_names": [
+        "algo_organs",
+        "algo_version",
+        "birth_place",
+        "birth_time",
+        "chart_source",
+        "chat_completed",
+        "chat_turns",
+        "combined_top",
+        "created_at",
+        "day",
+        "dob",
+        "gender",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "run_at",
+        "schema_version",
+        "snapshot_json",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 50,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/audit_events",
+      "sampled_documents": 4,
+      "field_count": 7,
+      "field_names": [
+        "action",
+        "created_at",
+        "owner_internal_user_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 13,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 2,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 12,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 3,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 13,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 11,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 3,
+      "field_count": 11,
+      "field_names": [
+        "active_patient_id",
+        "charts",
+        "charts_used",
+        "created_at",
+        "date",
+        "history",
+        "is_tester",
+        "owner_internal_user_id",
+        "schema_version",
+        "since",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 50,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 3,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 3,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 3,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 3,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 3,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 3,
+      "field_count": 9,
+      "field_names": [
+        "created_at",
+        "hidden",
+        "hidden_reason",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 3,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/tester_charts",
+      "sampled_documents": 1,
+      "field_count": 22,
+      "field_names": [
+        "algo_diseases",
+        "algo_organs",
+        "algo_version",
+        "birth_place",
+        "birth_time",
+        "chart_source",
+        "chat_completed",
+        "chat_json",
+        "chat_turns",
+        "combined_top",
+        "created_at",
+        "day",
+        "dob",
+        "gender",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "run_at",
+        "schema_version",
+        "snapshot_json",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 3,
+      "field_count": 11,
+      "field_names": [
+        "active_patient_id",
+        "charts",
+        "charts_used",
+        "created_at",
+        "date",
+        "history",
+        "is_tester",
+        "owner_internal_user_id",
+        "schema_version",
+        "since",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 38,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 2,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 2,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 2,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 2,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 2,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 2,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 2,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/tester_charts",
+      "sampled_documents": 1,
+      "field_count": 21,
+      "field_names": [
+        "algo_diseases",
+        "algo_organs",
+        "algo_version",
+        "birth_place",
+        "birth_time",
+        "chart_source",
+        "chat_completed",
+        "chat_turns",
+        "combined_top",
+        "created_at",
+        "day",
+        "dob",
+        "gender",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "run_at",
+        "schema_version",
+        "snapshot_json",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 19,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 1,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 1,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 1,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 1,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 38,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 2,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 2,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 2,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 2,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 44,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 2,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 2,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 2,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 2,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 1,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 3,
+      "field_count": 11,
+      "field_names": [
+        "active_patient_id",
+        "charts",
+        "charts_used",
+        "created_at",
+        "date",
+        "history",
+        "is_tester",
+        "owner_internal_user_id",
+        "schema_version",
+        "since",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 50,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 6,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 4,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 6,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 4,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 6,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 6,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 4,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/tester_charts",
+      "sampled_documents": 3,
+      "field_count": 21,
+      "field_names": [
+        "algo_diseases",
+        "algo_organs",
+        "algo_version",
+        "birth_place",
+        "birth_time",
+        "chart_source",
+        "chat_completed",
+        "chat_turns",
+        "combined_top",
+        "created_at",
+        "day",
+        "dob",
+        "gender",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "run_at",
+        "schema_version",
+        "snapshot_json",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 50,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 4,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 2,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 4,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 3,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 4,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 2,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 4,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 19,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 1,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 1,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 1,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 1,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 2,
+      "field_count": 9,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "is_tester",
+        "owner_internal_user_id",
+        "schema_version",
+        "since",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 38,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 2,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 2,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 2,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 2,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 2,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 2,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 19,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 1,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 1,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 1,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 1,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 19,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/audit_events",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "action",
+        "created_at",
+        "owner_internal_user_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 1,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 1,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 1,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 1,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/account",
+      "sampled_documents": 1,
+      "field_count": 7,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/algorithm_results",
+      "sampled_documents": 50,
+      "field_count": 13,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_inputs",
+      "sampled_documents": 3,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/chart_sources",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/combined_results",
+      "sampled_documents": 3,
+      "field_count": 11,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/identity_vault",
+      "sampled_documents": 1,
+      "field_count": 10,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/inputs",
+      "sampled_documents": 3,
+      "field_count": 18,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/patients",
+      "sampled_documents": 2,
+      "field_count": 7,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    },
+    {
+      "path": "users/{document}/prokerala_results",
+      "sampled_documents": 2,
+      "field_count": 8,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "subcollections": [],
+      "error": null
+    }
+  ]
+}

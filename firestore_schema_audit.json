@@ -1,0 +1,8861 @@
+{
+  "project": "astrohealth-509609",
+  "schema": [
+    {
+      "collection": "branch_hints",
+      "sample_count": 44,
+      "field_names": [
+        "branch",
+        "disease"
+      ],
+      "field_types": {
+        "branch": [
+          "string"
+        ],
+        "disease": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "chat_logs",
+      "sample_count": 20,
+      "field_names": [
+        "chat_plan_source",
+        "completed",
+        "completed_at",
+        "created_at",
+        "final_assessment",
+        "hitlist_cluster_scores",
+        "kind",
+        "patient_id",
+        "session_id",
+        "started_at",
+        "turns"
+      ],
+      "field_types": {
+        "started_at": [
+          "string"
+        ],
+        "turns": [
+          "array"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "final_assessment": [
+          "string"
+        ],
+        "completed": [
+          "boolean"
+        ],
+        "completed_at": [
+          "string"
+        ],
+        "chat_plan_source": [
+          "string"
+        ],
+        "session_id": [
+          "string"
+        ],
+        "hitlist_cluster_scores": [
+          "map"
+        ],
+        "kind": [
+          "string"
+        ],
+        "created_at": [
+          "DatetimeWithNanoseconds"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "chat_maps",
+      "sample_count": 2,
+      "field_names": [
+        "kind",
+        "list",
+        "map"
+      ],
+      "field_types": {
+        "list": [
+          "array"
+        ],
+        "kind": [
+          "string"
+        ],
+        "map": [
+          "map"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "clerk_index",
+      "sample_count": 16,
+      "field_names": [
+        "created_at",
+        "internal_user_id"
+      ],
+      "field_types": {
+        "internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "organ_aliases",
+      "sample_count": 25,
+      "field_names": [
+        "alias",
+        "canonical"
+      ],
+      "field_types": {
+        "alias": [
+          "string"
+        ],
+        "canonical": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "organ_branch_families",
+      "sample_count": 9,
+      "field_names": [
+        "branches",
+        "organ"
+      ],
+      "field_types": {
+        "branches": [
+          "array"
+        ],
+        "organ": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "stop_words",
+      "sample_count": 100,
+      "field_names": [
+        "word"
+      ],
+      "field_types": {
+        "word": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "symptom_library",
+      "sample_count": 45,
+      "field_names": [
+        "disease",
+        "symptoms"
+      ],
+      "field_types": {
+        "disease": [
+          "string"
+        ],
+        "symptoms": [
+          "array"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "test_collection",
+      "sample_count": 1,
+      "field_names": [
+        "status"
+      ],
+      "field_types": {
+        "status": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users",
+      "sample_count": 28,
+      "field_names": [
+        "born",
+        "clerk_user_id",
+        "created_at",
+        "first",
+        "internal_user_id",
+        "last",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "clerk_user_id": [
+          "string"
+        ],
+        "internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "born": [
+          "number"
+        ],
+        "first": [
+          "string"
+        ],
+        "last": [
+          "string"
+        ]
+      },
+      "subcollections": [
+        "account",
+        "algorithm_results",
+        "audit_events",
+        "chart_inputs",
+        "chart_sources",
+        "combined_results",
+        "identity_vault",
+        "inputs",
+        "patients",
+        "prokerala_results",
+        "tester_charts"
+      ]
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 2,
+      "field_names": [
+        "charts",
+        "created_at",
+        "date",
+        "is_tester",
+        "owner_internal_user_id",
+        "schema_version",
+        "since",
+        "updated_at"
+      ],
+      "field_types": {
+        "updated_at": [
+          "string"
+        ],
+        "is_tester": [
+          "boolean"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "since": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "date": [
+          "string"
+        ],
+        "charts": [
+          "number"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 1,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "active_patient_id": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "charts_used": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "history": [
+          "array"
+        ],
+        "schema_version": [
+          "number"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 3,
+      "field_names": [
+        "active_patient_id",
+        "charts",
+        "charts_used",
+        "created_at",
+        "date",
+        "history",
+        "is_tester",
+        "owner_internal_user_id",
+        "schema_version",
+        "since",
+        "updated_at"
+      ],
+      "field_types": {
+        "history": [
+          "array"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "charts_used": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "active_patient_id": [
+          "string"
+        ],
+        "is_tester": [
+          "boolean"
+        ],
+        "since": [
+          "string"
+        ],
+        "charts": [
+          "number"
+        ],
+        "date": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 3,
+      "field_names": [
+        "active_patient_id",
+        "charts",
+        "charts_used",
+        "created_at",
+        "date",
+        "history",
+        "is_tester",
+        "owner_internal_user_id",
+        "schema_version",
+        "since",
+        "updated_at"
+      ],
+      "field_types": {
+        "history": [
+          "array"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "charts_used": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "active_patient_id": [
+          "string"
+        ],
+        "is_tester": [
+          "boolean"
+        ],
+        "since": [
+          "string"
+        ],
+        "charts": [
+          "number"
+        ],
+        "date": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 1,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "history": [
+          "array"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "charts_used": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "active_patient_id": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 1,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "history": [
+          "array"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "charts_used": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "active_patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 1,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "history": [
+          "array"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "charts_used": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "active_patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 3,
+      "field_names": [
+        "active_patient_id",
+        "charts",
+        "charts_used",
+        "created_at",
+        "date",
+        "history",
+        "is_tester",
+        "owner_internal_user_id",
+        "schema_version",
+        "since",
+        "updated_at"
+      ],
+      "field_types": {
+        "history": [
+          "array"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "charts_used": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "active_patient_id": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "is_tester": [
+          "boolean"
+        ],
+        "since": [
+          "string"
+        ],
+        "date": [
+          "string"
+        ],
+        "charts": [
+          "number"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 1,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "history": [
+          "array"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "charts_used": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "active_patient_id": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 2,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "is_tester",
+        "owner_internal_user_id",
+        "schema_version",
+        "since",
+        "updated_at"
+      ],
+      "field_types": {
+        "history": [
+          "array"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "charts_used": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "active_patient_id": [
+          "string"
+        ],
+        "is_tester": [
+          "boolean"
+        ],
+        "since": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 1,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "history": [
+          "array"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "charts_used": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "active_patient_id": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 1,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "active_patient_id": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "charts_used": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "history": [
+          "array"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/account",
+      "sample_count": 1,
+      "field_names": [
+        "active_patient_id",
+        "charts_used",
+        "created_at",
+        "history",
+        "owner_internal_user_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "history": [
+          "array"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "charts_used": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "active_patient_id": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 19,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "output": [
+          "array",
+          "map"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 100,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "output": [
+          "array",
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 57,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "output": [
+          "array",
+          "map"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 38,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "output": [
+          "array",
+          "map"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 19,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "output": [
+          "array",
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 38,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "output": [
+          "array",
+          "map"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 44,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "output": [
+          "array",
+          "map"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 100,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "output": [
+          "array",
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 57,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "output": [
+          "array",
+          "map"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 19,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "output": [
+          "array",
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 38,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "output": [
+          "array",
+          "map"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 19,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "input_id": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "output": [
+          "array",
+          "map"
+        ],
+        "source": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 19,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "output": [
+          "array",
+          "map"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/algorithm_results",
+      "sample_count": 69,
+      "field_names": [
+        "algorithm",
+        "algorithm_version",
+        "created_at",
+        "input_id",
+        "output",
+        "owner_internal_user_id",
+        "patient_id",
+        "prokerala_result_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "output": [
+          "array",
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "prokerala_result_id": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_version": [
+          "string"
+        ],
+        "algorithm": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 4,
+      "field_names": [
+        "action",
+        "created_at",
+        "owner_internal_user_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "action": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 1,
+      "field_names": [
+        "action",
+        "created_at",
+        "owner_internal_user_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "action": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/audit_events",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 13,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 3,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 2,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 2,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 2,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 6,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 3,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 2,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_inputs",
+      "sample_count": 3,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 1,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 2,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 3,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 2,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 1,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 1,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 1,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 4,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 2,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 1,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 1,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 1,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 1,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/chart_sources",
+      "sample_count": 1,
+      "field_names": [
+        "algo_version",
+        "created_at",
+        "current_positions_json",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "raw_chart_json",
+        "raw_dasha_json",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "profile": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "current_positions_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "raw_dasha_json": [
+          "string"
+        ],
+        "raw_chart_json": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 1,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "algorithm_count": [
+          "number"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 12,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "input_id": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "algorithm_count": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 3,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "algorithm_count": [
+          "number"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 2,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "algorithm_count": [
+          "number"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 1,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "algorithm_count": [
+          "number"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 2,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "algorithm_count": [
+          "number"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 2,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "algorithm_count": [
+          "number"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 6,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "algorithm_count": [
+          "number"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 3,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "algorithm_count": [
+          "number"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 1,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "algorithm_count": [
+          "number"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 2,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "algorithm_count": [
+          "number"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 1,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "algorithm_count": [
+          "number"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 1,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "algorithm_count": [
+          "number"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/combined_results",
+      "sample_count": 3,
+      "field_names": [
+        "algorithm_count",
+        "algorithm_ids",
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "schema_version",
+        "source",
+        "status",
+        "updated_at"
+      ],
+      "field_types": {
+        "algorithm_count": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "status": [
+          "string"
+        ],
+        "algorithm_ids": [
+          "array"
+        ],
+        "source": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 3,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 3,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 2,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 4,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 2,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 2,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/identity_vault",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "created_at",
+        "dob",
+        "father_name",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "updated_at"
+      ],
+      "field_types": {
+        "name": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 13,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 3,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 2,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 2,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 2,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 6,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 3,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 2,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 1,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "lat": [
+          "number"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/inputs",
+      "sample_count": 3,
+      "field_names": [
+        "birth_place",
+        "birth_time",
+        "created_at",
+        "dob",
+        "father_name",
+        "gender",
+        "input_id",
+        "lat",
+        "lng",
+        "mother_name",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "profile",
+        "record_type",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "profile": [
+          "map"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "mother_name": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "lng": [
+          "number"
+        ],
+        "lat": [
+          "number"
+        ],
+        "source": [
+          "string"
+        ],
+        "father_name": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "input_id": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 3,
+      "field_names": [
+        "created_at",
+        "hidden",
+        "hidden_reason",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "hidden_reason": [
+          "string"
+        ],
+        "hidden": [
+          "boolean"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 2,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 2,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 6,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 2,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 2,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "source": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/patients",
+      "sample_count": 2,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 11,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 3,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 2,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 2,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 4,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 3,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 2,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 1,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/prokerala_results",
+      "sample_count": 2,
+      "field_names": [
+        "created_at",
+        "input_id",
+        "owner_internal_user_id",
+        "patient_id",
+        "payload",
+        "schema_version",
+        "source",
+        "updated_at"
+      ],
+      "field_types": {
+        "payload": [
+          "map"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "source": [
+          "string"
+        ],
+        "input_id": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 1,
+      "field_names": [
+        "algo_organs",
+        "algo_version",
+        "birth_place",
+        "birth_time",
+        "chart_source",
+        "chat_completed",
+        "chat_turns",
+        "combined_top",
+        "created_at",
+        "day",
+        "dob",
+        "gender",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "run_at",
+        "schema_version",
+        "snapshot_json",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "day": [
+          "string"
+        ],
+        "snapshot_json": [
+          "string"
+        ],
+        "gender": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "chat_turns": [
+          "number"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "chat_completed": [
+          "boolean"
+        ],
+        "chart_source": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "algo_organs": [
+          "map"
+        ],
+        "run_at": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "combined_top": [
+          "array"
+        ],
+        "algo_version": [
+          "number"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 1,
+      "field_names": [
+        "algo_diseases",
+        "algo_organs",
+        "algo_version",
+        "birth_place",
+        "birth_time",
+        "chart_source",
+        "chat_completed",
+        "chat_json",
+        "chat_turns",
+        "combined_top",
+        "created_at",
+        "day",
+        "dob",
+        "gender",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "run_at",
+        "schema_version",
+        "snapshot_json",
+        "updated_at"
+      ],
+      "field_types": {
+        "chat_json": [
+          "string"
+        ],
+        "schema_version": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "snapshot_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "chat_turns": [
+          "number"
+        ],
+        "chart_source": [
+          "string"
+        ],
+        "chat_completed": [
+          "boolean"
+        ],
+        "day": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "run_at": [
+          "string"
+        ],
+        "algo_organs": [
+          "map"
+        ],
+        "algo_diseases": [
+          "map"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "combined_top": [
+          "array"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 1,
+      "field_names": [
+        "algo_diseases",
+        "algo_organs",
+        "algo_version",
+        "birth_place",
+        "birth_time",
+        "chart_source",
+        "chat_completed",
+        "chat_turns",
+        "combined_top",
+        "created_at",
+        "day",
+        "dob",
+        "gender",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "run_at",
+        "schema_version",
+        "snapshot_json",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "snapshot_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "chat_turns": [
+          "number"
+        ],
+        "chart_source": [
+          "string"
+        ],
+        "chat_completed": [
+          "boolean"
+        ],
+        "day": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "run_at": [
+          "string"
+        ],
+        "algo_organs": [
+          "map"
+        ],
+        "algo_diseases": [
+          "map"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "combined_top": [
+          "array"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 3,
+      "field_names": [
+        "algo_diseases",
+        "algo_organs",
+        "algo_version",
+        "birth_place",
+        "birth_time",
+        "chart_source",
+        "chat_completed",
+        "chat_turns",
+        "combined_top",
+        "created_at",
+        "day",
+        "dob",
+        "gender",
+        "name",
+        "owner_internal_user_id",
+        "patient_id",
+        "record_type",
+        "run_at",
+        "schema_version",
+        "snapshot_json",
+        "updated_at"
+      ],
+      "field_types": {
+        "schema_version": [
+          "number"
+        ],
+        "day": [
+          "string"
+        ],
+        "snapshot_json": [
+          "string"
+        ],
+        "owner_internal_user_id": [
+          "string"
+        ],
+        "dob": [
+          "string"
+        ],
+        "chat_turns": [
+          "number"
+        ],
+        "gender": [
+          "string"
+        ],
+        "chat_completed": [
+          "boolean"
+        ],
+        "chart_source": [
+          "string"
+        ],
+        "record_type": [
+          "string"
+        ],
+        "patient_id": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "updated_at": [
+          "string"
+        ],
+        "algo_organs": [
+          "map"
+        ],
+        "algo_diseases": [
+          "map"
+        ],
+        "birth_time": [
+          "string"
+        ],
+        "run_at": [
+          "string"
+        ],
+        "created_at": [
+          "string"
+        ],
+        "birth_place": [
+          "string"
+        ],
+        "algo_version": [
+          "number"
+        ],
+        "combined_top": [
+          "array"
+        ]
+      },
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    },
+    {
+      "collection": "users/{document}/tester_charts",
+      "sample_count": 0,
+      "field_names": [],
+      "field_types": {},
+      "subcollections": []
+    }
+  ]
+}
