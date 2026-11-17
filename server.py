@@ -135,6 +135,20 @@ register_auth_errors(app)
 from orchestrator import Orchestrator
 orchestrator = Orchestrator()
 
+try:
+    from app.core.config import load_data_settings
+    from app.knowledge.runtime import activate_knowledge_base
+    _kb_settings = load_data_settings()
+    if _kb_settings.kb_source == "firestore" or _kb_settings.kb_strict:
+        activate_knowledge_base()
+        print(f"[KB] source={_kb_settings.kb_source} strict={_kb_settings.kb_strict}")
+    else:
+        print(f"[KB] source={_kb_settings.kb_source} (explicit offline fixtures; set KB_SOURCE=firestore after seeding)")
+except Exception as _kb_error:
+    print(f"[KB] [FAIL] {_kb_error}")
+    if os.environ.get("KB_STRICT", "").strip().lower() in {"1", "true", "yes", "on"}:
+        raise
+
 # Credentials now imported from config.py
 
 # ── Token cache (auto-refreshes before expiry) ─────────────────────────────
@@ -1030,6 +1044,8 @@ def _save_chart_to_main_db(patient_id: str, source: str, response: dict, fetch_r
 # ══════════════════════════════════════════════════════════════
 def _run_chart_pipeline(patient_id: str, fetch_result: dict, birth: dict,
                         current_planetary_positions: dict, source: str) -> dict:
+    from app.knowledge.runtime import assert_calculation_source
+    assert_calculation_source()
     name        = birth.get("name", "")
     dob         = birth.get("dob", "")
     birth_time  = birth.get("birth_time", "08:00")
@@ -1429,6 +1445,47 @@ def health():
     return jsonify({"status": "ok", "server": "AstroMedica"})
 
 
+@app.get("/ready")
+def ready():
+    """Readiness. Strict knowledge mode fails closed. Fixture mode is reported, not hidden."""
+    from app.core.config import load_data_settings
+    from app.knowledge.runtime import get_knowledge_base
+
+    settings = load_data_settings()
+    kb_state = "not_activated"
+    try:
+        kb_state = get_knowledge_base().stats()["source"]
+    except Exception:
+        kb_state = "not_activated"
+    strict_blocked = settings.kb_strict and kb_state != "firestore"
+    body = {
+        "status": "not_ready" if strict_blocked else "ok",
+        "knowledge_base": kb_state,
+        "kb_strict": settings.kb_strict,
+        "chat_mode": os.getenv("CHAT_MODE", "classic"),
+        "rl_hint_mode": settings.rl_hint_mode,
+        "datastore": "firestore" if settings.firestore_enabled else "memory",
+    }
+    return jsonify(body), (503 if strict_blocked else 200)
+
+
+def _restore_chat_session(session_id: str) -> bool:
+    try:
+        from app.chat.sessions import recover_session
+        actor = (getattr(g, "user", None) or {}).get("internal_user_id")
+        if not actor:
+            return False
+        restored = recover_session(actor, session_id)
+        if not restored:
+            return False
+        orchestrator.restore_session(session_id, restored)
+        print(f"[Chat] Session {session_id} restored from Firestore")
+        return True
+    except Exception as exc:
+        print(f"[Chat] session restore failed: {type(exc).__name__}")
+        return False
+
+
 DEMO_LIST_HIDDEN_PATIENT_IDS = {"007"}
 
 
@@ -1757,10 +1814,10 @@ def send_message():
             return jsonify({"success": False, "error": "session_id required"}), 400
 
         if not orchestrator.session_exists(session_id):
-            # Sessions live in server memory: a restart or a second gunicorn
-            # worker loses them. The page offers to restart the chat.
-            print(f"[Chat] Session {session_id} not found (server restarted, or more than one worker?)")
-            return jsonify({"success": False, "code": "session_ended", "error": "Session not found."}), 400
+            restored = _restore_chat_session(session_id)
+            if not restored:
+                print(f"[Chat] Session {session_id} not found (server restarted, or more than one worker?)")
+                return jsonify({"success": False, "code": "session_ended", "error": "Session not found."}), 400
         # The request only carries session_id, so check the session's patient.
         check_patient_access(orchestrator.get_session(session_id)["patient_id"])
 

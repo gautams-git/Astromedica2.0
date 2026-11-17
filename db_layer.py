@@ -106,6 +106,11 @@ def save_identity_vault(
     user_id = _current_user_id()
     if user_id:
         _repository().save(user_id, "identity_vault", patient_id, record)
+        try:
+            from app.integration import mirror_identity
+            mirror_identity(_repository(), user_id, patient_id, record)
+        except Exception as exc:
+            print(f"[DB] [FAIL] private/identity mirror for patient {patient_id}: {type(exc).__name__}")
         return
     # Outside a request (scripts) there is no user to file it under.
     vault = _read_json(_IDENTITY_VAULT_FILE, {})
@@ -151,6 +156,15 @@ def insert_kb_chunk(text: str, embedding: list[float], metadata: dict | None = N
         "metadata": metadata or {},
     })
     _write_json(_KB_CHUNKS_FILE, chunks)
+    try:
+        _repository().data_plane.save_chunk(chunk_id, {
+            "content": text,
+            "source_dataset": (metadata or {}).get("source_dataset", ""),
+            "source_record_id": (metadata or {}).get("source_record_id", ""),
+            "metadata": {"embedding_stored": False, **(metadata or {})},
+        })
+    except Exception as exc:
+        print(f"[DB] [FAIL] kb_chunks mirror: {type(exc).__name__}")
     return chunk_id
 
 

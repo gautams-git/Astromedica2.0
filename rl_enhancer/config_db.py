@@ -68,6 +68,14 @@ def _get_client() -> firestore.Client:
     global _client
     with _client_lock:
         if _client is None:
+            try:
+                from app.infrastructure.firestore.client import get_shared_client
+                shared = get_shared_client()
+                if shared is not None:
+                    _client = shared
+                    return _client
+            except Exception:
+                pass
             _client = firestore.Client(project=project_id())
         return _client
 

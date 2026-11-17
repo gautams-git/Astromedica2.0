@@ -1,4 +1,8 @@
-"""Thread-safe in-memory job store."""
+"""Thread-safe in-memory job store.
+
+The worker still consumes this queue. job_records is a durable status copy,
+not a second queue.
+"""
 from __future__ import annotations
 
 import threading
@@ -25,6 +29,22 @@ class Job:
         return asdict(self)
 
 
+def _mirror_job(job: Job) -> None:
+    try:
+        from app.chat.sessions import session_backend
+        plane = session_backend()
+        if plane is None:
+            return
+        plane.save_job(job.id, {
+            "status": job.status,
+            "message": job.message,
+            "patient_id": None,
+            "execution_metadata": {"progress": job.progress, "error": job.error},
+        })
+    except Exception:
+        return
+
+
 class JobStore:
     def __init__(self):
         self._jobs: Dict[str, Job] = {}
@@ -36,7 +56,8 @@ class JobStore:
             job = Job(id=uuid.uuid4().hex[:12], input_path=input_path)
             self._jobs[job.id] = job
             self._order.append(job.id)
-            return job
+        _mirror_job(job)
+        return job
 
     def get(self, job_id: str) -> Optional[Job]:
         with self._lock:
@@ -47,24 +68,24 @@ class JobStore:
             job = self._jobs.get(job_id)
             if not job:
                 return None
-            for k, v in fields.items():
-                if hasattr(job, k):
-                    setattr(job, k, v)
+            for key, value in fields.items():
+                if hasattr(job, key):
+                    setattr(job, key, value)
             job.updated_at = time.time()
-            return job
+        _mirror_job(job)
+        return job
 
     def next_queued(self) -> Optional[Job]:
         with self._lock:
-            for jid in self._order:
-                job = self._jobs.get(jid)
+            for job_id in self._order:
+                job = self._jobs.get(job_id)
                 if job and job.status == "queued":
                     return job
             return None
 
     def list(self, limit: int = 50) -> List[Job]:
         with self._lock:
-            items = [self._jobs[j] for j in reversed(self._order)
-                     if j in self._jobs]
+            items = [self._jobs[job_id] for job_id in reversed(self._order) if job_id in self._jobs]
             return items[:limit]
 
     def cancel(self, job_id: str) -> Optional[Job]:
@@ -76,7 +97,8 @@ class JobStore:
                 job.status = "cancelled"
                 job.message = "Cancelled by user"
                 job.updated_at = time.time()
-            return job
+        _mirror_job(job)
+        return job
 
 
 STORE = JobStore()

@@ -226,6 +226,7 @@ def delete_chart(uid: str, pid: str) -> dict:
 
     for coll in PER_PATIENT_DOCS:
         step(f"{coll}/{pid}", lambda c=coll: _repo().delete(uid, c, pid))
+    step("nested patient tree", lambda: _repo().data_plane.delete_patient_tree(uid, pid))
     for coll in PER_RUN_COLLECTIONS:
         step(f"{coll} records", lambda c=coll: sum(_repo().delete(uid, c, doc_id)
                                                    for doc_id, _ in _repo().list_docs(uid, c, pid)))
