@@ -64,7 +64,8 @@ def save_chat_turn(
     turn: int,
     role: str,
     message: str,
-    metadata: dict = None
+    metadata: dict = None,
+    session_id: str | None = None,
 ) -> None:
     """
     Appends one Q&A turn to patients/00X/chat_log.json
@@ -94,7 +95,48 @@ def save_chat_turn(
 
     with open(log_file, "w") as f:
         json.dump(log, f, indent=2)
+    if session_id:
+        _mirror_durable_turn(patient_id, session_id, turn, role, message, metadata)
     sync_rl_report(patient_id, log)
+
+
+def _mirror_chat_completion(patient_id: str, session_id: str, session: dict) -> None:
+    try:
+        from flask import g, has_request_context
+        if not has_request_context():
+            return
+        user_id = (getattr(g, "user", None) or {}).get("internal_user_id")
+        if not user_id:
+            return
+        from app_core.runtime import get_services
+        plane = get_services().repository.data_plane
+        plane.complete_chat(user_id, patient_id, session_id, {"cluster_scores": session.get("cluster_scores") or {}})
+        plane.append_audit(user_id, patient_id, "chat_completed", {"chat_id": session_id})
+    except Exception as exc:
+        print(f"[Chat] durable completion not saved: {type(exc).__name__}")
+
+
+def _mirror_durable_turn(patient_id: str, session_id: str, turn: int, role: str, message: str, metadata: dict | None) -> None:
+    # Disk remains the working copy. Firestore is the durable copy for other workers.
+    try:
+        from flask import g, has_request_context
+        if not has_request_context():
+            return
+        user_id = (getattr(g, "user", None) or {}).get("internal_user_id")
+        if not user_id:
+            return
+        from app.integration import mirror_turn
+        from app_core.runtime import get_services
+        mirror_turn(get_services().repository, user_id, patient_id, session_id, {
+            "turn_id": f"{int(turn):06d}-{role}",
+            "role": role,
+            "content": message,
+            "metadata": metadata or {},
+            "question_type": (metadata or {}).get("question_type"),
+            "cluster_rank": (metadata or {}).get("cluster_rank"),
+        })
+    except Exception as exc:
+        print(f"[Chat] durable turn not saved: {type(exc).__name__}")
 
 
 def sync_rl_report(patient_id: str, log: dict) -> None:
@@ -1184,7 +1226,8 @@ def start_chat(
             **conversation_store[session_id]["last_question_meta"],
             "session_id": session_id,
             "backend_reasoning": conversation_store[session_id]["debug_context"]["latest_question_explanation"]
-        }
+        },
+        session_id=session_id,
     )
 
     return {
@@ -1317,7 +1360,7 @@ def send_message(
         "answered_cluster_rank": cluster_rank,
         "answered_branch_id": branch_id,
         "answered_question_type": last_meta.get("question_type", "")
-    })
+    }, session_id=session_id)
 
     # Get Gemma response
     next_assistant_turn = session["turn_count"] + 1
@@ -1383,7 +1426,7 @@ def send_message(
         "session_id": session_id,
         "cluster_scores": session.get("cluster_scores", {}),
         "backend_reasoning": session["debug_context"]["latest_question_explanation"]
-    })
+    }, session_id=session_id)
 
     # Detect final assessment
     is_final = (
@@ -1407,6 +1450,7 @@ def send_message(
         with open(log_file, "w") as f:
             json.dump(log, f, indent=2)
         sync_rl_report(patient_id, log)
+        _mirror_chat_completion(patient_id, session_id, session)
         if session.get("skip_rl"):
             # Tester chat: not for RL training (set in server.start_consultation).
             print(f"[RL] Patient {patient_id}: tester chat - RL not queued")

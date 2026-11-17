@@ -30,16 +30,28 @@ class MemoryRepository:
         self.users_by_clerk: dict[str, dict] = {}
         self.users: dict[str, dict] = {}
         self.docs: dict[tuple, dict] = {}
+        from app.infrastructure.firestore.memory import MemoryDocumentStore
+        from app.infrastructure.firestore.repositories import DataPlane
+
+        self.data_plane = DataPlane(
+            MemoryDocumentStore(),
+            encryption_key=os.environ.get("IDENTITY_ENCRYPTION_KEY", ""),
+        )
 
     def ping(self) -> bool:
         return True
+
+    def _sync_data_plane(self, record: dict) -> None:
+        _sync_user_record(self.data_plane, record)
 
     def get_or_create_user(self, clerk_user_id: str) -> dict:
         with self._lock:
             existing = self.users_by_clerk.get(clerk_user_id)
             if existing:
                 existing["updated_at"] = _now()
-                return dict(existing)
+                stored = dict(existing)
+                self._sync_data_plane(stored)
+                return stored
             internal_id = new_internal_user_id()
             record = {
                 "internal_user_id": internal_id,
@@ -50,7 +62,9 @@ class MemoryRepository:
             }
             self.users_by_clerk[clerk_user_id] = record
             self.users[internal_id] = record
-            return dict(record)
+            stored = dict(record)
+        self._sync_data_plane(stored)
+        return stored
 
     def _path(self, internal_user_id: str, collection: str, doc_id: str) -> tuple:
         return (internal_user_id, collection, doc_id)
@@ -155,6 +169,13 @@ class FirestoreRepository(MemoryRepository):
         # Give up after ~10 s. The library default retries for 5 minutes, so an
         # expired Google login or a network problem froze every request.
         self._call = {"retry": Retry(predicate=if_transient_error, timeout=10.0), "timeout": 10.0}
+        from app.infrastructure.firestore.firestore_store import FirestoreDocumentStore
+        from app.infrastructure.firestore.repositories import DataPlane
+
+        self.data_plane = DataPlane(
+            FirestoreDocumentStore(self._client, self._call),
+            encryption_key=os.environ.get("IDENTITY_ENCRYPTION_KEY", ""),
+        )
 
     def ping(self) -> bool:
         try:
@@ -162,6 +183,9 @@ class FirestoreRepository(MemoryRepository):
             return True
         except Exception:
             return False
+
+    def _sync_data_plane(self, record: dict) -> None:
+        _sync_user_record(self.data_plane, record)
 
     def get_or_create_user(self, clerk_user_id: str) -> dict:
         index = self._client.collection("clerk_index").document(clerk_user_id)
@@ -172,6 +196,7 @@ class FirestoreRepository(MemoryRepository):
             user_ref.set({"updated_at": _now()}, merge=True, **self._call)
             data = user_ref.get(**self._call).to_dict() or {}
             data["internal_user_id"] = internal_id
+            self._sync_data_plane(data)
             return data
 
         internal_id = new_internal_user_id()
@@ -184,6 +209,7 @@ class FirestoreRepository(MemoryRepository):
         }
         self._client.collection("users").document(internal_id).set(record, **self._call)
         index.set({"internal_user_id": internal_id, "created_at": record["created_at"]}, **self._call)
+        self._sync_data_plane(record)
         return record
 
     def _user_collection(self, internal_user_id: str, collection: str):
@@ -252,6 +278,21 @@ class FirestoreRepository(MemoryRepository):
         if clerk_user_id:
             self._client.collection("clerk_index").document(clerk_user_id).delete(**self._call)
         return count
+
+
+def _sync_user_record(data_plane, record: dict) -> None:
+    try:
+        data_plane.ensure_user(
+            record["clerk_user_id"],
+            internal_user_id=record["internal_user_id"],
+            email=record.get("email"),
+            role=record.get("role") or "patient",
+        )
+    except Exception as exc:
+        import logging
+        logging.getLogger("astromedica.repository").error(
+            "data plane user sync failed: %s", type(exc).__name__
+        )
 
 
 def build_repository(settings: Settings):

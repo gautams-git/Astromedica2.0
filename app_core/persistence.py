@@ -235,6 +235,20 @@ class ChartPersistence:
             combined_document,
         )
 
+        from app.integration import mirror_generation
+
+        mirror_payload = dict(response)
+        mirror_payload.setdefault("combined_algo", combined_document)
+        mirror_generation(
+            self.repository,
+            internal_user_id,
+            patient_id,
+            chart_input,
+            source,
+            mirror_payload,
+            input_id,
+        )
+
         return {
             "input_id": input_id,
             "patient_id": patient_id,

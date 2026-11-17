@@ -7,3 +7,12 @@ graceful_timeout = 30
 accesslog = "-"
 errorlog = "-"
 capture_output = True
+
+
+def on_exit(server):
+    """Stop background refreshers. In-flight requests finish via graceful_timeout."""
+    try:
+        from rl_enhancer.config_loader import stop_refresher
+        stop_refresher()
+    except Exception:
+        return

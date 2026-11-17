@@ -2,8 +2,10 @@
 # Secrets are supplied by the environment or Secret Manager, not by this file.
 #
 # The env file below must also contain (see README §1.8):
-#   WEB_CONCURRENCY=1              one gunicorn worker - chat sessions live in
-#   GUNICORN_CMD_ARGS=--threads 8  memory; a 2nd worker gives "Session not found"
+#   WEB_CONCURRENCY=1              raise this only after CHAT_DURABLE=true and
+#   GUNICORN_CMD_ARGS=--threads 8  Firestore is the main DB. Sessions are then
+#                                  restored from Firestore on another worker.
+# Do not publish Firestore or Redis ports. The app uses ADC, not a key file.
 #
 # Admin page (README §1.9): http(s)://<vm-address>/admin, or the "Admin" button on
 # the home page. Only Clerk ids listed in the env file can use it:

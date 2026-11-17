@@ -127,9 +127,29 @@ def _read_input(path: str):
     return parsed, wrapper, chat_summary, counts
 
 
+def _mirror_rl_output(patient_id: str, session: dict, output: list) -> None:
+    from app_core.runtime import get_services
+    repository = get_services().repository
+    chat_id = str(session.get("session_id") or "latest")
+    owners = []
+    for user in repository.list_users():
+        user_id = user.get("internal_user_id")
+        if user_id and repository.owns_patient(user_id, patient_id):
+            owners.append(user_id)
+    if not owners:
+        return
+    from app.integration import mirror_rl_output
+    for user_id in owners:
+        mirror_rl_output(repository, user_id, patient_id, chat_id, f"rl-{chat_id}"[:120], output, _model_name())
+
+
 def _save_patient_output(patient_id: str, wrapper: dict, output: list, counts: dict) -> Path:
     session = (_inline_chat_logs(wrapper) or [{}])[0]
     out_path = PATIENTS_DIR / patient_id / RL_OUTPUT_FILE
+    try:
+        _mirror_rl_output(patient_id, session, output)
+    except Exception as exc:
+        print(f"[RL] durable output not saved: {type(exc).__name__}")
     out_path.write_text(json.dumps({
         "patient_id": patient_id,
         "generated_at": datetime.now().isoformat(),

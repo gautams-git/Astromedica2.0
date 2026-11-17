@@ -8,6 +8,7 @@ In-memory cache of the four configurable data structures.
 from __future__ import annotations
 
 import logging
+import os
 import threading
 import time
 from typing import Any, Dict, List, Tuple, Set
@@ -49,8 +50,12 @@ def _compile_bootstrap_disease_map():
 DISEASE_MAP = _compile_bootstrap_disease_map()
 
 
+def _rl_strict() -> bool:
+    return os.environ.get("RL_CONFIG_STRICT", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def reload_all() -> Dict[str, Any]:
-    """Reload everything from Firestore. Falls back to bootstrap on failure."""
+    """Reload RL configuration. Strict mode does not substitute bootstrap data."""
     # config_loader.py — inside reload_all(), after the global line
     global SYMPTOM_LIBRARY, ORGAN_ALIASES, BRANCH_HINTS, ORGAN_MAP, DISEASE_MAP
     global STOP_WORDS, ORGAN_BRANCH_FAMILIES
@@ -76,16 +81,17 @@ def reload_all() -> Dict[str, Any]:
         new_stop = config_db.load_stop_words()
         new_families = config_db.load_organ_branch_families()
 
+        strict = _rl_strict()
         with _LOCK:
-            SYMPTOM_LIBRARY = new_symptoms or dict(BOOTSTRAP_SYMPTOM_LIBRARY)
-            ORGAN_ALIASES = new_aliases or dict(BOOTSTRAP_ORGAN_ALIASES)
-            BRANCH_HINTS = new_hints or dict(BOOTSTRAP_BRANCH_HINTS)
-            ORGAN_MAP = new_chat_maps["organ_map"] or dict(BOOTSTRAP_ORGAN_MAP)
-            DISEASE_MAP = new_chat_maps["disease_map"] or _compile_bootstrap_disease_map()
-            # config_loader.py — inside the with _LOCK: block, after the existing assignments
-            STOP_WORDS = new_stop or set(BOOTSTRAP_STOP_WORDS)
-            ORGAN_BRANCH_FAMILIES = (new_families
-                                     or dict(BOOTSTRAP_ORGAN_BRANCH_FAMILIES))
+            if strict and not (new_symptoms and new_aliases and new_hints and new_stop and new_families):
+                raise RuntimeError("RL configuration dataset is missing")
+            SYMPTOM_LIBRARY = new_symptoms or ({} if strict else dict(BOOTSTRAP_SYMPTOM_LIBRARY))
+            ORGAN_ALIASES = new_aliases or ({} if strict else dict(BOOTSTRAP_ORGAN_ALIASES))
+            BRANCH_HINTS = new_hints or ({} if strict else dict(BOOTSTRAP_BRANCH_HINTS))
+            ORGAN_MAP = new_chat_maps["organ_map"] or ({} if strict else dict(BOOTSTRAP_ORGAN_MAP))
+            DISEASE_MAP = new_chat_maps["disease_map"] or ([] if strict else _compile_bootstrap_disease_map())
+            STOP_WORDS = new_stop or (set() if strict else set(BOOTSTRAP_STOP_WORDS))
+            ORGAN_BRANCH_FAMILIES = new_families or ({} if strict else dict(BOOTSTRAP_ORGAN_BRANCH_FAMILIES))
             _last_loaded = time.time()
             _source = "firestore"
 
@@ -98,10 +104,27 @@ def reload_all() -> Dict[str, Any]:
                 len(STOP_WORDS), len(ORGAN_BRANCH_FAMILIES),
             )
     except Exception as e:
+        if _rl_strict():
+            logger.error("config_loader: strict reload failed, bootstrap was not used: %s", e)
+            with _LOCK:
+                if _source != "firestore":
+                    SYMPTOM_LIBRARY = {}
+                    ORGAN_ALIASES = {}
+                    BRANCH_HINTS = {}
+                    ORGAN_MAP = {}
+                    DISEASE_MAP = []
+                    STOP_WORDS = set()
+                    ORGAN_BRANCH_FAMILIES = {}
+                _last_loaded = time.time()
+                _source = "unavailable"
+            return _status()
         logger.warning("config_loader: reload failed, keeping current values: %s", e)
         with _LOCK:
             _last_loaded = time.time()
-            _source = "bootstrap"
+            if _source == "firestore":
+                pass
+            else:
+                _source = "bootstrap"
 
     return _status()
 

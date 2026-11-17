@@ -28,6 +28,56 @@ from rules import apply_rule_1
 # chat_module's own system prompt, not a replacement for it. Kept as a
 # fixed constant here rather than editing chat_module.py, so its existing
 # clustering/screening-question logic stays untouched.
+def _chat_mode_name() -> str:
+    import os
+    return os.getenv("CHAT_MODE", "classic").strip().lower() or "classic"
+
+
+def _actor_id() -> str | None:
+    try:
+        from flask import g, has_request_context
+        if not has_request_context():
+            return None
+        return (getattr(g, "user", None) or {}).get("internal_user_id")
+    except Exception:
+        return None
+
+
+def _persist_from(session_id: str, session: dict) -> None:
+    try:
+        from app.chat.sessions import persist_session
+        persist_session(_actor_id(), session_id, session)
+    except Exception as exc:
+        print(f"[Chat] session snapshot not saved: {type(exc).__name__}")
+
+
+def _audit_chat(patient_id: str, event_type: str, session_id: str) -> None:
+    actor = _actor_id()
+    if not actor:
+        return
+    try:
+        from app_core.runtime import get_services
+        get_services().repository.data_plane.append_audit(
+            actor, patient_id, event_type, {"chat_id": session_id}, source="chat"
+        )
+    except Exception as exc:
+        print(f"[Chat] audit {event_type} not saved: {type(exc).__name__}")
+
+
+def _record_rl_hint(session: dict) -> None:
+    """Classic-chat bookkeeping only. Agentic mode already owns RL hints."""
+    import os
+    if os.getenv("CHAT_MODE", "classic").strip().lower() == "agentic":
+        return
+    try:
+        from app.chat import rl_hint_mode
+        if rl_hint_mode() == "off" or not session:
+            return
+        session["rl_hint_status"] = "recorded_not_applied"
+    except Exception:
+        return
+
+
 LLM2_SAFETY_CONSTRAINT = (
     "Never diagnose. Never prescribe. Explain astrological health signals "
     "in friendly, non-clinical language. No symptoms list. No medication."
@@ -53,6 +103,14 @@ class Orchestrator:
 
     def remove_session(self, session_id: str) -> None:
         self._sessions.pop(session_id, None)
+
+    def restore_session(self, session_id: str, session: dict) -> None:
+        self._sessions[session_id] = session
+
+    def _persist_session(self, session_id: str) -> None:
+        session = self._sessions.get(session_id)
+        if session:
+            _persist_from(session_id, session)
 
     def _load_chart_from_disk(self, patient_id: str) -> dict:
         # The chart cache lives in memory, so after a server restart a patient
@@ -217,6 +275,9 @@ class Orchestrator:
                 print(f"[RAG] [FAIL] {type(e).__name__}: {str(e)[:200]} - chat continues without RAG")
 
         print("[LLM2] response received (turn 1)")
+        self._sessions[session_id]["chat_mode"] = _chat_mode_name()
+        self._persist_session(session_id)
+        _audit_chat(patient_id, "chat_started", session_id)
         print("-" * 50)
         return opening_message
 
@@ -241,6 +302,8 @@ class Orchestrator:
         result = chat_module.send_message(
             session_id, user_message, self._sessions, call_gemini_fn
         )
+        self._persist_session(session_id)
+        _record_rl_hint(self._sessions.get(session_id) or {})
         print(f"[CHAT MESSAGE] session_id={session_id} turn={result.get('turn')}")
         print(f"[LLM2] response received (turn {result.get('turn')})")
         print("-" * 50)

@@ -171,6 +171,11 @@ def save_chart_source(patient_id: str, raw_chart: dict, raw_dasha: dict,
         "algo_version": ALGO_VERSION,
     }
     _repo().save(_uid(), _SOURCES, patient_id, record)
+    try:
+        from app.integration import mirror_chart_source
+        mirror_chart_source(_repo(), _uid(), patient_id, raw_chart, raw_dasha, profile)
+    except Exception as exc:
+        print(f"[DB] [FAIL] private/source mirror for patient {patient_id}: {type(exc).__name__}")
     return sum(len(record[k]) for k in ("raw_chart_json", "raw_dasha_json", "current_positions_json"))
 
 
